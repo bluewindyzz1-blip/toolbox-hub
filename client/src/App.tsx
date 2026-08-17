@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import AdminCategories from "./pages/AdminCategories";
 import { ContactPage, InfoPage, SearchPage } from "./pages/InfoPages";
+import { AdSenseAutoAds } from "./components/CatalogSupport";
 
 const PdfTool = lazy(() => import("./pages/PdfTool"));
 const DocumentTool = lazy(() => import("./pages/DocumentTool"));
@@ -72,5 +73,5 @@ function Router() {
   </Switch>;
 }
 
-function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><AnalyticsScript /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>; }
+function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><AnalyticsScript /><AdSenseAutoAds /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>; }
 export default App;

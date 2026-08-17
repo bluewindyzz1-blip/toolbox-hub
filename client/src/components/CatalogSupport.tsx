@@ -58,15 +58,44 @@ const adSlotIds: Partial<Record<AdSlotName, string | undefined>> = {
 
 function validPublisherId(value?: string) { return Boolean(value && /^ca-pub-\d+$/.test(value)); }
 
+function ensureAdSenseScript(publisher: string) {
+  const scriptId = "toolbox-adsense-script";
+  const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+  if (existing) return existing;
+  const script = document.createElement("script");
+  script.id = scriptId;
+  script.async = true;
+  script.crossOrigin = "anonymous";
+  script.dataset.adClient = publisher;
+  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisher}`;
+  document.head.appendChild(script);
+  return script;
+}
+
+/**
+ * Loads the standard AdSense code globally when a valid Vercel publisher ID is present.
+ * This makes AdSense Auto ads eligible on every public route while manual ad units continue
+ * to render only in their intended content positions.
+ */
+export function AdSenseAutoAds() {
+  const publisher = import.meta.env.VITE_ADSENSE_PUBLISHER_ID?.trim();
+  useEffect(() => {
+    if (!validPublisherId(publisher)) return;
+    ensureAdSenseScript(publisher);
+  }, [publisher]);
+  return null;
+}
+
 export function AdSlot({ slot }: { slot: AdSlotName }) {
   const publisher = import.meta.env.VITE_ADSENSE_PUBLISHER_ID?.trim();
   const slotId = adSlotIds[slot]?.trim();
   const enabled = validPublisherId(publisher) && Boolean(slotId);
   useEffect(() => {
     if (!enabled || !publisher || !slotId) return;
-    const scriptId = "toolbox-adsense-script";
-    if (!document.getElementById(scriptId)) { const script = document.createElement("script"); script.id = scriptId; script.async = true; script.crossOrigin = "anonymous"; script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisher}`; document.head.appendChild(script); }
-    const timer = window.setTimeout(() => { try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch { /* 광고 차단기 또는 네트워크 오류에서는 콘텐츠 레이아웃을 유지합니다. */ } }, 0);
+    ensureAdSenseScript(publisher);
+    const timer = window.setTimeout(() => {
+      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch { /* 광고 차단기 또는 네트워크 오류에서는 콘텐츠 레이아웃을 유지합니다. */ }
+    }, 0);
     return () => window.clearTimeout(timer);
   }, [enabled, publisher, slotId]);
   if (!enabled || !publisher || !slotId) return null;
