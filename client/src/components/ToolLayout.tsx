@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 import { PropsWithChildren, useState } from "react";
-import { AdSlot } from "@/components/CatalogSupport";
+import { AdSlot, SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
 import { getCategoryPath } from "@shared/catalog";
 import { SITE } from "@shared/site";
@@ -67,6 +67,7 @@ type ToolFrameProps = PropsWithChildren<{
 export function ToolFrame({ index, title, description, tag, children }: ToolFrameProps) {
   return (
     <div className="site-page">
+      <SeoHead title={`${title} | ${SITE.name}`} description={description} />
       <SiteHeader />
       <main className="container tool-page">
         <section className="tool-intro">

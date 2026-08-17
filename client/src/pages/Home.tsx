@@ -1,6 +1,7 @@
 import { ArrowUpRight, Calculator, FileText, FolderOpen, Image, Landmark, ReceiptText, Ruler, Search, ShieldCheck, Zap, Wrench } from "lucide-react";
 import { Link } from "wouter";
 import { SiteFooter, SiteHeader } from "@/components/ToolLayout";
+import { SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
 import { getCategoryPath, getToolPath } from "@shared/catalog";
 
@@ -18,7 +19,7 @@ export default function Home() {
   const recent = [...allTools].sort((a, b) => b.id - a.id).slice(0, 6);
   const recommended = allTools.filter((tool) => recommendationKeys.has(tool.logicKey ?? tool.slug)).slice(0, 6);
   const roots = categories.filter((item) => item.parentId === null);
-  return <div className="site-page"><SiteHeader /><main>
+  return <div className="site-page"><SeoHead title="도구상자 | 파일 변환 & 생활 계산기" description="생활 계산기와 브라우저 기반 파일 변환 도구를 한곳에서 이용하는 도구상자" path="/" kind="CollectionPage" /><SiteHeader /><main>
     <section className="hero container"><div className="hero-info"><p className="eyebrow">UTILITY SYSTEM / 2026</p><h1>일을 더<br /><em>간단하게.</em></h1><p className="hero-copy">파일 변환부터 생활 계산까지. 자주 필요한 도구를 빠르고 명확하게, 한 곳에 모았습니다.</p><div className="hero-actions"><Link href="/search" className="hero-cta"><Search size={20} />도구 검색 <ArrowUpRight size={19} /></Link><Link href="/convert" className="hero-secondary">PDF·파일 도구</Link></div></div><div className="hero-art" aria-hidden="true"><span className="art-number">06</span><div className="red-block" /><div className="art-label">ONE PLACE<br />UTILITY TOOLS</div></div></section>
     <section className="home-quick-links container" aria-label="주요 카테고리 바로가기">{roots.map((category) => <Link key={category.id} href={getCategoryPath(category, categories)}><FolderOpen size={20} /><span>{category.name}</span><ArrowUpRight size={17} /></Link>)}</section>
     <section className="tool-directory container"><div className="directory-head"><div><p className="eyebrow">POPULAR TOOLS</p><h2>자주 찾는 도구.</h2></div><p>관리자가 인기 표시와 정렬 순서를 관리하며,<br />주요 기능만 먼저 보여 드립니다.</p></div><ToolCards tools={popular} categories={categories} /></section>

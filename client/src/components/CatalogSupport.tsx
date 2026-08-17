@@ -13,20 +13,23 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
   Object.entries(attributes).forEach(([key, value]) => element?.setAttribute(key, value));
 }
 
-export function SeoHead({ title, description, path, kind = "WebApplication" }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage" }) {
+export function SeoHead({ title, description, path, kind = "WebApplication", noindex = false }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage"; noindex?: boolean }) {
   useEffect(() => {
     document.title = title;
-    const url = `${window.location.origin}${path ?? window.location.pathname}`;
+    const configuredOrigin = import.meta.env.VITE_CANONICAL_ORIGIN?.trim().replace(/\/$/, "");
+    const origin = configuredOrigin || window.location.origin;
+    const url = `${origin}${path ?? window.location.pathname}`;
     upsertMeta('meta[name="description"]', { name: "description", content: description });
     upsertMeta('meta[property="og:title"]', { property: "og:title", content: title });
     upsertMeta('meta[property="og:description"]', { property: "og:description", content: description });
     upsertMeta('meta[property="og:type"]', { property: "og:type", content: "website" });
     upsertMeta('meta[property="og:url"]', { property: "og:url", content: url });
     upsertMeta('link[rel="canonical"]', { rel: "canonical", href: url });
+    upsertMeta('meta[name="robots"]', { name: "robots", content: noindex ? "noindex,nofollow" : "index,follow" });
     let jsonLd = document.getElementById("catalog-jsonld");
     if (!jsonLd) { jsonLd = document.createElement("script"); jsonLd.id = "catalog-jsonld"; jsonLd.setAttribute("type", "application/ld+json"); document.head.appendChild(jsonLd); }
     jsonLd.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": kind, name: title, description, url });
-  }, [title, description, path, kind]);
+  }, [title, description, path, kind, noindex]);
   return null;
 }
 

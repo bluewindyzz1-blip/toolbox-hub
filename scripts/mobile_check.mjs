@@ -1,15 +1,17 @@
 import { writeFile } from "node:fs/promises";
 
 const mobile = { width: 390, height: 844, deviceScaleFactor: 1, mobile: true };
+const baseUrl = process.env.PREVIEW_BASE_URL || "http://localhost:3003";
+const previewHost = new URL(baseUrl).host;
 const pages = [
-  { slug: "home", url: "http://localhost:3001/" },
-  { slug: "pdf-merge", url: "http://localhost:3001/convert/pdf-edit/pdf-merge" },
-  { slug: "csv-excel", url: "http://localhost:3001/convert/document/csv-to-excel" },
-  { slug: "unit-energy", url: "http://localhost:3001/units/energy/unit-energy" },
+  { slug: "home", url: `${baseUrl}/` },
+  { slug: "pdf-merge", url: `${baseUrl}/convert/pdf-edit/pdf-merge` },
+  { slug: "csv-excel", url: `${baseUrl}/convert/document/csv-to-excel` },
+  { slug: "unit-energy", url: `${baseUrl}/units/energy/unit-energy` },
 ];
 
 const targets = await (await fetch("http://127.0.0.1:9222/json/list")).json();
-const target = targets.find((item) => item.type === "page" && item.url.includes("localhost:3001"));
+const target = targets.find((item) => item.type === "page" && item.url.includes(previewHost));
 if (!target?.webSocketDebuggerUrl) throw new Error("로컬 도구 페이지의 디버그 연결을 찾지 못했습니다.");
 
 const socket = new WebSocket(target.webSocketDebuggerUrl);
