@@ -1,24 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm exec vite build && pnpm exec vite build --config vite.config.ssr.ts",
+  "buildCommand": "pnpm run build:vercel",
   "outputDirectory": "dist/public",
-  "functions": {
-    "api/ssr.ts": {
-      "includeFiles": "dist/{public/index.html,server-ssr/**}"
-    }
-  },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/[...path]"
-    },
-    {
-      "source": "/",
-      "destination": "/api/ssr?route=/"
-    },
-    {
-      "source": "/:path((?!api(?:/|$)|assets(?:/|$)|favicon\\.ico$).*)",
-      "destination": "/api/ssr?route=/:path*"
+      "source": "/:path((?!api(?:/|$)).*)",
+      "destination": "/index.html"
     }
   ]
 }
