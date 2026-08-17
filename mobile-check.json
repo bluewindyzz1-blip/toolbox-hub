@@ -1,0 +1,26 @@
+[
+  {
+    "page": "http://localhost:3000/calculator/tax/comprehensive-income-tax",
+    "viewport": 390,
+    "documentWidth": 390,
+    "bodyWidth": 390,
+    "overflow": false,
+    "screenshot": "mobile-tax.png"
+  },
+  {
+    "page": "http://localhost:3000/calculator/date/d-day",
+    "viewport": 390,
+    "documentWidth": 390,
+    "bodyWidth": 390,
+    "overflow": false,
+    "screenshot": "mobile-dday.png"
+  },
+  {
+    "page": "http://localhost:3000/units/length/unit-convert",
+    "viewport": 390,
+    "documentWidth": 390,
+    "bodyWidth": 390,
+    "overflow": false,
+    "screenshot": "mobile-unit.png"
+  }
+]

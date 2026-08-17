@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786851418716,
+      "tag": "0000_perpetual_deadpool",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786855009984,
+      "tag": "0001_dashing_living_mummy",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786924478371,
+      "tag": "0002_popular_tool_discovery",
+      "breakpoints": true
+    }
+  ]
+}
