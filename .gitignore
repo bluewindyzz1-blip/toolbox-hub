@@ -115,4 +115,5 @@ client/public/__manus__/version.json
 
 # Generated static SEO and local verification artifacts
 client/public/sitemap.xml
+client/public/ads.txt
 PUBLIC_ROUTE_CHECK.json

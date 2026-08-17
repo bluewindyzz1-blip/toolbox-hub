@@ -18,4 +18,14 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.s
 const outputDir = resolve(import.meta.dirname, "..", "client", "public");
 await mkdir(outputDir, { recursive: true });
 await writeFile(resolve(outputDir, "sitemap.xml"), xml, "utf8");
+
+const publisherId = process.env.VITE_ADSENSE_PUBLISHER_ID?.trim();
+const adsTxtPath = resolve(outputDir, "ads.txt");
+if (publisherId && /^ca-pub-\d+$/.test(publisherId)) {
+  await writeFile(adsTxtPath, `google.com, ${publisherId}, DIRECT, f08c47fec0942fa0\n`, "utf8");
+  console.log(`Generated ads.txt for ${publisherId}.`);
+} else {
+  console.log("Skipped ads.txt generation because VITE_ADSENSE_PUBLISHER_ID is not configured.");
+}
+
 console.log(`Generated sitemap.xml with ${paths.length} public URLs for ${origin}.`);
