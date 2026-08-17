@@ -73,6 +73,20 @@ export function AdSlot({ slot }: { slot: AdSlotName }) {
   return <aside className="ad-slot" aria-label="광고"><ins className="adsbygoogle" style={{ display: "block" }} data-ad-client={publisher} data-ad-slot={slotId} data-ad-format="auto" data-full-width-responsive="true" /></aside>;
 }
 
+const officialReferenceGroups = [
+  { match: /종합소득세|양도소득세|증여세|상속세|부가세|연말정산|취득세|재산세/, label: "국세청·위택스 세금 안내", href: "https://www.nts.go.kr/" },
+  { match: /최저임금|주휴수당|연차수당|퇴직금|퇴직소득세|실업급여|근무시간|시급|연봉|월급|4대보험/, label: "고용노동부 노동 기준 안내", href: "https://www.moel.go.kr/" },
+  { match: /국민연금/, label: "국민연금공단 공식 안내", href: "https://www.nps.or.kr/" },
+  { match: /건강보험/, label: "국민건강보험공단 공식 안내", href: "https://www.nhis.or.kr/" },
+  { match: /중개수수료|전월세|주택담보|전세대출|월세/, label: "국토교통부 주택·부동산 안내", href: "https://www.molit.go.kr/" },
+];
+
+function OfficialReference({ tool }: { tool: CatalogTool }) {
+  const reference = officialReferenceGroups.find((item) => item.match.test(tool.title));
+  if (!reference) return null;
+  return <section className="official-reference"><p className="eyebrow">OFFICIAL REFERENCE</p><h2>공식 참고자료</h2><p>이 도구는 참고용 간이 계산입니다. 제도 적용·신고·계약 전에는 기준일과 세부 요건이 최신인지 아래 공식 안내에서 확인하세요.</p><a href={reference.href} target="_blank" rel="noreferrer">{reference.label} <span aria-hidden="true">↗</span></a></section>;
+}
+
 export function CalculatorActions({ onCalculate, onReset }: { onCalculate: () => void; onReset: () => void }) {
   return <div className="calculator-actions"><button className="primary-action" onClick={onCalculate}>계산하기</button><button className="reset-action" onClick={onReset}><RotateCcw size={16} />초기화</button></div>;
 }
@@ -84,6 +98,7 @@ export function ToolKnowledge({ tool, method, example, caution, children }: Prop
     <AdSlot slot="AD_CONTENT" />
     <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>계산 공식</h2><p>{tool.formula ?? "입력값을 기준으로 계산합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>계산 방법</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>계산 예시</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>주의사항</h2><p>{caution}</p></article></div>
     {children}
+    <OfficialReference tool={tool} />
     <section className="faq-section"><p className="eyebrow">FAQ</p><h2>자주 묻는 질문</h2>{(tool.faq ?? []).map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
     <AdSlot slot="AD_RELATED" />
     <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>관련 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>

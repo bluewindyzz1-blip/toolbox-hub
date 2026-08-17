@@ -24,7 +24,6 @@ const modes: Array<{ id: PdfMode; title: string; icon: typeof FileText; detail: 
   { id: "reorder", title: "순서 변경", icon: FilePenLine, detail: "페이지 번호 목록 순서대로 새 PDF를 만듭니다." },
   { id: "rotate", title: "페이지 회전", icon: RotateCw, detail: "선택한 페이지를 90·180·270도 회전합니다." },
   { id: "compress", title: "용량 줄이기", icon: FileArchive, detail: "페이지를 JPEG로 재구성하여 실제 파일 용량을 줄입니다." },
-  { id: "word", title: "PDF → Word", icon: FileText, detail: "서버 기반 구조 보존 변환 연결 전까지 제공하지 않습니다." },
 ];
 
 function parsePages(value: string, total: number) {

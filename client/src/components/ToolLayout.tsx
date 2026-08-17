@@ -52,7 +52,7 @@ export function SiteFooter() {
         <p>파일은 서버로 전송되지 않습니다.<br />모든 변환은 현재 브라우저에서 처리됩니다.</p>
         <p>UTILITY SYSTEM<br />2026 / KOREA</p>
       </div>
-      <div className="container footer-links"><Link href="/privacy">개인정보처리방침</Link><Link href="/terms">이용약관</Link><Link href="/disclaimer">면책조항</Link><Link href="/cookie-policy">쿠키 및 광고 안내</Link><Link href="/contact">문의하기</Link><Link href="/search">도구 검색</Link></div>
+      <div className="container footer-links"><Link href="/guide">이용방법</Link><Link href="/faq">FAQ</Link><Link href="/privacy">개인정보처리방침</Link><Link href="/terms">이용약관</Link><Link href="/disclaimer">면책조항</Link><Link href="/cookie-policy">쿠키 및 광고 안내</Link><Link href="/contact">문의하기</Link><Link href="/search">도구 검색</Link></div>
     </footer>
   );
 }

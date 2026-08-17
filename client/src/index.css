@@ -232,7 +232,7 @@ th:first-child,td:first-child { text-align:left; }
 .knowledge-grid article { min-height:205px; padding:1.35rem; border-right:var(--thin-line); border-bottom:var(--thin-line); }
 .knowledge-grid h2,.faq-section h2,.related-tools h2 { margin:.75rem 0 1rem; font-size:1.35rem; letter-spacing:-.08em; }
 .knowledge-grid article>p:last-child { margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.74rem; line-height:1.7; letter-spacing:-.07em; }
-.faq-section { margin-top:3rem; padding:2rem 0; border-top:var(--line); border-bottom:var(--thin-line); }
+.official-reference { margin-top:3rem; padding:1.5rem; border-top:var(--line); border-bottom:var(--thin-line); background:var(--paper); }.official-reference h2 { margin:.7rem 0; font-size:1.35rem; letter-spacing:-.08em; }.official-reference>p:not(.eyebrow) { max-width:720px; margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.76rem; line-height:1.7; letter-spacing:-.07em; }.official-reference a { display:inline-flex; gap:.35rem; margin-top:1rem; padding-bottom:.2rem; border-bottom:var(--thin-line); font-family:"Noto Sans KR",sans-serif; font-size:.76rem; font-weight:700; letter-spacing:-.06em; }.faq-section { margin-top:3rem; padding:2rem 0; border-top:var(--line); border-bottom:var(--thin-line); }
 .faq-section details { border-top:var(--thin-line); padding:1rem 0; }
 .faq-section details:last-child { border-bottom:var(--thin-line); }
 .faq-section summary { cursor:pointer; font-family:"Noto Sans KR",sans-serif; font-size:.82rem; font-weight:700; letter-spacing:-.07em; }
