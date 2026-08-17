@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm run build:vercel",
+  "buildCommand": "CANONICAL_ORIGIN=https://carculate.moneyko.co.kr SITEMAP_ORIGIN=https://carculate.moneyko.co.kr VITE_CANONICAL_ORIGIN=https://carculate.moneyko.co.kr pnpm run build:vercel",
   "outputDirectory": "dist/public",
   "rewrites": [
     {
