@@ -30,14 +30,19 @@ export default function Home() {
     <section className="home-category-explorer container" aria-label="주요 카테고리 바로가기" onMouseLeave={() => setHoveredRootId(null)} onKeyDown={(event) => { if (event.key === "Escape") { setHoveredRootId(null); setPinnedRootId(null); } }}>
       <div className="home-quick-links">{roots.map((category, index) => {
         const active = activeRootId === category.id;
+        const branches = categories.filter((branch) => branch.parentId === category.id).sort((a, b) => a.sortOrder - b.sortOrder);
         return <div key={category.id} className={`home-category-entry${active ? " active" : ""}`} onMouseEnter={() => setHoveredRootId(category.id)}>
           <Link href={getCategoryPath(category, categories)} className="home-category-link" onFocus={() => setHoveredRootId(category.id)}><FolderOpen size={20} /><span><small>{String(index + 1).padStart(2, "0")}</small>{category.name}</span><ArrowUpRight size={17} /></Link>
           <button type="button" className="home-category-toggle" onClick={() => setPinnedRootId((current) => current === category.id ? null : category.id)} aria-expanded={active} aria-controls={`home-category-panel-${category.id}`} aria-label={`${category.name} 하위 분류 ${active ? "닫기" : "열기"}`}><ChevronDown size={18} /></button>
+          {active && <div id={`home-category-panel-${category.id}`} className="home-category-panel mobile-category-panel" role="region" aria-label={`${category.name} 하위 분류`}>
+            <div className="home-category-panel-head"><div><p className="eyebrow">CATEGORY MAP</p><h2>{category.name} <em>분류</em></h2><p>{category.description}</p></div><Link href={getCategoryPath(category, categories)}>전체 {category.name}<ArrowUpRight size={18} /></Link></div>
+            <div className="home-category-branches">{branches.map((branch, branchIndex) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(branchIndex + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
+          </div>}
         </div>;
       })}</div>
-      {activeRoot && <div id={`home-category-panel-${activeRoot.id}`} className="home-category-panel" role="region" aria-label={`${activeRoot.name} 하위 분류`}>
+      {activeRoot && <div className="home-category-panel desktop-category-panel" role="region" aria-label={`${activeRoot.name} 하위 분류`}>
         <div className="home-category-panel-head"><div><p className="eyebrow">CATEGORY MAP</p><h2>{activeRoot.name} <em>분류</em></h2><p>{activeRoot.description}</p></div><Link href={getCategoryPath(activeRoot, categories)}>전체 {activeRoot.name}<ArrowUpRight size={18} /></Link></div>
-        <div className="home-category-branches">{activeBranches.map((branch, index) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
+        <div className="home-category-branches">{activeBranches.map((branch, branchIndex) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(branchIndex + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
       </div>}
     </section>
     <section className="tool-directory container"><div className="directory-head"><div><p className="eyebrow">POPULAR TOOLS</p><h2>자주 찾는 도구.</h2></div><p>관리자가 인기 표시와 정렬 순서를 관리하며,<br />주요 기능만 먼저 보여 드립니다.</p></div><ToolCards tools={popular} categories={categories} /></section>
