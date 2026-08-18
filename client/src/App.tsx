@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import { lazy, Suspense } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AnalyticsScript from "./components/AnalyticsScript";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -73,5 +74,5 @@ function Router() {
   </Switch>;
 }
 
-function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><AnalyticsScript /><AdSenseAutoAds /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>; }
+function App() { return <ErrorBoundary><ThemeProvider defaultTheme="light"><TooltipProvider><Toaster /><AnalyticsScript /><AdSenseAutoAds /><Router /><Analytics /></TooltipProvider></ThemeProvider></ErrorBoundary>; }
 export default App;
