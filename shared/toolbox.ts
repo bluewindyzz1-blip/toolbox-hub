@@ -727,3 +727,109 @@ export function calculateGpa(items: GpaItem[]) {
   const weightedPoints = validItems.reduce((sum, item) => sum + item.credits * item.gradePoint, 0);
   return { items: validItems, totalCredits, weightedPoints, gpa: totalCredits > 0 ? weightedPoints / totalCredits : 0 };
 }
+
+
+/** 추가 생활·업무 계산기: 모두 입력값을 기반으로 한 참고용 간이 계산이다. */
+export function calculateUnitPrice(totalAmount: number, quantity: number) {
+  const total = nonNegative(totalAmount); const count = nonNegative(quantity); const valid = count > 0;
+  return { totalAmount: total, quantity: count, unitPrice: valid ? total / count : 0, valid, message: valid ? "" : "수량은 0보다 커야 합니다." };
+}
+
+export function calculateFee(amount: number, feeRate: number) {
+  const transactionAmount = nonNegative(amount); const rate = Math.min(100, nonNegative(feeRate)); const fee = transactionAmount * rate / 100;
+  return { transactionAmount, feeRate: rate, fee, netAmount: transactionAmount - fee };
+}
+
+export function calculateParkingFee(durationMinutes: number, baseMinutes: number, baseFee: number, extraMinutes: number, extraFee: number) {
+  const duration = nonNegative(durationMinutes); const included = nonNegative(baseMinutes); const base = nonNegative(baseFee); const interval = nonNegative(extraMinutes); const additionalFee = nonNegative(extraFee);
+  const remainingMinutes = Math.max(0, duration - included); const extraBlocks = remainingMinutes > 0 && interval > 0 ? Math.ceil(remainingMinutes / interval) : 0;
+  const valid = remainingMinutes === 0 || interval > 0;
+  return { durationMinutes: duration, baseMinutes: included, baseFee: base, extraMinutes: interval, extraFee: additionalFee, remainingMinutes, extraBlocks, totalFee: valid ? base + extraBlocks * additionalFee : 0, valid, message: valid ? "" : "추가 시간 단위는 0보다 커야 합니다." };
+}
+
+export function calculateTravelBudget(transport: number, lodging: number, meals: number, other: number, people: number) {
+  const values = [transport, lodging, meals, other].map(nonNegative); const count = Math.max(1, safeInteger(people, 1)); const total = values.reduce((sum, value) => sum + value, 0);
+  return { transport: values[0], lodging: values[1], meals: values[2], other: values[3], people: count, total, perPerson: total / count };
+}
+
+export function calculateRecipeServings(originalServings: number, targetServings: number, ingredientAmount: number) {
+  const original = nonNegative(originalServings); const target = nonNegative(targetServings); const ingredient = nonNegative(ingredientAmount); const valid = original > 0;
+  const multiplier = valid ? target / original : 0;
+  return { originalServings: original, targetServings: target, ingredientAmount: ingredient, multiplier, adjustedAmount: ingredient * multiplier, valid, message: valid ? "" : "원래 인분은 0보다 커야 합니다." };
+}
+
+export function calculateSleepDuration(bedHour: number, bedMinute: number, wakeHour: number, wakeMinute: number) {
+  const validHour = (value: number) => Number.isInteger(value) && value >= 0 && value < 24;
+  const validMinute = (value: number) => Number.isInteger(value) && value >= 0 && value < 60;
+  const valid = validHour(bedHour) && validMinute(bedMinute) && validHour(wakeHour) && validMinute(wakeMinute);
+  if (!valid) return { valid: false, message: "시각은 0~23시, 분은 0~59분으로 입력하세요.", totalMinutes: 0, hours: 0, minutes: 0, crossesMidnight: false };
+  const bedtime = bedHour * 60 + bedMinute; const wakeTime = wakeHour * 60 + wakeMinute; let totalMinutes = wakeTime - bedtime;
+  const crossesMidnight = totalMinutes <= 0; if (crossesMidnight) totalMinutes += 24 * 60;
+  return { valid: true, message: "", totalMinutes, hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60, crossesMidnight };
+}
+
+export function calculateElectricityUsage(powerWatts: number, dailyHours: number, days: number, pricePerKwh: number) {
+  const watts = nonNegative(powerWatts); const hours = nonNegative(dailyHours); const period = nonNegative(days); const price = nonNegative(pricePerKwh); const kwh = watts * hours * period / 1000;
+  return { powerWatts: watts, dailyHours: hours, days: period, pricePerKwh: price, kwh, estimatedCost: kwh * price };
+}
+
+export function calculatePaintAmount(widthMeters: number, heightMeters: number, wallCount: number, coats: number, coverageSqmPerLiter: number) {
+  const width = nonNegative(widthMeters); const height = nonNegative(heightMeters); const walls = nonNegative(wallCount); const coatCount = nonNegative(coats); const coverage = nonNegative(coverageSqmPerLiter); const totalArea = width * height * walls * coatCount; const valid = coverage > 0;
+  return { widthMeters: width, heightMeters: height, wallCount: walls, coats: coatCount, coverageSqmPerLiter: coverage, totalArea, liters: valid ? totalArea / coverage : 0, valid, message: valid ? "" : "페인트 1L당 도포 면적은 0보다 커야 합니다." };
+}
+
+export function calculateSavingsGoal(goalAmount: number, currentAmount: number, monthlySaving: number) {
+  const goal = nonNegative(goalAmount); const current = Math.min(goal, nonNegative(currentAmount)); const monthly = nonNegative(monthlySaving); const remaining = Math.max(0, goal - current); const complete = remaining === 0; const valid = complete || monthly > 0;
+  return { goalAmount: goal, currentAmount: current, monthlySaving: monthly, remaining, months: complete ? 0 : valid ? Math.ceil(remaining / monthly) : 0, valid, message: valid ? "" : "월 저축액은 0보다 커야 합니다." };
+}
+
+export function calculateSimpleInterest(principal: number, annualRate: number, months: number) {
+  const amount = nonNegative(principal); const rate = nonNegative(annualRate) / 100; const period = nonNegative(months); const interest = amount * rate * period / 12;
+  return { principal: amount, annualRate: rate, months: period, interest, total: amount + interest };
+}
+
+export function calculateInstallment(amount: number, months: number, monthlyFeeRate: number) {
+  const purchaseAmount = nonNegative(amount); const period = Math.max(1, safeInteger(months, 1)); const feeRate = nonNegative(monthlyFeeRate) / 100; const fee = purchaseAmount * feeRate * period;
+  return { purchaseAmount, months: period, monthlyFeeRate: feeRate, fee, total: purchaseAmount + fee, monthlyPayment: (purchaseAmount + fee) / period };
+}
+
+export function calculateCurrencyExchange(amount: number, exchangeRate: number) {
+  const sourceAmount = nonNegative(amount); const rate = nonNegative(exchangeRate); return { sourceAmount, exchangeRate: rate, convertedAmount: sourceAmount * rate };
+}
+
+export function calculateGpaConversion(currentGpa: number, sourceScale: number, targetScale: number) {
+  const source = nonNegative(sourceScale); const target = nonNegative(targetScale); const gpa = Math.max(0, Math.min(source, nonNegative(currentGpa))); const valid = source > 0;
+  return { currentGpa: gpa, sourceScale: source, targetScale: target, convertedGpa: valid ? gpa / source * target : 0, percentage: valid ? gpa / source * 100 : 0, valid, message: valid ? "" : "현재 평점 기준 만점은 0보다 커야 합니다." };
+}
+
+export function calculateTargetScore(currentScore: number, completedRate: number, targetScore: number) {
+  const current = nonNegative(currentScore); const completed = Math.min(100, nonNegative(completedRate)); const target = nonNegative(targetScore); const remainingRate = 100 - completed; const requiredScore = remainingRate > 0 ? (target * 100 - current * completed) / remainingRate : 0;
+  return { currentScore: current, completedRate: completed, targetScore: target, remainingRate, requiredScore, valid: remainingRate > 0, message: remainingRate > 0 ? "" : "완료 비율이 100%이면 남은 평가 점수를 계산할 수 없습니다." };
+}
+
+export function calculateRankPercent(rank: number, totalPeople: number) {
+  const total = Math.max(1, safeInteger(totalPeople, 1)); const normalizedRank = Math.min(total, Math.max(1, safeInteger(rank, 1)));
+  return { rank: normalizedRank, totalPeople: total, topPercent: normalizedRank / total * 100, percentile: (total - normalizedRank) / total * 100, peopleBehind: total - normalizedRank };
+}
+
+export function calculateLaborCost(hourlyRate: number, people: number, hours: number) {
+  const rate = nonNegative(hourlyRate); const count = nonNegative(people); const duration = nonNegative(hours); return { hourlyRate: rate, people: count, hours: duration, perPersonCost: rate * duration, totalCost: rate * count * duration };
+}
+
+export function calculateProjectQuote(hourlyRate: number, estimatedHours: number, additionalCost: number, marginRate: number) {
+  const rate = nonNegative(hourlyRate); const hours = nonNegative(estimatedHours); const extra = nonNegative(additionalCost); const margin = nonNegative(marginRate) / 100; const baseCost = rate * hours + extra;
+  return { hourlyRate: rate, estimatedHours: hours, additionalCost: extra, marginRate: margin, baseCost, marginAmount: baseCost * margin, quote: baseCost * (1 + margin) };
+}
+
+export function calculateMonthlyBudget(budget: number, fixedExpense: number, variableExpense: number) {
+  const totalBudget = nonNegative(budget); const fixed = nonNegative(fixedExpense); const variable = nonNegative(variableExpense); const spent = fixed + variable; const remaining = totalBudget - spent;
+  return { budget: totalBudget, fixedExpense: fixed, variableExpense: variable, spent, remaining, usageRate: totalBudget > 0 ? spent / totalBudget * 100 : 0, overBudget: remaining < 0 };
+}
+
+export function calculateRewardPoints(purchaseAmount: number, rewardRate: number, usePoints: number) {
+  const purchase = nonNegative(purchaseAmount); const rate = nonNegative(rewardRate) / 100; const used = Math.min(purchase, nonNegative(usePoints)); const cashPayment = purchase - used; return { purchaseAmount: purchase, rewardRate: rate, usePoints: used, cashPayment, earnedPoints: cashPayment * rate };
+}
+
+export function calculateReturnRate(purchaseAmount: number, saleAmount: number, costs: number) {
+  const purchase = nonNegative(purchaseAmount); const sale = nonNegative(saleAmount); const expense = nonNegative(costs); const invested = purchase + expense; const profit = sale - invested; return { purchaseAmount: purchase, saleAmount: sale, costs: expense, invested, profit, returnRate: invested > 0 ? profit / invested * 100 : 0 };
+}

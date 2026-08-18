@@ -20,9 +20,11 @@ import SalaryEmploymentCalculators from "./SalaryEmploymentCalculators";
 import TaxSocialCalculators from "./TaxSocialCalculators";
 import DateTimeCalculators from "./DateTimeCalculators";
 import DailyWorkCalculators from "./DailyWorkCalculators";
+import EverydayCalculators from "./EverydayCalculators";
 
 const PdfTool = lazy(() => import("./PdfTool"));
 const DocumentTool = lazy(() => import("./DocumentTool"));
+const TextTransformTool = lazy(() => import("./TextTransformTool"));
 
 type RootKey = "calculator" | "convert" | "units";
 
@@ -74,6 +76,7 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
   if (["comprehensive-income-tax", "capital-gains-tax", "gift-tax", "inheritance-tax", "year-end-tax-refund", "national-pension", "health-insurance", "minimum-wage"].includes(slug)) return <TaxSocialCalculators kind={slug as any} />;
   if (["date-calculator", "d-day", "age", "man-age", "date-difference", "time-calculator"].includes(slug)) return <DateTimeCalculators kind={slug as any} />;
   if (["discount", "margin", "break-even", "fuel-cost", "split-bill", "average", "bmi", "bmr", "calories-burned", "gpa"].includes(slug)) return <DailyWorkCalculators kind={slug as any} />;
+  if (["unit-price", "fee", "parking-fee", "travel-budget", "recipe-servings", "sleep-duration", "electricity-usage", "paint-amount", "savings-goal", "simple-interest", "installment", "currency-exchange", "gpa-conversion", "target-score", "rank-percent", "labor-cost", "project-quote", "monthly-budget", "reward-points", "return-rate"].includes(slug)) return <EverydayCalculators kind={slug as any} />;
   if (slug === "vat-calculator") return <VatCalculator />;
   return <Unavailable title="계산기를 준비하고 있습니다." />;
 }
@@ -90,6 +93,8 @@ export function ConverterToolRoute({ slug }: { slug: string }) {
   if (imageModeBySlug[slug]) { const config = imageModeBySlug[slug]; return <ImageTool initialMode={config.mode} initialFormat={config.format} />; }
   const documentModeBySlug: Record<string, "csv-excel" | "excel-csv" | "csv-json" | "json-csv" | "txt-pdf"> = { "csv-to-excel": "csv-excel", "excel-to-csv": "excel-csv", "csv-to-json": "csv-json", "json-to-csv": "json-csv", "txt-to-pdf": "txt-pdf" };
   if (documentModeBySlug[slug]) return <Suspense fallback={<ToolFrame index="03" tag="DATA ENGINE" title="문서·데이터 변환" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">문서 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><DocumentTool initialMode={documentModeBySlug[slug]} /></Suspense>;
+  const textTransformSlugs = ["json-pretty", "json-minify", "csv-to-tsv", "tsv-to-csv", "csv-to-markdown", "json-to-markdown", "markdown-to-html", "html-to-text", "url-encode", "url-decode", "base64-encode", "base64-decode", "timestamp-to-date", "date-to-timestamp", "hex-to-rgb", "rgb-to-hex", "html-encode", "html-decode", "normalize-lines", "unique-lines"];
+  if (textTransformSlugs.includes(slug)) return <Suspense fallback={<ToolFrame index="04" tag="TEXT ENGINE" title="텍스트·웹 변환" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">텍스트 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><TextTransformTool initialMode={slug as any} /></Suspense>;
   if (slug === "unit-convert") return <UnitConverter />;
   const unitCategoryBySlug: Record<string, string> = { "unit-area": "area", "unit-weight": "weight", "unit-volume": "volume", "unit-temperature": "temperature", "unit-speed": "speed", "unit-data": "data", "unit-time": "time", "unit-pressure": "pressure", "unit-energy": "energy" };
   if (unitCategoryBySlug[slug]) return <UnitConverter initialCategory={unitCategoryBySlug[slug]} />;
