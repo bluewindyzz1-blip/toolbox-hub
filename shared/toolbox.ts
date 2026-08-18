@@ -617,3 +617,113 @@ export function calculateTimeOperation(baseTime: string, hours: number, minutes:
   const dayOffset = Math.floor(total / 1440); const normalized = ((total % 1440) + 1440) % 1440;
   return { valid: true, message: "", resultTime: `${String(Math.floor(normalized / 60)).padStart(2, "0")}:${String(normalized % 60).padStart(2, "0")}`, dayOffset, totalMinutes: delta };
 }
+
+
+/** 생활·업무 계산기: 입력값을 바탕으로 한 참고용 수식이며, 의료·금융·계약 판단을 대신하지 않는다. */
+export function calculateDiscount(originalPrice: number, discountRate: number) {
+  const price = nonNegative(originalPrice);
+  const rate = Math.min(100, nonNegative(discountRate));
+  const discount = price * rate / 100;
+  return { originalPrice: price, discountRate: rate, discount, finalPrice: price - discount };
+}
+
+export function calculateMargin(salesPrice: number, cost: number) {
+  const sales = nonNegative(salesPrice);
+  const purchaseCost = nonNegative(cost);
+  const profit = sales - purchaseCost;
+  return {
+    salesPrice: sales,
+    cost: purchaseCost,
+    profit,
+    marginRate: sales > 0 ? profit / sales * 100 : 0,
+    markupRate: purchaseCost > 0 ? profit / purchaseCost * 100 : 0,
+  };
+}
+
+export function calculateBreakEven(fixedCost: number, unitPrice: number, unitVariableCost: number) {
+  const fixed = nonNegative(fixedCost);
+  const price = nonNegative(unitPrice);
+  const variable = nonNegative(unitVariableCost);
+  const contributionMargin = price - variable;
+  const valid = contributionMargin > 0;
+  const units = valid ? Math.ceil(fixed / contributionMargin) : 0;
+  return {
+    fixedCost: fixed,
+    unitPrice: price,
+    unitVariableCost: variable,
+    contributionMargin,
+    valid,
+    units,
+    revenueAtBreakEven: valid ? units * price : 0,
+    message: valid ? "" : "판매 단가는 변동비보다 커야 손익분기점을 계산할 수 있습니다.",
+  };
+}
+
+export function calculateFuelCost(distanceKm: number, kmPerLiter: number, fuelPricePerLiter: number) {
+  const distance = nonNegative(distanceKm);
+  const efficiency = nonNegative(kmPerLiter);
+  const fuelPrice = nonNegative(fuelPricePerLiter);
+  const valid = efficiency > 0;
+  const liters = valid ? distance / efficiency : 0;
+  return { distanceKm: distance, kmPerLiter: efficiency, fuelPricePerLiter: fuelPrice, valid, liters, cost: liters * fuelPrice, message: valid ? "" : "연비는 0보다 커야 합니다." };
+}
+
+export function calculateSplitBill(totalAmount: number, people: number, tipRate = 0) {
+  const total = nonNegative(totalAmount);
+  const count = Math.max(1, safeInteger(people, 1));
+  const rate = Math.min(100, nonNegative(tipRate));
+  const tip = total * rate / 100;
+  const grandTotal = total + tip;
+  return { totalAmount: total, people: count, tipRate: rate, tip, grandTotal, perPerson: grandTotal / count };
+}
+
+export function calculateAverage(values: number[]) {
+  const validValues = values.filter((value) => Number.isFinite(value));
+  const sum = validValues.reduce((total, value) => total + value, 0);
+  return {
+    values: validValues,
+    count: validValues.length,
+    sum,
+    average: validValues.length ? sum / validValues.length : 0,
+    minimum: validValues.length ? Math.min(...validValues) : 0,
+    maximum: validValues.length ? Math.max(...validValues) : 0,
+  };
+}
+
+export function calculateBmi(weightKg: number, heightCm: number) {
+  const weight = nonNegative(weightKg);
+  const height = nonNegative(heightCm);
+  const meters = height / 100;
+  const valid = meters > 0;
+  const bmi = valid ? weight / (meters ** 2) : 0;
+  const category = !valid ? "계산 불가" : bmi < 18.5 ? "낮음" : bmi < 23 ? "일반 범위" : bmi < 25 ? "높음" : "매우 높음";
+  return { weightKg: weight, heightCm: height, bmi, category, valid, message: valid ? "" : "키는 0보다 커야 합니다." };
+}
+
+export type BmrSex = "female" | "male";
+export function calculateBmr(sex: BmrSex, age: number, weightKg: number, heightCm: number) {
+  const normalizedAge = Math.max(0, safeInteger(age));
+  const weight = nonNegative(weightKg);
+  const height = nonNegative(heightCm);
+  const valid = normalizedAge > 0 && weight > 0 && height > 0;
+  const bmr = valid ? 10 * weight + 6.25 * height - 5 * normalizedAge + (sex === "male" ? 5 : -161) : 0;
+  return { sex, age: normalizedAge, weightKg: weight, heightCm: height, bmr, valid, message: valid ? "" : "나이, 키, 체중을 모두 입력하세요." };
+}
+
+export type ActivityKind = "walking" | "cycling" | "jogging";
+const activityMet: Record<ActivityKind, number> = { walking: 3.5, cycling: 6, jogging: 8 };
+export function calculateCaloriesBurned(activity: ActivityKind, weightKg: number, minutes: number) {
+  const weight = nonNegative(weightKg);
+  const duration = nonNegative(minutes);
+  const met = activityMet[activity];
+  const calories = met * 3.5 * weight / 200 * duration;
+  return { activity, met, weightKg: weight, minutes: duration, calories };
+}
+
+export type GpaItem = { credits: number; gradePoint: number };
+export function calculateGpa(items: GpaItem[]) {
+  const validItems = items.map((item) => ({ credits: nonNegative(item.credits), gradePoint: Math.min(4.5, Math.max(0, Number.isFinite(item.gradePoint) ? item.gradePoint : 0)) })).filter((item) => item.credits > 0);
+  const totalCredits = validItems.reduce((sum, item) => sum + item.credits, 0);
+  const weightedPoints = validItems.reduce((sum, item) => sum + item.credits * item.gradePoint, 0);
+  return { items: validItems, totalCredits, weightedPoints, gpa: totalCredits > 0 ? weightedPoints / totalCredits : 0 };
+}

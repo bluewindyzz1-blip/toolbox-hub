@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { defaultCatalog, getCategoryPath, getToolPath } from "../shared/catalog";
 
-const origin = (process.env.SITEMAP_ORIGIN || process.env.CANONICAL_ORIGIN || "https://toolbox-hub-h4sq.vercel.app").replace(/\/$/, "");
+const origin = (process.env.SITEMAP_ORIGIN || process.env.CANONICAL_ORIGIN || "https://carculate.moneyko.co.kr").replace(/\/$/, "");
 const staticPaths = ["/", "/about", "/guide", "/faq", "/privacy", "/terms", "/disclaimer", "/cookie-policy", "/contact", "/document"];
 const descendantCategoryIds = (id: number): number[] => [id, ...defaultCatalog.categories.filter((category) => category.parentId === id).flatMap((category) => descendantCategoryIds(category.id))];
 const categoryPaths = defaultCatalog.categories

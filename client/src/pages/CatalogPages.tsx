@@ -18,6 +18,7 @@ import FinanceRealEstateCalculators from "./FinanceRealEstateCalculators";
 import SalaryEmploymentCalculators from "./SalaryEmploymentCalculators";
 import TaxSocialCalculators from "./TaxSocialCalculators";
 import DateTimeCalculators from "./DateTimeCalculators";
+import DailyWorkCalculators from "./DailyWorkCalculators";
 
 const PdfTool = lazy(() => import("./PdfTool"));
 const DocumentTool = lazy(() => import("./DocumentTool"));
@@ -63,6 +64,7 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
   if (["annual-take-home", "monthly-take-home", "retirement-income-tax", "weekly-holiday-pay", "annual-leave-pay", "hourly-wage", "work-hours", "four-insurance", "unemployment-benefit"].includes(slug)) return <SalaryEmploymentCalculators kind={slug as any} />;
   if (["comprehensive-income-tax", "capital-gains-tax", "gift-tax", "inheritance-tax", "year-end-tax-refund", "national-pension", "health-insurance", "minimum-wage"].includes(slug)) return <TaxSocialCalculators kind={slug as any} />;
   if (["date-calculator", "d-day", "age", "man-age", "date-difference", "time-calculator"].includes(slug)) return <DateTimeCalculators kind={slug as any} />;
+  if (["discount", "margin", "break-even", "fuel-cost", "split-bill", "average", "bmi", "bmr", "calories-burned", "gpa"].includes(slug)) return <DailyWorkCalculators kind={slug as any} />;
   if (slug === "vat-calculator") return <VatCalculator />;
   return <Unavailable title="계산기를 준비하고 있습니다." />;
 }
@@ -70,8 +72,13 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
 export function ConverterToolRoute({ slug }: { slug: string }) {
   const pdfModeBySlug: Record<string, { mode: "to-images" | "images-to-pdf" | "merge" | "split" | "extract" | "delete" | "reorder" | "rotate" | "compress"; format?: "png" | "jpg" }> = { "pdf-convert": { mode: "to-images" }, "pdf-to-jpg": { mode: "to-images", format: "jpg" }, "pdf-to-png": { mode: "to-images", format: "png" }, "jpg-to-pdf": { mode: "images-to-pdf" }, "png-to-pdf": { mode: "images-to-pdf" }, "pdf-merge": { mode: "merge" }, "pdf-split": { mode: "split" }, "pdf-extract-pages": { mode: "extract" }, "pdf-delete-pages": { mode: "delete" }, "pdf-reorder-pages": { mode: "reorder" }, "pdf-rotate-pages": { mode: "rotate" }, "pdf-compress": { mode: "compress" } };
   if (pdfModeBySlug[slug]) { const config = pdfModeBySlug[slug]; return <Suspense fallback={<ToolFrame index="01" tag="DOCUMENT ENGINE" title="PDF·파일 도구" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">PDF 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><PdfTool initialMode={config.mode} initialFormat={config.format} /></Suspense>; }
-  const imageModeBySlug: Record<string, "convert" | "compress" | "resize"> = { "image-convert": "convert", "image-compress": "compress", "image-resize": "resize" };
-  if (imageModeBySlug[slug]) return <ImageTool initialMode={imageModeBySlug[slug]} />;
+  type ImageToolConfig = { mode: "convert" | "compress" | "resize" | "rotate" | "flip" | "grayscale" | "padding"; format?: "image/png" | "image/jpeg" | "image/webp" };
+  const imageModeBySlug: Record<string, ImageToolConfig> = {
+    "image-convert": { mode: "convert" }, "image-compress": { mode: "compress" }, "image-resize": { mode: "resize" },
+    "jpg-to-png": { mode: "convert", format: "image/png" }, "png-to-jpg": { mode: "convert", format: "image/jpeg" }, "jpg-to-webp": { mode: "convert", format: "image/webp" }, "png-to-webp": { mode: "convert", format: "image/webp" }, "webp-to-jpg": { mode: "convert", format: "image/jpeg" }, "webp-to-png": { mode: "convert", format: "image/png" },
+    "image-rotate": { mode: "rotate" }, "image-flip": { mode: "flip" }, "image-grayscale": { mode: "grayscale" }, "image-padding": { mode: "padding" },
+  };
+  if (imageModeBySlug[slug]) { const config = imageModeBySlug[slug]; return <ImageTool initialMode={config.mode} initialFormat={config.format} />; }
   const documentModeBySlug: Record<string, "csv-excel" | "excel-csv" | "csv-json" | "json-csv" | "txt-pdf"> = { "csv-to-excel": "csv-excel", "excel-to-csv": "excel-csv", "csv-to-json": "csv-json", "json-to-csv": "json-csv", "txt-to-pdf": "txt-pdf" };
   if (documentModeBySlug[slug]) return <Suspense fallback={<ToolFrame index="03" tag="DATA ENGINE" title="문서·데이터 변환" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">문서 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><DocumentTool initialMode={documentModeBySlug[slug]} /></Suspense>;
   if (slug === "unit-convert") return <UnitConverter />;
