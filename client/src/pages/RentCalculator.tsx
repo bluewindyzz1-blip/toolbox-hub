@@ -15,7 +15,7 @@ export default function RentCalculator() {
   const result = calculateRent(applied.deposit * 10000, applied.monthlyRent * 10000, applied.rate);
   const reset = () => { setDeposit(10000); setMonthlyRent(70); setRate(5.5); setApplied({ deposit: 10000, monthlyRent: 70, rate: 5.5 }); };
   return (
-    <ToolMetaResolver slug="monthly-rent">{(tool) => <ToolFrame index="03" tag="HOUSING CALCULATOR" title="월세 계산기" description="보증금의 월 환산 비용과 월세를 함께 계산해 현재 계약의 실질 월 지출을 확인하세요.">
+    <ToolMetaResolver slug="monthly-rent">{(tool) => <ToolFrame index="03" tag="HOUSING CALCULATOR" title="월세 계산기" description="보증금·월세·전월세 전환율을 입력해 보증금 월 환산액을 포함한 실질 월 지출을 확인하세요.">
       <SeoHead title={tool.seoTitle ?? tool.title} description={tool.seoDescription ?? tool.description} /><CatalogBreadcrumb toolSlug={tool.slug} />
       <section className="calculator-layout">
         <div className="calculator-form">
@@ -23,7 +23,7 @@ export default function RentCalculator() {
           <label>보증금 <div className="input-suffix"><CommaNumberInput ariaLabel="보증금" value={deposit} onValueChange={setDeposit} /><span>만원</span></div></label>
           <label>월세 <div className="input-suffix"><CommaNumberInput ariaLabel="월세" value={monthlyRent} onValueChange={setMonthlyRent} /><span>만원</span></div></label>
           <label>전월세 전환율 <div className="input-suffix"><CommaNumberInput ariaLabel="전월세 전환율" value={rate} onValueChange={setRate} /><span>%</span></div></label>
-          <p className="form-footnote">전환율은 계약 조건 또는 지역별 법정 상한을 확인해 입력하세요.</p>
+          <p className="form-footnote">전환율은 계약 조건을 기준으로 입력하세요. 관리비와 공과금은 실질 월 지출에 포함되지 않습니다.</p>
           <CalculatorActions onCalculate={() => setApplied({ deposit, monthlyRent, rate })} onReset={reset} />
         </div>
         <div className="calculator-output red-output">
@@ -33,7 +33,7 @@ export default function RentCalculator() {
         </div>
       </section>
       <section className="insight-grid"><article><Landmark size={22} /><p>연간 현금 월세</p><strong>{won.format(result.yearlyCashOutflow)}원</strong></article><article><ArrowRightLeft size={22} /><p>환산 전세 보증금</p><strong>{won.format(result.equivalentDeposit)}원</strong><small>동일 전환율 기준</small></article><article><WalletCards size={22} /><p>계산 기준</p><strong>{applied.rate}%</strong><small>연 전환율</small></article></section>
-      <ToolKnowledge tool={tool} method="보증금에 입력한 전환율을 적용해 월 환산액을 구한 다음 월세와 더합니다." example="보증금 1억원, 월세 70만원, 전환율 5.5%를 입력하면 실질 월 지출을 확인할 수 있습니다." caution="전환율과 계약 조건은 지역, 계약 시점, 법정 상한에 따라 다를 수 있습니다." />
+      <ToolKnowledge tool={tool} method="보증금에 입력한 전환율을 적용해 월 환산액을 구한 다음 실제 월세와 더합니다." example="보증금 1억원, 월세 70만원, 전환율 5.5%를 입력하면 보증금 월 환산액을 포함한 실질 월 지출을 확인할 수 있습니다." caution="전환율과 계약 조건은 지역, 계약 시점, 법정 상한에 따라 다를 수 있으며 관리비·공과금은 별도입니다." />
     </ToolFrame>}</ToolMetaResolver>
   );
 }

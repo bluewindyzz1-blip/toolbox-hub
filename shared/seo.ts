@@ -107,13 +107,44 @@ const coreCalculatorFaq: Record<string, ToolFaq[]> = {
   ],
 };
 
+const prioritySearchFaq: Record<string, ToolFaq[]> = {
+  "monthly-take-home": [
+    { question: "월급 실수령액은 왜 사람마다 다른가요?", answer: "월 세전 급여가 같아도 비과세 급여, 부양가족·자녀 수, 보수월액, 원천징수 선택비율과 연말정산 공제에 따라 공제액이 달라질 수 있습니다." },
+  ],
+  "annual-take-home": [
+    { question: "같은 연봉인데 월 실수령액이 다른 이유는 무엇인가요?", answer: "상여금 지급 방식, 비과세 항목, 부양가족과 자녀 수, 원천징수와 연말정산 조건에 따라 실제 월별 수령액은 달라질 수 있습니다." },
+  ],
+  "four-insurance": [
+    { question: "4대보험과 사대보험은 같은 말인가요?", answer: "일반적으로 국민연금, 건강보험, 장기요양보험, 고용보험을 묶어 4대보험 또는 사대보험이라고 부릅니다. 사업장과 가입 유형에 따라 실제 부담 항목은 달라질 수 있습니다." },
+  ],
+  "weekly-holiday-pay": [
+    { question: "주 15시간이면 주휴수당을 받을 수 있나요?", answer: "주 평균 소정근로시간, 해당 주 개근 여부와 근로계약 조건을 함께 확인해야 합니다. 이 도구는 입력한 시간과 개근 가정으로 참고용 금액을 보여 줍니다." },
+  ],
+  "unemployment-benefit": [
+    { question: "계산 결과가 나오면 실업급여를 받을 수 있나요?", answer: "아니요. 퇴사 사유, 피보험단위기간, 재취업활동 등 수급 요건은 고용센터가 최종 판단합니다. 이 도구는 입력한 월급·나이·가입기간에 따른 참고용 추정입니다." },
+  ],
+  "retirement-pay": [
+    { question: "퇴직금 계산에 최근 3개월 임금 합계를 넣는 이유는 무엇인가요?", answer: "이 도구는 최근 임금과 총일수를 바탕으로 평균임금을 구해 예상 퇴직금을 계산합니다. 실제 임금 항목과 산정 기간은 급여명세서·회사 정산 내역을 함께 확인하세요." },
+  ],
+  "loan-interest": [
+    { question: "원리금균등과 원금균등의 월 상환액은 왜 다른가요?", answer: "원리금균등은 매월 납입액이 비교적 일정하도록 계산하고, 원금균등은 매월 같은 원금을 갚아 초기 납입액이 더 크지만 시간이 갈수록 줄어듭니다." },
+  ],
+  "monthly-rent": [
+    { question: "관리비도 실질 월세에 포함되나요?", answer: "이 도구는 입력한 월세와 보증금의 월 환산액을 계산합니다. 관리비·공과금·이사비 등 계약별 비용은 별도로 더해 비교하세요." },
+  ],
+  "brokerage-fee": [
+    { question: "복비와 부동산 중개수수료는 같은 뜻인가요?", answer: "일상적으로 복비는 부동산 중개보수 또는 중개수수료를 뜻합니다. 이 도구는 주택 거래금액별 중개보수 상한액을 계산하며 실제 지급액은 협의와 지역 기준을 확인해야 합니다." },
+  ],
+};
+
 const defaultFaq: ToolFaq[] = [
   { question: "계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?", answer: "이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요." },
   { question: "입력한 정보는 저장되나요?", answer: "계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다." },
 ];
 
 export function getVisibleToolFaq(tool: CatalogTool): ToolFaq[] {
-  return tool.faq?.length ? tool.faq : (coreCalculatorFaq[tool.slug] ?? []);
+  const merged = [...(tool.faq ?? []), ...(coreCalculatorFaq[tool.slug] ?? []), ...(prioritySearchFaq[tool.slug] ?? [])];
+  return merged.filter((item, index) => merged.findIndex((candidate) => candidate.question === item.question) === index);
 }
 
 export function getStaticRouteFaq(path: string): ToolFaq[] {

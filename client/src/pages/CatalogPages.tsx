@@ -25,9 +25,9 @@ const DocumentTool = lazy(() => import("./DocumentTool"));
 type RootKey = "calculator" | "convert" | "units";
 
 const rootTitles: Record<RootKey, { title: string; description: string; index: string }> = {
-  calculator: { title: "계산기", description: "금융, 부동산, 급여, 세금 등 실생활에 필요한 계산기를 카테고리별로 탐색하세요.", index: "07" },
-  convert: { title: "파일 변환", description: "PDF, 이미지, 문서 변환 도구를 브라우저 안에서 바로 사용하세요.", index: "08" },
-  units: { title: "단위 변환", description: "길이부터 데이터 용량까지 자주 쓰는 단위를 빠르게 환산하세요.", index: "09" },
+  calculator: { title: "생활 계산기 모음", description: "월급·퇴직금·대출·부동산·세금처럼 자주 필요한 계산기를 카테고리별로 찾아 바로 계산하세요.", index: "07" },
+  convert: { title: "파일 변환 도구", description: "PDF 합치기, 이미지 압축, CSV·Excel 변환 등 파일 작업을 브라우저 안에서 바로 처리하세요.", index: "08" },
+  units: { title: "단위 변환기", description: "길이·무게·온도·면적부터 데이터 용량까지 자주 쓰는 단위를 빠르게 환산하세요.", index: "09" },
 };
 
 function RootPage({ rootSlug }: { rootSlug: RootKey }) {
@@ -36,7 +36,7 @@ function RootPage({ rootSlug }: { rootSlug: RootKey }) {
   const info = rootTitles[rootSlug];
   if (!data || !root) return <CatalogLoading />;
   const groups = categoryToolGroups(data.categories, data.tools, root).filter(({ tools }) => tools.length > 0);
-  return <div className="site-page"><SeoHead title={`${root.seoTitle ?? info.title} | 도구상자`} description={root.seoDescription ?? info.description} kind="CollectionPage" /><SiteHeader /><main className="container catalog-page"><CatalogBreadcrumb rootSlug={rootSlug} /><section className="catalog-intro"><span>{info.index}</span><div><p className="eyebrow">CATALOG / {rootSlug.toUpperCase()}</p><h1>{root.name}</h1><p>{root.description ?? info.description}</p></div></section><div className="category-directory">{groups.map(({ subcategory, tools }) => <section key={subcategory.id} className="category-group"><div><p className="eyebrow">CATEGORY</p><h2>{subcategory.name}</h2><p>{subcategory.description}</p><Link href={getCategoryPath(subcategory, data.categories)}>카테고리 보기 <ArrowUpRight size={17} /></Link></div><div className="category-tool-list">{tools.map((tool) => <Link key={tool.id} href={getToolPath(tool, data.categories)}><span>{String(tool.sortOrder).padStart(2, "0")}</span><div><h3>{tool.title}</h3><p>{tool.description}</p></div><ArrowUpRight size={20} /></Link>)}</div></section>)}</div></main><SiteFooter /></div>;
+  return <div className="site-page"><SeoHead title={`${root.seoTitle ?? info.title} | 도구상자`} description={root.seoDescription ?? info.description} kind="CollectionPage" /><SiteHeader /><main className="container catalog-page"><CatalogBreadcrumb rootSlug={rootSlug} /><section className="catalog-intro"><span>{info.index}</span><div><p className="eyebrow">CATALOG / {rootSlug.toUpperCase()}</p><h1>{info.title}</h1><p>{root.description ?? info.description}</p></div></section><div className="category-directory">{groups.map(({ subcategory, tools }) => <section key={subcategory.id} className="category-group"><div><p className="eyebrow">CATEGORY</p><h2>{subcategory.name}</h2><p>{subcategory.description}</p><Link href={getCategoryPath(subcategory, data.categories)}>카테고리 보기 <ArrowUpRight size={17} /></Link></div><div className="category-tool-list">{tools.map((tool) => <Link key={tool.id} href={getToolPath(tool, data.categories)}><span>{String(tool.sortOrder).padStart(2, "0")}</span><div><h3>{tool.title}</h3><p>{tool.description}</p></div><ArrowUpRight size={20} /></Link>)}</div></section>)}</div></main><SiteFooter /></div>;
 }
 
 function SubcategoryPage({ rootSlug, categorySlug }: { rootSlug: RootKey; categorySlug: string }) {
