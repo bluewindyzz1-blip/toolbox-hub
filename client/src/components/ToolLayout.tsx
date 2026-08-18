@@ -16,7 +16,7 @@ export function SiteHeader() {
     <header className="site-header">
       <div className="container header-shell">
         <Link href="/" className="brand" aria-label="도구상자 홈">
-          <span className="brand-mark" aria-hidden="true" />
+          <img src="/toolbox-mark.svg" className="brand-mark" width={30} height={30} alt="" aria-hidden="true" />
           <span>{SITE.name}</span>
           <sup>01</sup>
         </Link>
@@ -48,7 +48,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
-        <p><span className="red-square" /> {SITE.name}</p>
+        <p><img src="/toolbox-mark.svg" className="footer-brand-mark" width={20} height={20} alt="" aria-hidden="true" /> {SITE.name}</p>
         <p>파일은 서버로 전송되지 않습니다.<br />모든 변환은 현재 브라우저에서 처리됩니다.</p>
         <p>UTILITY SYSTEM<br />2026 / KOREA</p>
       </div>

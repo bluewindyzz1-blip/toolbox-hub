@@ -14,7 +14,9 @@ a { color:inherit; text-decoration:none; }
 .site-header { border-bottom:var(--thin-line); background:var(--paper); position:relative; z-index:20; }
 .header-shell { height:78px; display:flex; align-items:center; gap:2rem; }
 .brand { display:inline-flex; align-items:center; gap:.55rem; font-size:1.32rem; font-weight:800; letter-spacing:-.08em; white-space:nowrap; }
-.brand-mark,.red-square { display:inline-block; width:16px; height:16px; background:var(--signal); }
+.brand-mark { display:block; width:30px; height:30px; flex:0 0 auto; }
+.red-square { display:inline-block; width:16px; height:16px; background:var(--signal); }
+.footer-brand-mark { display:block; width:20px; height:20px; flex:0 0 auto; }
 .brand sup { align-self:flex-start; padding-top:.35rem; font-size:.58rem; letter-spacing:0; }
 .desktop-nav { margin-left:auto; display:flex; height:100%; }
 .desktop-nav a { display:flex; align-items:center; padding:0 1rem; border-left:var(--thin-line); font-size:.83rem; font-weight:700; letter-spacing:-.06em; transition:background .18s var(--ease-out),color .18s var(--ease-out); }
