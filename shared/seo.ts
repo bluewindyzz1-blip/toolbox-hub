@@ -1,0 +1,220 @@
+import {
+  CatalogCategory,
+  CatalogSnapshot,
+  CatalogTool,
+  defaultCatalog,
+  getCategoryLineage,
+  getCategoryPath,
+  getToolPath,
+  legacyToolPaths,
+} from "./catalog";
+
+export type SeoPageKind = "WebSite" | "WebApplication" | "CollectionPage" | "WebPage";
+
+export type BreadcrumbItem = { name: string; path: string };
+export type ToolFaq = { question: string; answer: string };
+
+export type SeoRoute = {
+  title: string;
+  description: string;
+  canonicalPath: string;
+  kind: SeoPageKind;
+  robots: "index,follow" | "noindex,nofollow";
+  breadcrumbs: BreadcrumbItem[];
+  faq: Array<{ question: string; answer: string }>;
+};
+
+export const SITE_NAME = "도구상자";
+export const SITE_DESCRIPTION = "생활 계산기, PDF·이미지·문서 파일 변환, 단위 환산을 브라우저에서 바로 사용하는 도구상자";
+
+const staticRouteMeta: Record<string, Pick<SeoRoute, "title" | "description" | "kind" | "robots">> = {
+  "/": {
+    title: "도구상자 | 생활 계산기·PDF·이미지 파일 변환",
+    description: "급여·세금·대출·부동산 계산기와 PDF·이미지·문서 변환, 단위 환산을 설치 없이 한곳에서 이용하세요.",
+    kind: "WebSite",
+    robots: "index,follow",
+  },
+  "/about": { title: "도구상자 소개 | 생활 계산기·파일 변환", description: "생활 계산과 브라우저 기반 파일 변환을 제공하는 도구상자의 운영 원칙과 제공 기능을 안내합니다.", kind: "WebPage", robots: "index,follow" },
+  "/guide": { title: "도구상자 이용방법 | 계산기·파일 변환 사용 안내", description: "계산기 입력, 파일 변환, 결과 다운로드와 참고사항을 도구상자 이용방법에서 확인하세요.", kind: "WebPage", robots: "index,follow" },
+  "/faq": { title: "자주 묻는 질문 | 도구상자", description: "계산 결과의 참고 범위, 브라우저 파일 처리, 개인정보와 광고 안내에 관한 자주 묻는 질문입니다.", kind: "WebPage", robots: "index,follow" },
+  "/privacy": { title: "개인정보처리방침 | 도구상자", description: "도구상자의 파일·계산기 입력 처리 방식과 개인정보 보호 방침을 안내합니다.", kind: "WebPage", robots: "index,follow" },
+  "/terms": { title: "이용약관 | 도구상자", description: "도구상자 온라인 계산 및 브라우저 기반 파일 처리 서비스의 이용약관입니다.", kind: "WebPage", robots: "index,follow" },
+  "/disclaimer": { title: "면책조항 | 도구상자", description: "도구상자 계산 결과와 파일 처리 기능의 참고 범위 및 이용 시 유의사항을 안내합니다.", kind: "WebPage", robots: "index,follow" },
+  "/cookie-policy": { title: "쿠키 및 광고 안내 | 도구상자", description: "도구상자의 쿠키, 방문 통계와 Google AdSense 광고 처리 안내입니다.", kind: "WebPage", robots: "index,follow" },
+  "/contact": { title: "문의하기 | 도구상자", description: "계산 오류, 파일 변환 오류, 개인정보 문의와 서비스 개선 의견을 도구상자 운영 이메일로 보낼 수 있습니다.", kind: "WebPage", robots: "index,follow" },
+  "/document": { title: "문서 변환 도구 | CSV·Excel·JSON·TXT 변환 | 도구상자", description: "CSV·Excel·JSON·TXT 파일을 브라우저에서 형식에 맞게 변환하는 문서 변환 도구입니다.", kind: "WebApplication", robots: "index,follow" },
+  "/search": { title: "도구 검색 | 도구상자", description: "계산기, PDF, 이미지, 문서 변환과 단위 변환 도구를 검색합니다.", kind: "WebPage", robots: "noindex,nofollow" },
+};
+
+const staticRouteFaq: Record<string, ToolFaq[]> = {
+  "/faq": [
+    { question: "계산 결과를 실제 계약·신고·급여 지급에 그대로 사용해도 되나요?", answer: "아니요. 계산기는 입력값을 바탕으로 한 참고용 추정입니다. 세금, 금융, 부동산, 급여처럼 중요한 판단 전에는 공식 기관의 최신 기준, 계약서 또는 전문가 안내를 확인하세요." },
+    { question: "파일은 서버에 업로드되거나 저장되나요?", answer: "현재 제공되는 파일 도구는 브라우저 안에서 처리합니다. 선택 파일과 처리 결과는 서버에 업로드하거나 장기 저장하지 않으며, 탭을 닫거나 초기화하면 작업 데이터가 사라집니다." },
+    { question: "파일 변환이 실패하면 어떻게 하나요?", answer: "파일 형식과 크기를 먼저 확인하고, 브라우저를 새로고침한 뒤 다시 시도하세요. 복잡한 PDF, 암호화된 파일 또는 기기 메모리 제한에 따라 일부 기능이 실패할 수 있으므로 원본 파일은 별도로 보관하세요." },
+    { question: "도구상자는 무료로 사용할 수 있나요?", answer: "현재 공개된 계산기와 브라우저 기반 파일 도구는 별도 회원가입 없이 사용할 수 있습니다. 광고 표시 여부와 기능 제공 범위는 운영 정책에 따라 달라질 수 있습니다." },
+    { question: "오류나 개선 의견은 어디에 문의하나요?", answer: "문의하기 페이지의 양식을 이용하면 사용 중인 이메일 앱에서 운영 이메일로 메시지를 보낼 수 있습니다. 계산 오류는 입력값과 재현 방법을 함께 보내면 확인에 도움이 됩니다." },
+  ],
+};
+
+const coreCalculatorFaq: Record<string, ToolFaq[]> = {
+  "monthly-rent": [
+    { question: "관리비도 실질 월 지출에 포함되나요?", answer: "이 계산기는 입력한 월세와 보증금의 월 환산액을 기준으로 합니다. 관리비, 공과금, 이사비 등은 계약 조건에 따라 달라 별도로 더해 확인하세요." },
+    { question: "보증금 전환율은 무엇을 입력하면 되나요?", answer: "계약서나 비교하려는 기준의 연 전환율을 입력하세요. 전환율은 보증금을 월 비용으로 비교하기 위한 가정값이므로, 실제 계약의 월세·보증금 조건이 우선합니다." },
+  ],
+  "loan-interest": [
+    { question: "원리금균등과 원금균등상환은 무엇이 다른가요?", answer: "원리금균등은 매월 납입액이 비교적 일정하고, 원금균등은 매월 갚는 원금이 같아 초기 납입액이 더 크지만 시간이 갈수록 줄어듭니다." },
+    { question: "계산 결과가 금융기관 상환표와 다른 이유는 무엇인가요?", answer: "실제 대출은 납입일, 거치기간, 중도상환, 금리 변동, 원 단위 절사와 상품 조건에 따라 달라질 수 있습니다. 약정서와 금융기관 상환표를 확인하세요." },
+  ],
+  "annual-net": [
+    { question: "간편 연봉 실수령액과 실제 급여명세서는 왜 다를 수 있나요?", answer: "비과세 급여, 부양가족, 원천징수 선택 비율, 상여금과 연말정산 결과에 따라 실제 공제액이 달라질 수 있습니다. 이 도구는 빠른 참고용 추정입니다." },
+    { question: "연봉을 월급으로 나눌 때 상여금도 포함하나요?", answer: "입력한 연봉을 기준으로 월 단위 예상 금액을 계산합니다. 상여금 지급 시기나 급여 구성은 회사의 급여 규정과 근로계약서를 확인하세요." },
+  ],
+  "pyeong": [
+    { question: "1평은 몇 제곱미터인가요?", answer: "1평은 약 3.305785제곱미터입니다. 이 도구는 이 환산 기준으로 평과 제곱미터를 서로 변환합니다." },
+    { question: "전용면적과 공급면적은 어떻게 다른가요?", answer: "전용면적은 실제로 단독 사용 가능한 면적이고, 공급면적은 주거공용면적을 더한 면적입니다. 광고나 계약서를 볼 때 어떤 면적인지 함께 확인하세요." },
+  ],
+  "retirement-pay": [
+    { question: "퇴직금은 누구나 받을 수 있나요?", answer: "계속 근로기간과 주 평균 소정근로시간 등 법정 요건에 따라 달라질 수 있습니다. 실제 수급 요건과 지급 기준은 고용노동부 안내 및 회사 규정을 확인하세요." },
+    { question: "퇴직금 계산의 평균임금은 어떻게 확인하나요?", answer: "통상적으로 퇴직 전 일정 기간의 임금 총액을 기준으로 산정하지만, 임금 항목과 산정 기간에 따라 달라질 수 있습니다. 급여명세서와 회사의 정산 내역을 함께 확인하세요." },
+  ],
+  "vat-calculator": [
+    { question: "부가세 포함 금액에서 공급가액은 어떻게 계산하나요?", answer: "일반적인 10% 부가세 기준에서는 부가세 포함 금액을 1.1로 나누어 공급가액을 구하고, 차액을 부가세로 볼 수 있습니다." },
+    { question: "계산 결과로 부가세 신고 금액을 확정할 수 있나요?", answer: "아니요. 매출·매입 세액공제, 영세율, 면세, 가산세와 신고 요건은 반영하지 않은 기본 계산입니다. 실제 신고는 국세청 안내와 증빙을 기준으로 확인하세요." },
+  ],
+  "rent-conversion": [
+    { question: "전월세 전환율은 어떻게 비교하면 되나요?", answer: "보증금과 월세를 한 기준으로 비교하기 위한 연 환산 비율입니다. 같은 계약 조건에서 여러 전환율을 넣어 월 부담 차이를 비교해 볼 수 있습니다." },
+    { question: "법정 전환율과 계약 전환율은 항상 같은가요?", answer: "적용 기준과 계약 유형, 시점에 따라 확인해야 할 사항이 있을 수 있습니다. 이 도구는 입력한 전환율로 환산만 하므로 실제 계약 전에는 최신 공식 기준과 계약서를 확인하세요." },
+  ],
+  "jeonse-to-monthly": [
+    { question: "전세금을 월세로 바꿀 때 무엇을 확인해야 하나요?", answer: "전세 보증금, 적용 전환율, 관리비와 계약 기간을 함께 비교하세요. 이 계산은 보증금의 월 환산액을 보여 주는 참고값입니다." },
+    { question: "환산한 월세에 관리비가 포함되나요?", answer: "포함되지 않습니다. 관리비와 공과금은 별도 조건이므로 실제 월 부담을 비교할 때 추가하세요." },
+  ],
+  "monthly-to-jeonse": [
+    { question: "월세를 전세 보증금으로 환산할 때 전환율이 왜 필요한가요?", answer: "월세와 전세 보증금은 단위가 달라 바로 비교하기 어렵습니다. 전환율은 월세를 보증금 기준으로 바꾸기 위한 가정값입니다." },
+    { question: "환산 보증금이 실제 계약 가능 금액을 뜻하나요?", answer: "아니요. 지역 시세, 주택 상태, 계약 기간과 협상 조건은 반영하지 않은 산술 환산 결과입니다." },
+  ],
+  "loan-amortization": [
+    { question: "원리금균등상환의 월 납입액은 왜 거의 일정한가요?", answer: "매월 원금과 이자의 합계가 일정하도록 계산하는 방식입니다. 기간이 지날수록 이자 비중은 줄고 원금 비중은 커집니다." },
+    { question: "거치기간이 있는 대출도 계산할 수 있나요?", answer: "이 도구는 일반적인 상환 시작 기준을 제공합니다. 거치기간이나 변동금리가 있으면 실제 상환표와 다를 수 있습니다." },
+  ],
+  "deposit-interest": [
+    { question: "예금 이자는 세전 금액인가요?", answer: "이 도구의 결과는 입력한 금리와 기간으로 계산한 예상 이자입니다. 실제 세후 수령액은 상품의 과세 방식과 우대금리 조건을 함께 확인하세요." },
+    { question: "중도 해지하면 같은 금리가 적용되나요?", answer: "일반적으로 중도 해지 시 약정금리와 다른 중도해지 이율이 적용될 수 있습니다. 상품설명서와 금융기관 조건을 확인하세요." },
+  ],
+  "savings": [
+    { question: "적금은 매월 같은 날 납입해야 하나요?", answer: "이 도구는 일정하게 납입하는 일반적인 경우를 가정합니다. 실제 상품의 납입일, 자유적립 여부와 우대 조건에 따라 결과가 달라질 수 있습니다." },
+    { question: "적금 만기 예상액은 세후 금액인가요?", answer: "세금과 우대금리 충족 여부는 반영 범위가 다를 수 있습니다. 실제 만기 수령액은 상품설명서의 이자 계산 및 과세 조건을 확인하세요." },
+  ],
+};
+
+const defaultFaq: ToolFaq[] = [
+  { question: "계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?", answer: "이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요." },
+  { question: "입력한 정보는 저장되나요?", answer: "계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다." },
+];
+
+export function getVisibleToolFaq(tool: CatalogTool): ToolFaq[] {
+  return tool.faq?.length ? tool.faq : (coreCalculatorFaq[tool.slug] ?? []);
+}
+
+export function getStaticRouteFaq(path: string): ToolFaq[] {
+  return staticRouteFaq[normalizePath(path)] ?? [];
+}
+
+function normalizePath(path: string) {
+  if (!path || path === "/") return "/";
+  const value = path.split("?")[0].replace(/\/+$/, "");
+  return value.startsWith("/") ? value : `/${value}`;
+}
+
+function withBrand(title: string) {
+  return title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+}
+
+function getCatalog(catalog?: CatalogSnapshot) {
+  return catalog ?? defaultCatalog;
+}
+
+function findToolByPath(path: string, catalog: CatalogSnapshot) {
+  const canonical = catalog.tools.find((tool) => getToolPath(tool, catalog.categories) === path);
+  if (canonical) return canonical;
+  return catalog.tools.find((tool) => legacyToolPaths[tool.slug] === path);
+}
+
+function categoryBreadcrumbs(category: CatalogCategory, catalog: CatalogSnapshot): BreadcrumbItem[] {
+  return [
+    { name: "홈", path: "/" },
+    ...getCategoryLineage(category, catalog.categories).map((item) => ({ name: item.name, path: getCategoryPath(item, catalog.categories) })),
+  ];
+}
+
+function fallback(path: string): SeoRoute {
+  return {
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    canonicalPath: path,
+    kind: "WebPage",
+    robots: "index,follow",
+    breadcrumbs: [{ name: "홈", path: "/" }],
+    faq: [],
+  };
+}
+
+export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapshot): SeoRoute {
+  const path = normalizePath(rawPath);
+  const catalog = getCatalog(suppliedCatalog);
+  const staticMeta = staticRouteMeta[path];
+  if (staticMeta) {
+    return {
+      ...staticMeta,
+      canonicalPath: path,
+      breadcrumbs: path === "/" ? [{ name: "홈", path: "/" }] : [{ name: "홈", path: "/" }, { name: staticMeta.title.replace(` | ${SITE_NAME}`, ""), path }],
+      faq: getStaticRouteFaq(path),
+    };
+  }
+
+  const tool = findToolByPath(path, catalog);
+  if (tool) {
+    const category = catalog.categories.find((item) => item.id === tool.categoryId);
+    const canonicalPath = getToolPath(tool, catalog.categories);
+    const breadcrumbs = category ? [...categoryBreadcrumbs(category, catalog), { name: tool.title, path: canonicalPath }] : [{ name: "홈", path: "/" }, { name: tool.title, path: canonicalPath }];
+    return {
+      title: withBrand(tool.seoTitle?.trim() || tool.title),
+      description: tool.seoDescription?.trim() || tool.description,
+      canonicalPath,
+      kind: "WebApplication",
+      robots: "index,follow",
+      breadcrumbs,
+      faq: tool.kind === "calculator" ? [...getVisibleToolFaq(tool), ...defaultFaq] : [],
+    };
+  }
+
+  const category = catalog.categories.find((item) => getCategoryPath(item, catalog.categories) === path);
+  if (category) {
+    return {
+      title: withBrand(category.seoTitle?.trim() || category.name),
+      description: category.seoDescription?.trim() || category.description || SITE_DESCRIPTION,
+      canonicalPath: path,
+      kind: "CollectionPage",
+      robots: "index,follow",
+      breadcrumbs: categoryBreadcrumbs(category, catalog),
+      faq: [],
+    };
+  }
+
+  return fallback(path);
+}
+
+export function getSeoPublicPaths(catalog: CatalogSnapshot = defaultCatalog) {
+  const staticPaths = Object.keys(staticRouteMeta).filter((path) => path !== "/search");
+  const categoryPaths = catalog.categories
+    .filter((category) => category.parentId === null || catalog.categories.some((root) => root.id === category.parentId && root.parentId === null))
+    .filter((category) => catalog.tools.some((tool) => getCategoryLineage(catalog.categories.find((item) => item.id === tool.categoryId)!, catalog.categories).some((lineage) => lineage.id === category.id)))
+    .map((category) => getCategoryPath(category, catalog.categories));
+  const toolPaths = catalog.tools.filter((tool) => tool.status === "active").map((tool) => getToolPath(tool, catalog.categories));
+  return Array.from(new Set([...staticPaths, ...categoryPaths, ...toolPaths])).sort();
+}
+
+export function toAbsoluteUrl(path: string, origin?: string) {
+  const base = (origin || "https://carculate.moneyko.co.kr").replace(/\/$/, "");
+  return `${base}${normalizePath(path)}`;
+}

@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { RotateCcw } from "lucide-react";
 import { PropsWithChildren, useEffect } from "react";
 import { CatalogCategory, CatalogTool, getCategoryLineage, getCategoryPath, getToolPath } from "@shared/catalog";
+import { getVisibleToolFaq, resolveSeoRoute, SeoPageKind, SITE_NAME, toAbsoluteUrl } from "@shared/seo";
 import { useCatalog } from "@/hooks/useCatalog";
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
@@ -13,22 +14,41 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
   Object.entries(attributes).forEach(([key, value]) => element?.setAttribute(key, value));
 }
 
-export function SeoHead({ title, description, path, kind = "WebApplication", noindex = false }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage"; noindex?: boolean }) {
+export function SeoHead({ title, description, path, kind = "WebApplication", noindex = false }: { title: string; description: string; path?: string; kind?: SeoPageKind; noindex?: boolean }) {
   useEffect(() => {
-    document.title = title;
+    const targetPath = path ?? window.location.pathname;
+    const route = resolveSeoRoute(targetPath);
+    const resolvedTitle = route.title !== SITE_NAME ? route.title : title;
+    const resolvedDescription = route.title !== SITE_NAME ? route.description : description;
+    const resolvedKind = route.title !== SITE_NAME ? route.kind : kind;
     const configuredOrigin = import.meta.env.VITE_CANONICAL_ORIGIN?.trim().replace(/\/$/, "");
     const origin = configuredOrigin || window.location.origin;
-    const url = `${origin}${path ?? window.location.pathname}`;
-    upsertMeta('meta[name="description"]', { name: "description", content: description });
-    upsertMeta('meta[property="og:title"]', { property: "og:title", content: title });
-    upsertMeta('meta[property="og:description"]', { property: "og:description", content: description });
+    const url = toAbsoluteUrl(route.canonicalPath, origin);
+    const robots = noindex || route.robots === "noindex,nofollow" ? "noindex,nofollow" : "index,follow";
+
+    document.title = resolvedTitle;
+    upsertMeta('meta[name="description"]', { name: "description", content: resolvedDescription });
+    upsertMeta('meta[property="og:title"]', { property: "og:title", content: resolvedTitle });
+    upsertMeta('meta[property="og:description"]', { property: "og:description", content: resolvedDescription });
     upsertMeta('meta[property="og:type"]', { property: "og:type", content: "website" });
+    upsertMeta('meta[property="og:site_name"]', { property: "og:site_name", content: SITE_NAME });
     upsertMeta('meta[property="og:url"]', { property: "og:url", content: url });
+    upsertMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary" });
     upsertMeta('link[rel="canonical"]', { rel: "canonical", href: url });
-    upsertMeta('meta[name="robots"]', { name: "robots", content: noindex ? "noindex,nofollow" : "index,follow" });
+    upsertMeta('meta[name="robots"]', { name: "robots", content: robots });
+
+    const graph: Record<string, unknown>[] = [
+      { "@type": resolvedKind, name: resolvedTitle, description: resolvedDescription, url },
+    ];
+    if (route.breadcrumbs.length > 1) {
+      graph.push({ "@type": "BreadcrumbList", itemListElement: route.breadcrumbs.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, item: toAbsoluteUrl(item.path, origin) })) });
+    }
+    if (route.faq.length) {
+      graph.push({ "@type": "FAQPage", mainEntity: route.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) });
+    }
     let jsonLd = document.getElementById("catalog-jsonld");
     if (!jsonLd) { jsonLd = document.createElement("script"); jsonLd.id = "catalog-jsonld"; jsonLd.setAttribute("type", "application/ld+json"); document.head.appendChild(jsonLd); }
-    jsonLd.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": kind, name: title, description, url });
+    jsonLd.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
   }, [title, description, path, kind, noindex]);
   return null;
 }
@@ -123,14 +143,15 @@ export function CalculatorActions({ onCalculate, onReset }: { onCalculate: () =>
 export function ToolKnowledge({ tool, method, example, caution, children }: PropsWithChildren<{ tool: CatalogTool; method: string; example: string; caution: string }>) {
   const { data } = useCatalog();
   const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
+  const visibleFaq = getVisibleToolFaq(tool);
   return <section className="tool-knowledge">
     <AdSlot slot="AD_CONTENT" />
     <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>계산 공식</h2><p>{tool.formula ?? "입력값을 기준으로 계산합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>계산 방법</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>계산 예시</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>주의사항</h2><p>{caution}</p></article></div>
     {children}
     <OfficialReference tool={tool} />
-    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>자주 묻는 질문</h2>{(tool.faq ?? []).map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
+    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>{tool.title} 자주 묻는 질문</h2>{visibleFaq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
     <AdSlot slot="AD_RELATED" />
-    <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>관련 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
+    <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>{tool.title}와 함께 쓰는 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
   </section>;
 }
 

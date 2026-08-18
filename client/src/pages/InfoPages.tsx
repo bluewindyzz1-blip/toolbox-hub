@@ -5,6 +5,7 @@ import { SiteFooter, SiteHeader } from "@/components/ToolLayout";
 import { SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
 import { getCategoryPath, getToolPath } from "@shared/catalog";
+import { getStaticRouteFaq } from "@shared/seo";
 
 const DEFAULT_SUPPORT_EMAIL = "infokokk1@naver.com";
 
@@ -66,7 +67,8 @@ const pages = {
 export function InfoPage({ type }: { type: keyof typeof pages }) {
   const page = pages[type];
   const path = `/${type === "about" ? "about" : type === "guide" ? "guide" : type === "faq" ? "faq" : type === "cookie" ? "cookie-policy" : type}`;
-  return <div className="site-page"><SeoHead title={`${page.title} | 도구상자`} description={page.paragraphs[0]} path={path} kind="CollectionPage" /><SiteHeader /><main className="container info-page"><p className="eyebrow">INFORMATION / 2026</p><h1>{page.title}</h1><div className="info-copy">{page.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div><Link href="/">도구상자 홈으로 돌아가기</Link></main><SiteFooter /></div>;
+  const questions = getStaticRouteFaq(path);
+  return <div className="site-page"><SeoHead title={`${page.title} | 도구상자`} description={page.paragraphs[0]} path={path} kind="CollectionPage" /><SiteHeader /><main className="container info-page"><p className="eyebrow">INFORMATION / 2026</p><h1>{page.title}</h1><div className="info-copy">{page.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>{questions.length > 0 && <section className="faq-section info-faq"><p className="eyebrow">COMMON QUESTIONS</p><h2>도구상자 이용 FAQ</h2>{questions.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>}<Link href="/">도구상자 홈으로 돌아가기</Link></main><SiteFooter /></div>;
 }
 
 export function SearchPage() {

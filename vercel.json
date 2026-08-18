@@ -2,6 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "CANONICAL_ORIGIN=https://carculate.moneyko.co.kr SITEMAP_ORIGIN=https://carculate.moneyko.co.kr VITE_CANONICAL_ORIGIN=https://carculate.moneyko.co.kr pnpm run build:vercel",
   "outputDirectory": "dist/public",
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/:path((?!api(?:/|$)).*)",
