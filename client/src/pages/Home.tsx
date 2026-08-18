@@ -1,5 +1,6 @@
-import { ArrowUpRight, Calculator, FileText, FolderOpen, Image, Landmark, ReceiptText, Ruler, Search, ShieldCheck, Zap, Wrench } from "lucide-react";
+import { ArrowUpRight, Calculator, ChevronDown, FileText, FolderOpen, Image, Landmark, ReceiptText, Ruler, Search, ShieldCheck, Zap, Wrench } from "lucide-react";
 import { Link } from "wouter";
+import { useState } from "react";
 import { SiteFooter, SiteHeader } from "@/components/ToolLayout";
 import { SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
@@ -18,10 +19,27 @@ export default function Home() {
   const popular = allTools.filter((tool) => tool.isPopular).sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id).slice(0, 9);
   const recent = [...allTools].sort((a, b) => b.id - a.id).slice(0, 6);
   const recommended = allTools.filter((tool) => recommendationKeys.has(tool.logicKey ?? tool.slug)).slice(0, 6);
-  const roots = categories.filter((item) => item.parentId === null);
+  const roots = categories.filter((item) => item.parentId === null).sort((a, b) => a.sortOrder - b.sortOrder);
+  const [hoveredRootId, setHoveredRootId] = useState<number | null>(null);
+  const [pinnedRootId, setPinnedRootId] = useState<number | null>(null);
+  const activeRootId = pinnedRootId ?? hoveredRootId;
+  const activeRoot = roots.find((category) => category.id === activeRootId);
+  const activeBranches = activeRoot ? categories.filter((category) => category.parentId === activeRoot.id).sort((a, b) => a.sortOrder - b.sortOrder) : [];
   return <div className="site-page"><SeoHead title="도구상자 | 파일 변환 & 생활 계산기" description="생활 계산기와 브라우저 기반 파일 변환 도구를 한곳에서 이용하는 도구상자" path="/" kind="CollectionPage" /><SiteHeader /><main>
     <section className="hero container"><div className="hero-info"><p className="eyebrow">UTILITY SYSTEM / 2026</p><h1>일을 더<br /><em>간단하게.</em></h1><p className="hero-copy">파일 변환부터 생활 계산까지. 자주 필요한 도구를 빠르고 명확하게, 한 곳에 모았습니다.</p><div className="hero-actions"><Link href="/search" className="hero-cta"><Search size={20} />도구 검색 <ArrowUpRight size={19} /></Link><Link href="/convert" className="hero-secondary">PDF·파일 도구</Link></div></div><div className="hero-art" aria-hidden="true"><span className="art-number">06</span><div className="red-block" /><div className="art-label">ONE PLACE<br />UTILITY TOOLS</div></div></section>
-    <section className="home-quick-links container" aria-label="주요 카테고리 바로가기">{roots.map((category) => <Link key={category.id} href={getCategoryPath(category, categories)}><FolderOpen size={20} /><span>{category.name}</span><ArrowUpRight size={17} /></Link>)}</section>
+    <section className="home-category-explorer container" aria-label="주요 카테고리 바로가기" onMouseLeave={() => setHoveredRootId(null)} onKeyDown={(event) => { if (event.key === "Escape") { setHoveredRootId(null); setPinnedRootId(null); } }}>
+      <div className="home-quick-links">{roots.map((category, index) => {
+        const active = activeRootId === category.id;
+        return <div key={category.id} className={`home-category-entry${active ? " active" : ""}`} onMouseEnter={() => setHoveredRootId(category.id)}>
+          <Link href={getCategoryPath(category, categories)} className="home-category-link" onFocus={() => setHoveredRootId(category.id)}><FolderOpen size={20} /><span><small>{String(index + 1).padStart(2, "0")}</small>{category.name}</span><ArrowUpRight size={17} /></Link>
+          <button type="button" className="home-category-toggle" onClick={() => setPinnedRootId((current) => current === category.id ? null : category.id)} aria-expanded={active} aria-controls={`home-category-panel-${category.id}`} aria-label={`${category.name} 하위 분류 ${active ? "닫기" : "열기"}`}><ChevronDown size={18} /></button>
+        </div>;
+      })}</div>
+      {activeRoot && <div id={`home-category-panel-${activeRoot.id}`} className="home-category-panel" role="region" aria-label={`${activeRoot.name} 하위 분류`}>
+        <div className="home-category-panel-head"><div><p className="eyebrow">CATEGORY MAP</p><h2>{activeRoot.name} <em>분류</em></h2><p>{activeRoot.description}</p></div><Link href={getCategoryPath(activeRoot, categories)}>전체 {activeRoot.name}<ArrowUpRight size={18} /></Link></div>
+        <div className="home-category-branches">{activeBranches.map((branch, index) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
+      </div>}
+    </section>
     <section className="tool-directory container"><div className="directory-head"><div><p className="eyebrow">POPULAR TOOLS</p><h2>자주 찾는 도구.</h2></div><p>관리자가 인기 표시와 정렬 순서를 관리하며,<br />주요 기능만 먼저 보여 드립니다.</p></div><ToolCards tools={popular} categories={categories} /></section>
     <section className="tool-directory container compact-directory"><div className="directory-head"><div><p className="eyebrow">NEWLY ADDED</p><h2>최근 추가된 도구.</h2></div><p>PDF·이미지·문서 변환과 단위 환산까지<br />새로 확장된 기능을 확인하세요.</p></div><ToolCards tools={recent} categories={categories} /></section>
     <section className="tool-directory container compact-directory"><div className="directory-head"><div><p className="eyebrow">RECOMMENDED</p><h2>바로 써볼 도구.</h2></div><p>파일 작업, 생활 계산, 데이터 변환처럼<br />자주 필요한 흐름을 우선 추천합니다.</p></div><ToolCards tools={recommended} categories={categories} /></section>
