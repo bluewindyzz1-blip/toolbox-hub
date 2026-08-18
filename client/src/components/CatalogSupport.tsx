@@ -146,16 +146,16 @@ export function CalculatorActions({ onCalculate, onReset }: { onCalculate: () =>
   return <div className="calculator-actions"><button className="primary-action" onClick={onCalculate}>계산하기</button><button className="reset-action" onClick={onReset}><RotateCcw size={16} />초기화</button></div>;
 }
 
-export function ToolKnowledge({ tool, method, example, caution, children }: PropsWithChildren<{ tool: CatalogTool; method: string; example: string; caution: string }>) {
+export function ToolKnowledge({ tool, formula, formulaLabel = "계산 공식", method, methodLabel = "계산 방법", example, exampleLabel = "계산 예시", caution, cautionLabel = "주의사항", children }: PropsWithChildren<{ tool: CatalogTool; formula?: string; formulaLabel?: string; method: string; methodLabel?: string; example: string; exampleLabel?: string; caution: string; cautionLabel?: string }>) {
   const { data } = useCatalog();
   const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
   const visibleFaq = getVisibleToolFaq(tool);
   return <section className="tool-knowledge">
     <AdSlot slot="AD_CONTENT" />
-    <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>계산 공식</h2><p>{tool.formula ?? "입력값을 기준으로 계산합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>계산 방법</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>계산 예시</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>주의사항</h2><p>{caution}</p></article></div>
+    <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>{formulaLabel}</h2><p>{formula ?? tool.formula ?? "입력값을 기준으로 처리합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>{methodLabel}</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>{exampleLabel}</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>{cautionLabel}</h2><p>{caution}</p></article></div>
     {children}
     <OfficialReference tool={tool} />
-    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>{tool.title} 자주 묻는 질문</h2>{visibleFaq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
+    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>{tool.title} 자주 묻는 질문</h2>{visibleFaq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}{tool.kind === "calculator" ? <><details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></> : <><details><summary>입력한 텍스트는 저장되나요?</summary><p>입력 텍스트와 변환 결과는 현재 브라우저에서 처리하며 서버에 업로드하거나 장기 저장하지 않습니다.</p></details><details><summary>변환 결과를 바로 사용해도 되나요?</summary><p>복사하거나 다운로드하기 전에 결과 형식과 내용이 목적에 맞는지 확인하세요. 특히 코드·URL·표 데이터는 사용하는 서비스의 형식 규칙이 우선합니다.</p></details></>}</section>
     <AdSlot slot="AD_RELATED" />
     <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>{tool.title}와 함께 쓰는 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
   </section>;

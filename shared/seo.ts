@@ -170,6 +170,8 @@ const calculatorCategoryFaq: Record<string, ToolFaq[]> = {
   ],
 };
 
+const visibleConverterFaqSlugs = new Set(["json-pretty", "csv-to-markdown", "url-encode", "base64-encode"]);
+
 const defaultFaq: ToolFaq[] = [
   { question: "계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?", answer: "이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요." },
   { question: "입력한 정보는 저장되나요?", answer: "계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다." },
@@ -262,7 +264,7 @@ export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapsh
       kind: "WebApplication",
       robots: "index,follow",
       breadcrumbs,
-      faq: tool.kind === "calculator" ? [...getVisibleToolFaq(tool), ...defaultFaq] : [],
+      faq: tool.kind === "calculator" ? [...getVisibleToolFaq(tool), ...defaultFaq] : visibleConverterFaqSlugs.has(tool.slug) ? getVisibleToolFaq(tool) : [],
       collectionItems: [],
     };
   }

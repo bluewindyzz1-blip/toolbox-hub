@@ -1,13 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Check, Clipboard, Copy, Download, FileCode2, RefreshCcw } from "lucide-react";
-import { CatalogBreadcrumb, SeoHead, ToolMetaResolver } from "@/components/CatalogSupport";
+import { CatalogBreadcrumb, SeoHead, ToolKnowledge, ToolMetaResolver } from "@/components/CatalogSupport";
 import { ToolFrame } from "@/components/ToolLayout";
 import { downloadBlob } from "@/lib/file-utils";
 
 export type TextMode = "json-pretty" | "json-minify" | "csv-to-tsv" | "tsv-to-csv" | "csv-to-markdown" | "json-to-markdown" | "markdown-to-html" | "html-to-text" | "url-encode" | "url-decode" | "base64-encode" | "base64-decode" | "timestamp-to-date" | "date-to-timestamp" | "hex-to-rgb" | "rgb-to-hex" | "html-encode" | "html-decode" | "normalize-lines" | "unique-lines";
 type ModeSpec = { title: string; tab: string; description: string; placeholder: string; sample: string; outputLabel: string; downloadName: string; downloadType: string };
+type PriorityGuide = { purpose: string; method: string; example: string; caution: string };
 
 type CsvRow = string[];
+
+const priorityGuides: Partial<Record<TextMode, PriorityGuide>> = {
+  "json-pretty": { purpose: "한 줄이거나 들여쓰기가 섞인 유효 JSON을 읽기 쉬운 구조로 정리합니다.", method: "JSON 텍스트를 붙여 넣고 변환하면 브라우저의 JSON 파서가 문법을 확인한 뒤 2칸 들여쓰기로 다시 출력합니다.", example: `{"name":"도구상자","tools":20}를 입력하면 name과 tools 필드가 줄바꿈된 JSON으로 표시됩니다.`, caution: "API 키·비밀번호·개인정보처럼 민감한 내용은 붙여 넣지 마세요. 형식이 맞지 않으면 큰따옴표, 쉼표와 괄호 짝을 먼저 확인하세요." },
+  "csv-to-markdown": { purpose: "쉼표로 구분한 CSV 행을 문서에 붙여 넣을 수 있는 Markdown 표로 만듭니다.", method: "첫 줄을 표의 머리글로 사용하고, 이후 행을 Markdown의 표 문법으로 변환합니다. 셀 안의 세로줄과 줄바꿈은 표에서 읽히도록 처리합니다.", example: "이름,점수와 민수,90을 입력하면 이름·점수 열을 가진 2행 Markdown 표가 만들어집니다.", caution: "쉼표가 포함된 셀은 큰따옴표로 감싸는 CSV 형식이어야 합니다. 붙여 넣을 서비스가 Markdown 표를 지원하는지도 확인하세요." },
+  "url-encode": { purpose: "한글과 특수문자를 URL의 쿼리 파라미터 값에 사용할 수 있는 퍼센트 인코딩 문자열로 바꿉니다.", method: "인코딩할 텍스트만 입력해 변환한 뒤, 결과를 URL의 값 자리로 복사합니다. 복원해야 할 때는 URL 디코딩 도구를 사용합니다.", example: "검색어=도구상자 & 정렬=최신을 입력하면 한글·공백·특수문자가 % 기호를 사용하는 인코딩 문자열로 변환됩니다.", caution: "https://, /, ?, &, =까지 포함한 URL 전체를 그대로 인코딩하면 주소 구조가 바뀔 수 있습니다. 필요한 값 부분만 변환하세요." },
+  "base64-encode": { purpose: "UTF-8 텍스트를 Base64 문자 표현으로 변환해 텍스트 기반 데이터 처리에 활용합니다.", method: "텍스트를 입력하고 변환하면 현재 브라우저에서 UTF-8 바이트를 Base64 문자열로 바꿉니다. 결과는 Base64 디코딩으로 다시 확인할 수 있습니다.", example: "도구상자를 입력하면 한글을 포함한 Base64 문자열이 표시되고, 같은 문자열을 디코딩하면 원래 텍스트로 복원됩니다.", caution: "Base64는 암호화가 아닙니다. 누구나 원문을 복원할 수 있으므로 비밀번호·인증정보·개인정보를 보호하는 용도로 사용하지 마세요." },
+};
 
 const specs: Record<TextMode, ModeSpec> = {
   "json-pretty": { title: "JSON 정리", tab: "JSON 정리", description: "JSON 텍스트를 들여쓰기와 줄바꿈이 있는 읽기 쉬운 형식으로 정리합니다.", placeholder: '{"name":"도구상자","tools":20}', sample: '{"name":"도구상자","tools":20}', outputLabel: "정리된 JSON", downloadName: "formatted.json", downloadType: "application/json;charset=utf-8" },
@@ -98,6 +106,7 @@ export function transform(mode: TextMode, source: string) {
 export default function TextTransformTool({ initialMode = "json-pretty" }: { initialMode?: TextMode }) {
   const [mode, setMode] = useState<TextMode>(initialMode); const [source, setSource] = useState(specs[initialMode].sample); const [result, setResult] = useState(""); const [error, setError] = useState(""); const [copied, setCopied] = useState(false);
   const spec = useMemo(() => specs[mode], [mode]);
+  const guide = priorityGuides[initialMode];
   useEffect(() => { setMode(initialMode); setSource(specs[initialMode].sample); setResult(""); setError(""); setCopied(false); }, [initialMode]);
   function changeMode(next: TextMode) { setMode(next); setSource(specs[next].sample); setResult(""); setError(""); setCopied(false); }
   function runTransform() { try { setResult(transform(mode, source)); setError(""); setCopied(false); } catch (caught) { setResult(""); setError(caught instanceof Error ? caught.message : "변환 중 오류가 발생했습니다."); } }
@@ -111,5 +120,6 @@ export default function TextTransformTool({ initialMode = "json-pretty" }: { ini
         <div className="conversion-panel text-result-panel"><label className="text-transform-label">{spec.outputLabel}<textarea value={result} readOnly placeholder="변환 결과가 여기에 표시됩니다." spellCheck={false} /></label><div className="calculator-actions"><button className="primary-action" onClick={copyResult} disabled={!result}>{copied ? <Check size={18} /> : <Copy size={18} />}{copied ? "복사됨" : "결과 복사"}</button><button className="reset-action" onClick={() => result && downloadBlob(new Blob(["\uFEFF", result], { type: spec.downloadType }), spec.downloadName)} disabled={!result}><Download size={18} />다운로드</button></div></div>
       </div><div className="process-strip"><span><Clipboard size={16} />텍스트는 서버로 전송되지 않습니다</span><span><FileCode2 size={16} />현재 브라우저에서 즉시 변환</span></div>
     </section>
+    {guide && <ToolKnowledge tool={tool} formula={guide.purpose} formulaLabel="언제 쓰나요?" method={guide.method} methodLabel="변환 순서" example={guide.example} exampleLabel="입력·결과 예시" caution={guide.caution} cautionLabel="확인할 점" />}
   </ToolFrame>}</ToolMetaResolver>;
 }

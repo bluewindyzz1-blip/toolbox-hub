@@ -11,6 +11,7 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
+    "verify:priority-seo": "tsx scripts/verify-priority-seo.ts",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
