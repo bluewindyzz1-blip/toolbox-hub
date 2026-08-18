@@ -37,9 +37,15 @@ export function SeoHead({ title, description, path, kind = "WebApplication", noi
     upsertMeta('link[rel="canonical"]', { rel: "canonical", href: url });
     upsertMeta('meta[name="robots"]', { name: "robots", content: robots });
 
-    const graph: Record<string, unknown>[] = [
-      { "@type": resolvedKind, name: resolvedTitle, description: resolvedDescription, url },
-    ];
+    const pageEntity: Record<string, unknown> = { "@type": resolvedKind, name: resolvedTitle, description: resolvedDescription, url };
+    if (route.collectionItems.length) {
+      pageEntity.mainEntity = {
+        "@type": "ItemList",
+        numberOfItems: route.collectionItems.length,
+        itemListElement: route.collectionItems.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, url: toAbsoluteUrl(item.path, origin) })),
+      };
+    }
+    const graph: Record<string, unknown>[] = [pageEntity];
     if (route.breadcrumbs.length > 1) {
       graph.push({ "@type": "BreadcrumbList", itemListElement: route.breadcrumbs.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, item: toAbsoluteUrl(item.path, origin) })) });
     }

@@ -18,9 +18,15 @@ function routeOutputPath(path: string) {
 function renderStructuredData(path: string) {
   const route = resolveSeoRoute(path, defaultCatalog);
   const url = toAbsoluteUrl(route.canonicalPath, origin);
-  const graph: Record<string, unknown>[] = [
-    { "@type": route.kind, name: route.title, description: route.description, url },
-  ];
+  const pageEntity: Record<string, unknown> = { "@type": route.kind, name: route.title, description: route.description, url };
+  if (route.collectionItems.length) {
+    pageEntity.mainEntity = {
+      "@type": "ItemList",
+      numberOfItems: route.collectionItems.length,
+      itemListElement: route.collectionItems.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, url: toAbsoluteUrl(item.path, origin) })),
+    };
+  }
+  const graph: Record<string, unknown>[] = [pageEntity];
 
   if (path === "/") {
     graph.push({ "@type": "Organization", name: SITE_NAME, url: origin, email: "infokokk1@naver.com" });

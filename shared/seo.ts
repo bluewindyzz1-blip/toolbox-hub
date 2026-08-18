@@ -13,6 +13,7 @@ export type SeoPageKind = "WebSite" | "WebApplication" | "CollectionPage" | "Web
 
 export type BreadcrumbItem = { name: string; path: string };
 export type ToolFaq = { question: string; answer: string };
+export type SeoCollectionItem = { name: string; path: string };
 
 export type SeoRoute = {
   title: string;
@@ -22,6 +23,7 @@ export type SeoRoute = {
   robots: "index,follow" | "noindex,nofollow";
   breadcrumbs: BreadcrumbItem[];
   faq: Array<{ question: string; answer: string }>;
+  collectionItems: SeoCollectionItem[];
 };
 
 export const SITE_NAME = "도구상자";
@@ -137,6 +139,37 @@ const prioritySearchFaq: Record<string, ToolFaq[]> = {
   ],
 };
 
+const calculatorCategoryFaq: Record<string, ToolFaq[]> = {
+  calculator: [
+    { question: "어떤 계산기를 찾을 수 있나요?", answer: "급여·직장인, 금융, 부동산, 세금, 날짜·시간, 생활 분야로 나누어 필요한 계산기를 찾을 수 있습니다. 각 도구는 입력값에 따라 예상 결과를 빠르게 보여 드립니다." },
+    { question: "계산 결과를 계약이나 신고에 바로 사용해도 되나요?", answer: "아니요. 계산 결과는 입력값 기준의 참고용 추정입니다. 실제 급여, 대출, 세금, 부동산 계약은 최신 공식 기준과 계약서 또는 전문가 안내를 함께 확인하세요." },
+  ],
+  finance: [
+    { question: "금융 계산기에서는 무엇을 계산할 수 있나요?", answer: "대출 이자와 상환 방식, 예금·적금 이자, 복리 수익, 퍼센트와 증감률을 입력 조건에 따라 계산할 수 있습니다." },
+    { question: "대출 상환액이 금융기관 안내와 다를 수 있나요?", answer: "그럴 수 있습니다. 실제 상환액은 납입일, 거치기간, 변동금리, 수수료, 원 단위 절사와 상품 약정에 따라 달라질 수 있으므로 약정서와 상환표를 확인하세요." },
+  ],
+  "real-estate": [
+    { question: "부동산 계산기로 어떤 비용을 비교할 수 있나요?", answer: "월세·전세 환산, 전세·주택담보대출 이자, 부동산 중개수수료, 취득세·재산세와 중도상환수수료를 조건별로 비교할 수 있습니다." },
+    { question: "부동산 계산 결과가 실제 계약 비용과 같은가요?", answer: "아니요. 거래 유형, 지역, 주택 조건, 적용 시점과 협의 내용에 따라 실제 비용은 달라질 수 있습니다. 계약 전에는 최신 공식 기준과 계약서를 확인하세요." },
+  ],
+  salary: [
+    { question: "급여 계산기에는 어떤 항목이 있나요?", answer: "연봉·월급 실수령액, 4대보험, 퇴직금, 주휴수당, 연차수당, 시급·근무시간과 실업급여 관련 참고 계산기를 제공합니다." },
+    { question: "실수령액이 급여명세서와 다른 이유는 무엇인가요?", answer: "비과세 항목, 부양가족, 상여금, 근무시간, 원천징수와 연말정산 조건에 따라 실제 공제와 지급액은 달라질 수 있습니다." },
+  ],
+  tax: [
+    { question: "세금 계산기 결과로 신고 금액을 확정할 수 있나요?", answer: "아니요. 이 도구는 일반적인 입력 조건의 참고 계산입니다. 공제·가산세·특례·신고 의무 등 실제 세무 판단은 최신 국세 안내와 증빙을 기준으로 확인하세요." },
+    { question: "어떤 세금 계산기를 제공하나요?", answer: "부가세, 종합소득세, 연말정산 환급금, 양도소득세, 증여세와 상속세의 기본 입력값 기반 계산기를 제공합니다." },
+  ],
+  lifestyle: [
+    { question: "생활 계산기에는 어떤 도구가 있나요?", answer: "할인율, 마진율, 손익분기점, 주유비, 더치페이, 평균, BMI, 기초대사량, 칼로리 소모와 학점 평균 계산기를 제공합니다." },
+    { question: "BMI와 기초대사량 결과는 건강 진단인가요?", answer: "아니요. 건강 관련 결과는 입력값을 바탕으로 한 일반적인 참고 지표이며, 건강 상태의 진단이나 치료 결정을 대신하지 않습니다." },
+  ],
+  date: [
+    { question: "날짜 계산기에서 무엇을 확인할 수 있나요?", answer: "기준일에서 날짜를 더하거나 빼는 계산, 두 날짜 차이, D-Day, 만 나이·세는 나이, 시간 단위 환산을 확인할 수 있습니다." },
+    { question: "D-Day 계산에 기준일과 목표일을 모두 입력해야 하나요?", answer: "네. 기준일과 목표일을 입력하면 남은 일수 또는 지난 일수를 계산합니다. 시간대나 당일 포함 여부에 따라 실제 일정 표기와 차이가 날 수 있습니다." },
+  ],
+};
+
 const defaultFaq: ToolFaq[] = [
   { question: "계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?", answer: "이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요." },
   { question: "입력한 정보는 저장되나요?", answer: "계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다." },
@@ -178,6 +211,18 @@ function categoryBreadcrumbs(category: CatalogCategory, catalog: CatalogSnapshot
   ];
 }
 
+function categoryCollectionItems(category: CatalogCategory, catalog: CatalogSnapshot): SeoCollectionItem[] {
+  return catalog.tools
+    .filter((tool) => tool.status === "active")
+    .filter((tool) => {
+      const toolCategory = catalog.categories.find((item) => item.id === tool.categoryId);
+      return Boolean(toolCategory && getCategoryLineage(toolCategory, catalog.categories).some((item) => item.id === category.id));
+    })
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
+    .slice(0, 24)
+    .map((tool) => ({ name: tool.title, path: getToolPath(tool, catalog.categories) }));
+}
+
 function fallback(path: string): SeoRoute {
   return {
     title: SITE_NAME,
@@ -187,6 +232,7 @@ function fallback(path: string): SeoRoute {
     robots: "index,follow",
     breadcrumbs: [{ name: "홈", path: "/" }],
     faq: [],
+    collectionItems: [],
   };
 }
 
@@ -200,6 +246,7 @@ export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapsh
       canonicalPath: path,
       breadcrumbs: path === "/" ? [{ name: "홈", path: "/" }] : [{ name: "홈", path: "/" }, { name: staticMeta.title.replace(` | ${SITE_NAME}`, ""), path }],
       faq: getStaticRouteFaq(path),
+      collectionItems: [],
     };
   }
 
@@ -216,6 +263,7 @@ export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapsh
       robots: "index,follow",
       breadcrumbs,
       faq: tool.kind === "calculator" ? [...getVisibleToolFaq(tool), ...defaultFaq] : [],
+      collectionItems: [],
     };
   }
 
@@ -228,7 +276,8 @@ export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapsh
       kind: "CollectionPage",
       robots: "index,follow",
       breadcrumbs: categoryBreadcrumbs(category, catalog),
-      faq: [],
+      faq: category.slug in calculatorCategoryFaq ? calculatorCategoryFaq[category.slug] : [],
+      collectionItems: categoryCollectionItems(category, catalog),
     };
   }
 
