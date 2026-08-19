@@ -93,3 +93,33 @@ pnpm test
 ```
 
 최종 소스와 이 안내서는 함께 보관해야 합니다. 특히 `pnpm-lock.yaml`, `vercel.json`, `client/index.html`, `shared/seo.ts`, `scripts/prerender-seo.ts`는 배포 재현에 필요한 파일이므로 누락하지 않습니다.
+
+
+## 10. 검색 의도형 SEO 제목 개선 추가분
+
+이번 업데이트는 새 페이지나 새 URL을 만들지 않고 `shared/content.ts`의 기존 guide `title`·`description`, `shared/catalog.ts`의 주요 계산기 `title`·`description`·`seoTitle`·`seoDescription`을 실제 검색 질문에 맞게 개선했습니다. slug, URL, 계산 로직, canonical, sitemap, robots.txt와 AdSense 구조는 유지합니다.
+
+복구 후 다음 명령으로 최신 상태를 확인합니다.
+
+```bash
+corepack enable
+pnpm install --frozen-lockfile
+pnpm check
+pnpm build:vercel
+pnpm verify:url-preservation
+pnpm verify:priority-seo
+pnpm verify:all-routes
+pnpm test
+```
+
+정상 기준은 기존 기준 URL 170개 보존, 총 indexable URL 230개, 카테고리 45개, 도구 140개, 테스트 63개 통과입니다. 계산기·세금·금융 결과는 입력값 기반 참고값이므로 실제 신고·계약에는 최신 공식 안내를 최종 기준으로 사용합니다.
+
+이번 변경 핵심 파일:
+
+- `shared/content.ts`: 기존 guide의 검색 의도형 title과 meta description 개선
+- `shared/catalog.ts`: 주요 계산기 H1·description·SEO title·SEO description 개선
+- `RECOVERY_GUIDE_FINAL_KO.md`: 이번 변경과 복구 절차 기록
+
+**중요:** guide와 계산기의 slug 및 URL은 변경하지 않습니다. 제목을 추가로 수정할 때도 slug·canonical·sitemap 경로를 그대로 유지해야 합니다.
+
+업데이트 일시: 2026-08-19
