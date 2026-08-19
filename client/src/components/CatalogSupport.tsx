@@ -182,6 +182,13 @@ export function AffiliateSlot({ category, title = "관련 서비스" }: { catego
   return <section className="affiliate-slot" aria-label={title}><p className="eyebrow">PARTNER SERVICES</p><h2>{title}</h2><p className="affiliate-disclosure">이 영역에는 제휴 링크가 포함될 수 있습니다. 서비스 이용 전 조건과 수수료를 직접 확인하세요.</p><div className="affiliate-grid">{offers.map((offer) => <a key={`${offer.href}-${offer.title}`} href={offer.href} target="_blank" rel="sponsored nofollow noreferrer"><span>{offer.label || "추천 서비스"}</span><strong>{offer.title}</strong><small>{offer.description}</small></a>)}</div></section>;
 }
 
+export function GuideDiscovery({ tools, title = "계산 결과를 더 잘 이해하는 가이드", limit = 6 }: { tools?: CatalogTool[]; title?: string; limit?: number }) {
+  const candidates = tools?.length ? guideContents.filter((guide) => tools.some((tool) => guide.relatedToolSlugs.includes(tool.slug))) : guideContents;
+  const guides = candidates.slice(0, limit);
+  if (!guides.length) return null;
+  return <section className="guide-discovery" aria-label={title}><div className="directory-head"><div><p className="eyebrow">PRACTICAL GUIDES</p><h2>{title}</h2></div><Link href="/guides">전체 가이드 보기 <span aria-hidden="true">→</span></Link></div><div className="guide-card-grid compact">{guides.map((guide) => <Link key={guide.slug} href={getGuidePath(guide.slug)}><span>{guide.eyebrow}</span><strong>{guide.title}</strong><small>{guide.description}</small><b>가이드 읽기 →</b></Link>)}</div></section>;
+}
+
 export function ToolMetaResolver({ slug, children }: { slug: string; children: (tool: CatalogTool) => React.ReactNode }) {
   const { data } = useCatalog();
   const tool = data?.tools.find((item) => item.slug === slug);

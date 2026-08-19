@@ -2,7 +2,7 @@ import { ArrowUpRight, Calculator, ChevronDown, FileText, FolderOpen, Image, Lan
 import { Link } from "wouter";
 import { useState } from "react";
 import { SiteFooter, SiteHeader } from "@/components/ToolLayout";
-import { SeoHead } from "@/components/CatalogSupport";
+import { GuideDiscovery, SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
 import { getCategoryPath, getToolPath } from "@shared/catalog";
 
@@ -45,6 +45,7 @@ export default function Home() {
         <div className="home-category-branches">{activeBranches.map((branch, branchIndex) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(branchIndex + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
       </div>}
     </section>
+    <GuideDiscovery />
     <section className="tool-directory container"><div className="directory-head"><div><p className="eyebrow">POPULAR TOOLS</p><h2>자주 찾는 도구.</h2></div><p>관리자가 인기 표시와 정렬 순서를 관리하며,<br />주요 기능만 먼저 보여 드립니다.</p></div><ToolCards tools={popular} categories={categories} /></section>
     <section className="tool-directory container compact-directory"><div className="directory-head"><div><p className="eyebrow">NEWLY ADDED</p><h2>최근 추가된 도구.</h2></div><p>PDF·이미지·문서 변환과 단위 환산까지<br />새로 확장된 기능을 확인하세요.</p></div><ToolCards tools={recent} categories={categories} /></section>
     <section className="tool-directory container compact-directory"><div className="directory-head"><div><p className="eyebrow">RECOMMENDED</p><h2>바로 써볼 도구.</h2></div><p>파일 작업, 생활 계산, 데이터 변환처럼<br />자주 필요한 흐름을 우선 추천합니다.</p></div><ToolCards tools={recommended} categories={categories} /></section>

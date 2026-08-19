@@ -367,3 +367,13 @@ th:first-child,td:first-child { text-align:left; }
 
 .guide-answer-card { max-width: 780px; margin: 2rem 0 0; padding: 1.35rem 1.5rem; border: var(--line); background: var(--ink); color: var(--paper); }
 .guide-answer-card p:last-child { margin: .7rem 0 0; font-size: 1.08rem; line-height: 1.75; }
+
+.guide-discovery { margin-top: 3.5rem; margin-bottom: 3.5rem; }
+.guide-discovery .directory-head { margin-bottom: 1rem; }
+.guide-discovery .directory-head>a { align-self: end; padding-bottom: .2rem; border-bottom: var(--thin-line); font-size: .78rem; font-weight: 700; }
+.guide-top-tools { margin: 1.8rem 0 2rem; padding: 1.25rem; border: var(--line); background: #f4f1ea; }
+.guide-top-tools .related-tools { margin-top: 1rem; }
+.guide-top-tools .related-tools a { background: var(--paper); }
+.guide-top-tools .related-tools a b { margin-top: .9rem; font-size: .78rem; }
+.guide-tool-prompt { margin: -.25rem 0 0; font-family: "Noto Sans KR", sans-serif; font-size: .78rem; line-height: 1.65; letter-spacing: -.06em; }
+@media (max-width: 760px) { .guide-discovery { margin-top: 2.5rem; margin-bottom: 2.5rem; }.guide-top-tools { margin-top: 1.25rem; padding: 1rem; }.guide-top-tools .related-tools a { min-height: 150px; } }
