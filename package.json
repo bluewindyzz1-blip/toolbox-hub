@@ -13,6 +13,7 @@
     "test": "vitest run",
     "verify:priority-seo": "tsx scripts/verify-priority-seo.ts",
     "verify:url-preservation": "tsx scripts/verify-url-preservation.ts",
+    "verify:all-routes": "tsx scripts/verify-all-routes.ts",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {

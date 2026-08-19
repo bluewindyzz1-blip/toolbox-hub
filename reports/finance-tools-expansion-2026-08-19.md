@@ -23,3 +23,5 @@
 `/calculator/automobile/maintenance-cost`는 8개 입력과 월 유지비 393,750원·연간 유지비 4,725,000원·5년 예상 비용 53,625,000원·km당 비용 315원을 표시했고, 자동차 유지비에 맞는 FAQ와 관련 도구를 렌더링했다.
 
 `/calculator/retirement/retirement-fund`는 8개 입력과 은퇴 필요자금 545,264,382원·예상 부족자금 326,152,068원·추가 월 저축액 896,412원·자금 소진 예상 7년 후를 표시했다. 은퇴 계산의 가정과 참고용 한계를 안내하고 퇴직금·국민연금·퇴직소득세 관련 내부링크를 표시했다.
+GitHub feature branch `feature/finance-tools-expansion`의 Vercel Preview가 `toolbox-hub-h4sq-3tdklyz9z-bluewindyzz1-8971s-projects.vercel.app`으로 생성됐다. Preview `/calculator/business/roas`에서 title, H1, 5개 입력, 기본 ROAS 400%, 광고 후 이익 1,200,000원, FAQ와 관련 도구가 정상 표시됐다. Preview 화면의 광고 영역은 기존 운영 구조에 따라 표시되며, 이번 변경에서 광고 설정은 수정하지 않았다.
+Preview `sitemap.xml`은 커스텀 도메인 canonical URL을 기준으로 기존 URL과 신규 카테고리·도구 URL을 함께 제공했다. 로컬 자동검증 결과 170개 기존 URL 누락 0개, 신규 8개, 중복 0개였다. Preview `robots.txt`는 기존과 동일하게 `Allow: /`, `/admin/`, `/api/`, `/404` 차단, `https://carculate.moneyko.co.kr/sitemap.xml` 선언과 DaumWebMasterTool 토큰을 유지했다.
