@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "verify:priority-seo": "tsx scripts/verify-priority-seo.ts",
+    "verify:url-preservation": "tsx scripts/verify-url-preservation.ts",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {

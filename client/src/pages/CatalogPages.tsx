@@ -21,6 +21,7 @@ import TaxSocialCalculators from "./TaxSocialCalculators";
 import DateTimeCalculators from "./DateTimeCalculators";
 import DailyWorkCalculators from "./DailyWorkCalculators";
 import EverydayCalculators from "./EverydayCalculators";
+import ExpansionCalculators from "./ExpansionCalculators";
 
 const PdfTool = lazy(() => import("./PdfTool"));
 const DocumentTool = lazy(() => import("./DocumentTool"));
@@ -77,6 +78,7 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
   if (["date-calculator", "d-day", "age", "man-age", "date-difference", "time-calculator"].includes(slug)) return <DateTimeCalculators kind={slug as any} />;
   if (["discount", "margin", "break-even", "fuel-cost", "split-bill", "average", "bmi", "bmr", "calories-burned", "gpa"].includes(slug)) return <DailyWorkCalculators kind={slug as any} />;
   if (["unit-price", "fee", "parking-fee", "travel-budget", "recipe-servings", "sleep-duration", "electricity-usage", "paint-amount", "savings-goal", "simple-interest", "installment", "currency-exchange", "gpa-conversion", "target-score", "rank-percent", "labor-cost", "project-quote", "monthly-budget", "reward-points", "return-rate"].includes(slug)) return <EverydayCalculators kind={slug as any} />;
+  if (["jeonse-vs-monthly", "family-loan-interest", "roas", "maintenance-cost", "retirement-fund"].includes(slug)) return <ExpansionCalculators kind={slug as any} />;
   if (slug === "vat-calculator") return <VatCalculator />;
   return <Unavailable title="계산기를 준비하고 있습니다." />;
 }

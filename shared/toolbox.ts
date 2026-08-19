@@ -833,3 +833,83 @@ export function calculateRewardPoints(purchaseAmount: number, rewardRate: number
 export function calculateReturnRate(purchaseAmount: number, saleAmount: number, costs: number) {
   const purchase = nonNegative(purchaseAmount); const sale = nonNegative(saleAmount); const expense = nonNegative(costs); const invested = purchase + expense; const profit = sale - invested; return { purchaseAmount: purchase, saleAmount: sale, costs: expense, invested, profit, returnRate: invested > 0 ? profit / invested * 100 : 0 };
 }
+
+
+export type FamilyLoanRepayment = "interest-only" | "equal-payment" | "equal-principal";
+
+export function calculateJeonseVsMonthly(jeonseDeposit: number, monthlyDeposit: number, monthlyRent: number, jeonseLoan: number, loanRate: number, expectedReturnRate: number) {
+  const values = [jeonseDeposit, monthlyDeposit, monthlyRent, jeonseLoan, loanRate, expectedReturnRate];
+  if (values.some((value) => !Number.isFinite(value) || value < 0) || jeonseDeposit < jeonseLoan) return { valid: false, jeonseAnnual: 0, monthlyAnnual: 0, jeonseMonthly: 0, monthlyMonthly: 0, differenceMonthly: 0, differenceAnnual: 0, recommendation: "입력값을 확인하세요." };
+  const jeonseMonthly = ((jeonseDeposit - jeonseLoan) * expectedReturnRate / 100 + jeonseLoan * loanRate / 100) / 12;
+  const monthlyMonthly = monthlyRent + monthlyDeposit * expectedReturnRate / 100 / 12;
+  const jeonseAnnual = jeonseMonthly * 12;
+  const monthlyAnnual = monthlyMonthly * 12;
+  const differenceMonthly = monthlyMonthly - jeonseMonthly;
+  const differenceAnnual = differenceMonthly * 12;
+  return { valid: true, jeonseAnnual, monthlyAnnual, jeonseMonthly, monthlyMonthly, differenceMonthly, differenceAnnual, recommendation: differenceAnnual > 0 ? "입력 조건에서는 전세의 연간 비용이 더 낮습니다." : differenceAnnual < 0 ? "입력 조건에서는 월세의 연간 비용이 더 낮습니다." : "입력 조건에서는 두 선택지의 연간 비용이 같습니다." };
+}
+
+export function calculateFamilyLoanInterest(principal: number, months: number, annualRate: number, repayment: FamilyLoanRepayment) {
+  if (![principal, months, annualRate].every((value) => Number.isFinite(value) && value >= 0) || principal <= 0 || months <= 0) return { valid: false, monthlyPayment: 0, annualInterest: 0, totalInterest: 0, totalRepayment: 0, repayment };
+  const monthlyRate = annualRate / 100 / 12;
+  if (repayment === "interest-only") {
+    const monthlyInterest = principal * monthlyRate;
+    return { valid: true, monthlyPayment: monthlyInterest, annualInterest: monthlyInterest * 12, totalInterest: monthlyInterest * months, totalRepayment: principal + monthlyInterest * months, repayment };
+  }
+  if (repayment === "equal-principal") {
+    const principalPayment = principal / months;
+    const totalInterest = principal * monthlyRate * (months + 1) / 2;
+    return { valid: true, monthlyPayment: principalPayment + principal * monthlyRate, annualInterest: totalInterest / months * 12, totalInterest, totalRepayment: principal + totalInterest, repayment };
+  }
+  const monthlyPayment = monthlyRate === 0 ? principal / months : principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+  const totalRepayment = monthlyPayment * months;
+  return { valid: true, monthlyPayment, annualInterest: (totalRepayment - principal) / months * 12, totalInterest: totalRepayment - principal, totalRepayment, repayment };
+}
+
+export function calculateRoas(adSpend: number, adRevenue: number, productCost: number, platformFeeRate: number, otherCosts: number) {
+  const values = [adSpend, adRevenue, productCost, platformFeeRate, otherCosts];
+  if (values.some((value) => !Number.isFinite(value) || value < 0) || platformFeeRate >= 100 || adSpend <= 0) return { valid: false, roas: 0, advertisingRatio: 0, profitAfterAds: 0, breakEvenRoas: 0, totalCosts: 0 };
+  const platformFee = adRevenue * platformFeeRate / 100;
+  const totalCosts = adSpend + productCost + platformFee + otherCosts;
+  const profitAfterAds = adRevenue - totalCosts;
+  const breakEvenRevenue = (adSpend + productCost + otherCosts) / (1 - platformFeeRate / 100);
+  return { valid: true, roas: adRevenue / adSpend * 100, advertisingRatio: adRevenue > 0 ? adSpend / adRevenue * 100 : 0, profitAfterAds, breakEvenRoas: breakEvenRevenue / adSpend * 100, totalCosts };
+}
+
+export function calculateCarMaintenance(vehiclePrice: number, annualDistance: number, fuelEfficiency: number, fuelPrice: number, annualTax: number, annualInsurance: number, annualMaintenance: number, annualOther: number) {
+  const values = [vehiclePrice, annualDistance, fuelEfficiency, fuelPrice, annualTax, annualInsurance, annualMaintenance, annualOther];
+  if (values.some((value) => !Number.isFinite(value) || value < 0) || annualDistance <= 0 || fuelEfficiency <= 0) return { valid: false, annualFuel: 0, annualTotal: 0, monthlyTotal: 0, fiveYearTotal: 0, perKm: 0 };
+  const annualFuel = annualDistance / fuelEfficiency * fuelPrice;
+  const annualTotal = annualFuel + annualTax + annualInsurance + annualMaintenance + annualOther;
+  return { valid: true, annualFuel, annualTotal, monthlyTotal: annualTotal / 12, fiveYearTotal: annualTotal * 5 + vehiclePrice, perKm: annualTotal / annualDistance };
+}
+
+export function calculateRetirementFund(currentAge: number, retirementAge: number, lifeExpectancy: number, currentAssets: number, monthlyLiving: number, monthlyPension: number, expectedReturnRate: number, inflationRate: number) {
+  const values = [currentAge, retirementAge, lifeExpectancy, currentAssets, monthlyLiving, monthlyPension, expectedReturnRate, inflationRate];
+  if (values.some((value) => !Number.isFinite(value) || value < 0) || retirementAge <= currentAge || lifeExpectancy <= retirementAge || monthlyLiving < monthlyPension) return { valid: false, yearsToRetirement: 0, retirementLiving: 0, requiredAssets: 0, projectedAssets: 0, shortage: 0, additionalMonthlySaving: 0, depletionYears: null as number | null };
+  const yearsToRetirement = retirementAge - currentAge;
+  const retirementYears = lifeExpectancy - retirementAge;
+  const monthlyReturn = Math.pow(1 + expectedReturnRate / 100, 1 / 12) - 1;
+  const monthlyInflation = Math.pow(1 + inflationRate / 100, 1 / 12) - 1;
+  const realMonthlyReturn = (1 + monthlyReturn) / (1 + monthlyInflation) - 1;
+  const retirementLiving = monthlyLiving * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+  const retirementPension = monthlyPension * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+  const monthlyGap = Math.max(retirementLiving - retirementPension, 0);
+  const realMonthlyGap = monthlyGap / Math.pow(1 + inflationRate / 100, yearsToRetirement);
+  const requiredAssets = realMonthlyReturn === 0 ? realMonthlyGap * retirementYears * 12 : realMonthlyGap * (1 - Math.pow(1 + realMonthlyReturn, -retirementYears * 12)) / realMonthlyReturn;
+  const projectedAssets = currentAssets * Math.pow(1 + expectedReturnRate / 100, yearsToRetirement);
+  const shortage = Math.max(requiredAssets - projectedAssets, 0);
+  const monthsToRetirement = yearsToRetirement * 12;
+  const annuityFactor = monthlyReturn === 0 ? monthsToRetirement : (Math.pow(1 + monthlyReturn, monthsToRetirement) - 1) / monthlyReturn;
+  const additionalMonthlySaving = shortage / Math.max(annuityFactor, 1);
+  let balance = projectedAssets;
+  let depletionYears: number | null = null;
+  for (let year = 1; year <= retirementYears; year += 1) {
+    const annualGap = Math.max(monthlyLiving - monthlyPension, 0) * 12 * Math.pow(1 + inflationRate / 100, yearsToRetirement + year - 1);
+    balance = balance * (1 + expectedReturnRate / 100) - annualGap;
+    if (balance <= 0) { depletionYears = year; break; }
+  }
+  return { valid: true, yearsToRetirement, retirementLiving, requiredAssets, projectedAssets, shortage, additionalMonthlySaving, depletionYears };
+}
+
+export type ExpansionCalculatorKind = "jeonse-vs-monthly" | "family-loan-interest" | "roas" | "maintenance-cost" | "retirement-fund";

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /404
+
+Sitemap: https://carculate.moneyko.co.kr/sitemap.xml
+#DaumWebMasterTool:50fb4494065ae247c2e2649040e894e0aecb518c1683296d550f61db7f8ecd45:6N/NZaZlOa+T9gxgCzvnAg==
