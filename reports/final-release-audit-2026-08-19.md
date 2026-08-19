@@ -1,3 +1,4 @@
 로컬 Preview 내부 검색에서 `ROAS` 입력 시 `ROAS 계산기` 결과가 표시되고 `/calculator/business/roas`로 연결됐다. 검색 결과에는 사업자 계산기 분류와 도구 설명이 함께 표시됐다.
 로컬 Preview 메인페이지는 검색 진입, PDF·파일 도구, 계산기·파일 변환·단위 변환 카테고리 카드, 인기 도구 9개, 신규 도구 6개, 추천 도구 6개와 주요 정책 링크를 표시했다. 신규 은퇴자금·자동차 유지비·ROAS·가족간 차용증 이자·전세 vs 월세 도구가 신규 섹션에서 실제 URL로 연결됐다. 검색에 없는 문자열 입력 시 `일치하는 공개 도구가 없습니다.` 안내가 표시됐다.
 Vercel 최신 Preview는 커밋 `faa3368`의 `Finalize finance tool platform and production release`로 생성되어 Ready 상태였다. 최신 Preview `/calculator/retirement/retirement-fund`에서 title, 은퇴자금 계산 입력, 기본 결과 545,264,382원, FAQ, 관련 도구 3개가 정상 표시됐다.
+최종 Production `https://carculate.moneyko.co.kr/`에서 메인페이지와 신규 도구 섹션이 정상 렌더링됐다. `https://carculate.moneyko.co.kr/calculator/business/roas`에서 ROAS 계산기 기본값 결과 400%·광고 후 이익 1,200,000원·손익분기 ROAS 266.67%, 고유 title·FAQ·관련 도구가 정상 표시됐다.

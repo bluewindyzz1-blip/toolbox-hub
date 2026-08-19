@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import AdminCategories from "./pages/AdminCategories";
 import { ContactPage, InfoPage, SearchPage } from "./pages/InfoPages";
+import { GuideCatalog, GuidePage } from "./pages/GuidePages";
 import { AdSenseAutoAds } from "./components/CatalogSupport";
 
 const PdfTool = lazy(() => import("./pages/PdfTool"));
@@ -63,6 +64,8 @@ function Router() {
     <Route path="/search" component={SearchPage} />
     <Route path="/about">{() => <InfoPage type="about" />}</Route>
     <Route path="/guide">{() => <InfoPage type="guide" />}</Route>
+    <Route path="/guides" component={GuideCatalog} />
+    <Route path="/guides/:slug">{(params) => <GuidePage slug={params.slug} />}</Route>
     <Route path="/faq">{() => <InfoPage type="faq" />}</Route>
     <Route path="/privacy">{() => <InfoPage type="privacy" />}</Route>
     <Route path="/terms">{() => <InfoPage type="terms" />}</Route>

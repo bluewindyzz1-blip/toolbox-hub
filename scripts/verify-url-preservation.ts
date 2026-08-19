@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defaultCatalog, getCategoryPath, getToolPath } from "../shared/catalog";
 import { toAbsoluteUrl } from "../shared/seo";
+import { getGuidePath, guideContents } from "../shared/content";
 
 const origin = "https://carculate.moneyko.co.kr";
 const root = resolve(import.meta.dirname, "..");
@@ -25,6 +26,8 @@ const approvedNewUrls = new Set([
   "/calculator/automobile/maintenance-cost",
   "/calculator/retirement",
   "/calculator/retirement/retirement-fund",
+  "/guides",
+  ...guideContents.map((guide) => getGuidePath(guide.slug)),
 ].map((path) => toAbsoluteUrl(path, origin)));
 
 for (const url of baseline) if (!sitemapSet.has(url)) failures.push(`기존 sitemap URL 누락: ${url}`);

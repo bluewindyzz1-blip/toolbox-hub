@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { RotateCcw } from "lucide-react";
 import { PropsWithChildren, useEffect } from "react";
 import { CatalogCategory, CatalogTool, getCategoryLineage, getCategoryPath, getToolPath } from "@shared/catalog";
+import { getGuidePath, guideContents } from "@shared/content";
 import { getVisibleToolFaq, resolveSeoRoute, SeoPageKind, SITE_NAME, toAbsoluteUrl } from "@shared/seo";
 import { useCatalog } from "@/hooks/useCatalog";
 
@@ -150,15 +151,35 @@ export function ToolKnowledge({ tool, formula, formulaLabel = "계산 공식", m
   const { data } = useCatalog();
   const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
   const visibleFaq = getVisibleToolFaq(tool);
+  const relatedGuides = guideContents.filter((guide) => guide.relatedToolSlugs.includes(tool.slug));
   return <section className="tool-knowledge">
     <AdSlot slot="AD_CONTENT" />
     <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>{formulaLabel}</h2><p>{formula ?? tool.formula ?? "입력값을 기준으로 처리합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>{methodLabel}</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>{exampleLabel}</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>{cautionLabel}</h2><p>{caution}</p></article></div>
     {children}
     <OfficialReference tool={tool} />
+    {relatedGuides.length > 0 && <section className="guide-linked-content"><p className="eyebrow">RELATED GUIDES</p><h2>{tool.title} 활용 가이드</h2><div className="guide-card-grid compact">{relatedGuides.map((guide) => <Link key={guide.slug} href={getGuidePath(guide.slug)}><strong>{guide.title}</strong><small>{guide.description}</small></Link>)}</div></section>}
     <section className="faq-section"><p className="eyebrow">FAQ</p><h2>{tool.title} 자주 묻는 질문</h2>{visibleFaq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}{tool.kind === "calculator" ? <><details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></> : <><details><summary>입력한 텍스트는 저장되나요?</summary><p>입력 텍스트와 변환 결과는 현재 브라우저에서 처리하며 서버에 업로드하거나 장기 저장하지 않습니다.</p></details><details><summary>변환 결과를 바로 사용해도 되나요?</summary><p>복사하거나 다운로드하기 전에 결과 형식과 내용이 목적에 맞는지 확인하세요. 특히 코드·URL·표 데이터는 사용하는 서비스의 형식 규칙이 우선합니다.</p></details></>}</section>
     <AdSlot slot="AD_RELATED" />
     <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>{tool.title}와 함께 쓰는 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
   </section>;
+}
+
+type AffiliateOffer = { title: string; description: string; href: string; category?: string; label?: string };
+
+function getAffiliateOffers(): AffiliateOffer[] {
+  const raw = import.meta.env.VITE_AFFILIATE_OFFERS_JSON?.trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((item): item is AffiliateOffer => Boolean(item && typeof item.title === "string" && typeof item.description === "string" && typeof item.href === "string" && /^https?:\/\//.test(item.href)));
+  } catch { return []; }
+}
+
+export function AffiliateSlot({ category, title = "관련 서비스" }: { category?: string; title?: string }) {
+  const offers = getAffiliateOffers().filter((item) => !category || !item.category || item.category === category).slice(0, 3);
+  if (!offers.length) return null;
+  return <section className="affiliate-slot" aria-label={title}><p className="eyebrow">PARTNER SERVICES</p><h2>{title}</h2><p className="affiliate-disclosure">이 영역에는 제휴 링크가 포함될 수 있습니다. 서비스 이용 전 조건과 수수료를 직접 확인하세요.</p><div className="affiliate-grid">{offers.map((offer) => <a key={`${offer.href}-${offer.title}`} href={offer.href} target="_blank" rel="sponsored nofollow noreferrer"><span>{offer.label || "추천 서비스"}</span><strong>{offer.title}</strong><small>{offer.description}</small></a>)}</div></section>;
 }
 
 export function ToolMetaResolver({ slug, children }: { slug: string; children: (tool: CatalogTool) => React.ReactNode }) {

@@ -8,6 +8,7 @@ import {
   getToolPath,
   legacyToolPaths,
 } from "./catalog";
+import { getGuideContent, getGuidePath, guideContents } from "./content";
 
 export type SeoPageKind = "WebSite" | "WebApplication" | "CollectionPage" | "WebPage";
 
@@ -38,6 +39,7 @@ const staticRouteMeta: Record<string, Pick<SeoRoute, "title" | "description" | "
   },
   "/about": { title: "도구상자 소개 | 생활 계산기·파일 변환", description: "생활 계산과 브라우저 기반 파일 변환을 제공하는 도구상자의 운영 원칙과 제공 기능을 안내합니다.", kind: "WebPage", robots: "index,follow" },
   "/guide": { title: "도구상자 이용방법 | 계산기·파일 변환 사용 안내", description: "계산기 입력, 파일 변환, 결과 다운로드와 참고사항을 도구상자 이용방법에서 확인하세요.", kind: "WebPage", robots: "index,follow" },
+  "/guides": { title: "계산기 활용 가이드 | 금융·부동산·세금·사업·은퇴", description: "계산 결과를 해석하고 관련 금융·부동산·세금·사업·자동차·은퇴 정보를 확인하는 실용 가이드입니다.", kind: "CollectionPage", robots: "index,follow" },
   "/faq": { title: "자주 묻는 질문 | 도구상자", description: "계산 결과의 참고 범위, 브라우저 파일 처리, 개인정보와 광고 안내에 관한 자주 묻는 질문입니다.", kind: "WebPage", robots: "index,follow" },
   "/privacy": { title: "개인정보처리방침 | 도구상자", description: "도구상자의 파일·계산기 입력 처리 방식과 개인정보 보호 방침을 안내합니다.", kind: "WebPage", robots: "index,follow" },
   "/terms": { title: "이용약관 | 도구상자", description: "도구상자 온라인 계산 및 브라우저 기반 파일 처리 서비스의 이용약관입니다.", kind: "WebPage", robots: "index,follow" },
@@ -252,6 +254,20 @@ export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapsh
     };
   }
 
+  const guide = path.startsWith("/guides/") ? getGuideContent(path.slice("/guides/".length)) : undefined;
+  if (guide) {
+    return {
+      title: withBrand(guide.title),
+      description: guide.description,
+      canonicalPath: getGuidePath(guide.slug),
+      kind: "WebPage",
+      robots: "index,follow",
+      breadcrumbs: [{ name: "홈", path: "/" }, { name: "계산기 활용 가이드", path: "/guides" }, { name: guide.title, path: getGuidePath(guide.slug) }],
+      faq: guide.faq,
+      collectionItems: guide.relatedToolSlugs.map((slug) => { const item = catalog.tools.find((tool) => tool.slug === slug); return item ? { name: item.title, path: getToolPath(item, catalog.categories) } : undefined; }).filter((item): item is SeoCollectionItem => Boolean(item)),
+    };
+  }
+
   const tool = findToolByPath(path, catalog);
   if (tool) {
     const category = catalog.categories.find((item) => item.id === tool.categoryId);
@@ -293,7 +309,8 @@ export function getSeoPublicPaths(catalog: CatalogSnapshot = defaultCatalog) {
     .filter((category) => catalog.tools.some((tool) => getCategoryLineage(catalog.categories.find((item) => item.id === tool.categoryId)!, catalog.categories).some((lineage) => lineage.id === category.id)))
     .map((category) => getCategoryPath(category, catalog.categories));
   const toolPaths = catalog.tools.filter((tool) => tool.status === "active").map((tool) => getToolPath(tool, catalog.categories));
-  return Array.from(new Set([...staticPaths, ...categoryPaths, ...toolPaths])).sort();
+  const guidePaths = guideContents.map((guide) => getGuidePath(guide.slug));
+  return Array.from(new Set([...staticPaths, ...categoryPaths, ...toolPaths, "/guide", ...guidePaths])).sort();
 }
 
 export function toAbsoluteUrl(path: string, origin?: string) {
