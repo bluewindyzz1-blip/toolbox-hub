@@ -8,6 +8,7 @@ import { getCategoryPath, getToolPath } from "@shared/catalog";
 
 const kindIcons = { calculator: Calculator, converter: FileText, unit: Ruler };
 const recommendationKeys = new Set(["pdf-merge", "image-compress", "csv-to-excel", "unit-data", "d-day", "monthly-take-home"]);
+const focusTopics = [{ slug: "finance", label: "금융" }, { slug: "real-estate", label: "부동산" }, { slug: "tax", label: "세금" }, { slug: "business", label: "사업자" }, { slug: "automobile", label: "자동차" }, { slug: "lifestyle", label: "생활" }, { slug: "convert", label: "변환/파일" }];
 
 function ToolCards({ tools, categories }: { tools: NonNullable<ReturnType<typeof useCatalog>["data"]>["tools"]; categories: NonNullable<ReturnType<typeof useCatalog>["data"]>["categories"] }) {
   return <div className="tool-grid">{tools.map((tool, index) => { const Icon = kindIcons[tool.kind] ?? Wrench; return <Link key={tool.id} href={getToolPath(tool, categories)} className="tool-card"><div className="card-top"><span>{String(index + 1).padStart(2, "0")}</span><span>{tool.kind.toUpperCase()}</span></div><Icon className="card-icon" strokeWidth={1.5} size={36} /><div className="card-bottom"><h3>{tool.title}</h3><p>{tool.description}</p></div><ArrowUpRight className="card-arrow" size={20} /></Link>; })}</div>;
@@ -45,6 +46,7 @@ export default function Home() {
         <div className="home-category-branches">{activeBranches.map((branch, branchIndex) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(branchIndex + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
       </div>}
     </section>
+    <section className="home-topic-directory container" aria-label="주요 분야별 계산기 바로가기"><div className="directory-head"><div><p className="eyebrow">FIND BY TOPIC</p><h2>분야별로 바로 찾기.</h2></div><p>금융·부동산·세금부터<br />파일 변환까지 한 번에 이동하세요.</p></div><div className="home-topic-grid">{focusTopics.map((topic, index) => { const category = topic.slug === "convert" ? categories.find((item) => item.slug === "convert" && item.parentId === null) : categories.find((item) => item.slug === topic.slug && item.parentId === 1); return category ? <Link key={topic.slug} href={getCategoryPath(category, categories)}><span>{String(index + 1).padStart(2, "0")}</span><strong>{topic.label}</strong><small>{category.description}</small><ArrowUpRight size={18} /></Link> : null; })}</div></section>
     <GuideDiscovery />
     <section className="tool-directory container"><div className="directory-head"><div><p className="eyebrow">POPULAR TOOLS</p><h2>자주 찾는 도구.</h2></div><p>관리자가 인기 표시와 정렬 순서를 관리하며,<br />주요 기능만 먼저 보여 드립니다.</p></div><ToolCards tools={popular} categories={categories} /></section>
     <section className="tool-directory container compact-directory"><div className="directory-head"><div><p className="eyebrow">NEWLY ADDED</p><h2>최근 추가된 도구.</h2></div><p>PDF·이미지·문서 변환과 단위 환산까지<br />새로 확장된 기능을 확인하세요.</p></div><ToolCards tools={recent} categories={categories} /></section>
