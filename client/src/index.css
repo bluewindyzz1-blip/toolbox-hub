@@ -364,3 +364,6 @@ th:first-child,td:first-child { text-align:left; }
   .guide-card-grid, .affiliate-grid, .guide-card-grid.compact { grid-template-columns: 1fr; }
   .guide-article { margin-top: 1.5rem; }
 }
+
+.guide-answer-card { max-width: 780px; margin: 2rem 0 0; padding: 1.35rem 1.5rem; border: var(--line); background: var(--ink); color: var(--paper); }
+.guide-answer-card p:last-child { margin: .7rem 0 0; font-size: 1.08rem; line-height: 1.75; }

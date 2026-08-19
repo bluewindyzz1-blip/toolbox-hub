@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { defaultCatalog, getCategoryPath, getToolPath } from "../shared/catalog";
 import { toAbsoluteUrl } from "../shared/seo";
-import { getGuidePath, guideContents } from "../shared/content";
+import { getGuideContent, getGuidePath, guideContents } from "../shared/content";
 
 const origin = "https://carculate.moneyko.co.kr";
 const root = resolve(import.meta.dirname, "..");
@@ -48,6 +48,11 @@ for (const url of approvedNewUrls) {
   const html = readFileSync(htmlPath, "utf8");
   const canonical = `rel="canonical" href="${url}"`;
   if (!html.includes(canonical)) failures.push(`신규 canonical 누락: ${path}`);
+}
+
+for (const guide of guideContents) {
+  for (const toolSlug of guide.relatedToolSlugs) if (!defaultCatalog.tools.some((tool) => tool.slug === toolSlug)) failures.push(`가이드 계산기 링크 누락: ${guide.slug} -> ${toolSlug}`);
+  for (const guideSlug of guide.relatedGuideSlugs) if (!getGuideContent(guideSlug)) failures.push(`가이드 콘텐츠 링크 누락: ${guide.slug} -> ${guideSlug}`);
 }
 
 for (const slug of ["family-loan-interest", "jeonse-vs-monthly", "roas", "maintenance-cost", "retirement-fund"]) {

@@ -6,6 +6,9 @@ export type GuideContent = {
   description: string;
   eyebrow: string;
   intro: string;
+  coreAnswer?: string;
+  example?: string;
+  caution?: string;
   sections: GuideSection[];
   faq: Array<{ question: string; answer: string }>;
   relatedToolSlugs: string[];
@@ -184,6 +187,174 @@ export const guideContents: GuideContent[] = [
     relatedToolSlugs: ["national-pension", "retirement-pay", "retirement-fund"],
     relatedGuideSlugs: ["retirement-fund-how-much-guide", "annual-net-pay-guide"],
     monetizationCategory: "retirement",
+  },
+  {
+    slug: "four-insurance-payroll-guide",
+    title: "월급에서 4대보험 공제액이 달라지는 이유와 확인 순서",
+    description: "월급에서 국민연금·건강보험·고용보험·장기요양보험 공제가 어떻게 달라지는지 계산기와 함께 확인합니다.",
+    eyebrow: "SALARY & TAX GUIDE",
+    intro: "같은 세전 월급이라도 보수월액, 비과세 항목, 가입 유형과 기준 시점에 따라 4대보험 공제액이 달라질 수 있습니다.",
+    coreAnswer: "먼저 세전 급여와 비과세 급여를 구분한 뒤 근로자 부담분과 사업주 부담분을 나누어 확인해야 합니다.",
+    example: "세전 월급과 비과세 식대, 가입 기준을 입력하고 월급 실수령액과 4대보험 계산기 결과를 함께 비교하세요.",
+    caution: "보험료율과 기준소득월액은 시점·가입 유형에 따라 달라질 수 있으므로 실제 급여명세서와 공식 안내를 최종 기준으로 확인하세요.",
+    sections: [
+      { heading: "급여명세서에서 먼저 확인할 항목", paragraphs: ["세전 급여, 비과세 수당, 보험료 산정 기준이 되는 보수 항목을 구분합니다. 급여 총액과 보험료 산정 기준이 항상 같은 것은 아닐 수 있습니다.", "4대보험 계산기는 입력한 가정으로 근로자와 사업주의 기본 부담액을 비교하는 참고 도구입니다."] },
+      { heading: "근로자 부담과 사업주 부담 구분하기", paragraphs: ["급여에서 빠지는 금액은 근로자 부담분이며 사업주 부담분은 급여 공제액과 별도로 회사가 부담합니다. 두 금액을 합쳐 개인의 공제액으로 오해하지 않도록 구분하세요."] },
+    ],
+    faq: [
+      { question: "4대보험 공제액이 매달 같은가요?", answer: "보수 변경, 정산, 휴직·복직, 가입 기준 변경에 따라 달라질 수 있습니다. 실제 급여명세서와 사업장 안내를 확인하세요." },
+      { question: "계산기 결과가 급여명세서와 다른 이유는 무엇인가요?", answer: "비과세 항목, 기준소득월액, 정산분과 적용 시점이 계산기의 가정과 다를 수 있기 때문입니다." },
+    ],
+    relatedToolSlugs: ["four-insurance", "monthly-take-home", "annual-net"],
+    relatedGuideSlugs: ["annual-net-pay-guide", "weekly-holiday-pay-guide"],
+    monetizationCategory: "tax",
+  },
+  {
+    slug: "weekly-holiday-pay-guide",
+    title: "주휴수당 계산 방법: 주 15시간·시급·근무일수 확인하기",
+    description: "주휴수당을 계산할 때 시급과 주당 근로시간, 개근 조건을 어떻게 정리하는지 안내합니다.",
+    eyebrow: "SALARY GUIDE",
+    intro: "주휴수당은 시급 하나만으로 결정되지 않습니다. 주당 소정근로시간과 근무일수, 개근 여부를 함께 확인해야 계산 결과를 해석할 수 있습니다.",
+    coreAnswer: "주휴수당을 확인하려면 시급·주당 소정근로시간·1일 근로시간을 같은 주 기준으로 정리해야 합니다.",
+    example: "시급과 주당 근로시간을 입력해 주급과 주휴수당을 계산한 뒤, 실제 근로계약서의 소정근로시간과 비교하세요.",
+    caution: "근로계약과 실제 근무 형태, 결근·휴업·단시간 근로 여부에 따라 적용이 달라질 수 있어 계산 결과를 임금 확정액으로 사용하지 마세요.",
+    sections: [
+      { heading: "주휴수당 계산에 필요한 입력값", paragraphs: ["시급, 주당 소정근로시간, 주당 근무일수와 1일 근로시간을 확인합니다. 실제 근무시간과 계약상 소정근로시간이 다르면 어느 기준을 적용할지 먼저 정리해야 합니다.", "주휴수당 계산기는 입력한 조건을 기준으로 예상 주휴수당과 주급을 보여줍니다."] },
+      { heading: "주급과 월급을 혼동하지 않기", paragraphs: ["주급은 한 주 기준 금액이고 월급은 월 환산 기준이므로 단순히 4배 하는 방식은 실제 급여 산정과 다를 수 있습니다. 월 환산이 필요하면 시급 계산기와 근무시간 계산기를 함께 사용하세요."] },
+    ],
+    faq: [
+      { question: "주 15시간이면 항상 주휴수당이 발생하나요?", answer: "소정근로시간과 개근 여부 등 여러 요건을 함께 확인해야 합니다. 이 페이지는 일반적인 계산 구조를 설명하는 참고 자료입니다." },
+      { question: "알바 주휴수당을 계산기에 나온 그대로 청구해도 되나요?", answer: "아닙니다. 근로계약서, 근무기록과 최신 공식 기준을 확인한 뒤 실제 지급액을 판단하세요." },
+    ],
+    relatedToolSlugs: ["weekly-holiday-pay", "hourly-wage", "work-hours"],
+    relatedGuideSlugs: ["four-insurance-payroll-guide", "annual-net-pay-guide"],
+    monetizationCategory: "finance",
+  },
+  {
+    slug: "real-estate-brokerage-fee-guide",
+    title: "부동산 중개수수료 계산 방법: 거래금액·상한요율 확인하기",
+    description: "매매·전세·월세 중개보수를 비교할 때 거래금액과 적용 요율, 부가세 여부를 확인하는 방법을 안내합니다.",
+    eyebrow: "REAL ESTATE GUIDE",
+    intro: "부동산 중개수수료는 거래 유형과 금액, 적용 구간에 따라 달라집니다. 계산 전 거래금액을 어떤 방식으로 산정하는지부터 확인해야 합니다.",
+    coreAnswer: "중개보수는 거래 유형과 거래금액을 확정한 뒤 해당 구간의 상한요율을 적용해 참고 금액을 계산합니다.",
+    example: "매매가 또는 전세보증금, 월세 거래라면 보증금과 월세 환산 기준을 확인해 중개보수 계산기에 입력하세요.",
+    caution: "지역·거래 유형·적용 시점·부가세와 실제 협의 조건에 따라 달라질 수 있으므로 계약 전 중개사와 공식 기준을 확인하세요.",
+    sections: [
+      { heading: "거래 유형별 거래금액 정리", paragraphs: ["매매는 매매대금, 전세는 보증금, 월세는 보증금과 월세를 기준으로 거래금액을 산정하는 방식이 달라질 수 있습니다. 계약서와 최신 요율표를 먼저 확인합니다.", "중개보수 계산기는 입력한 거래금액과 요율을 바탕으로 상한액을 참고 계산합니다."] },
+      { heading: "상한액과 실제 지급액 구분하기", paragraphs: ["계산 결과가 곧 확정 지급액을 뜻하는 것은 아닙니다. 중개보수는 상한 범위, 협의 내용, 부가세 처리와 계약 조건을 함께 확인해야 합니다."] },
+    ],
+    faq: [
+      { question: "계산기에 나온 금액을 반드시 지급해야 하나요?", answer: "계산기는 입력값과 상한요율을 기준으로 한 참고값입니다. 실제 지급 조건은 계약 당사자와 중개사, 최신 공식 기준을 확인하세요." },
+      { question: "월세 거래금액은 월세만 입력하나요?", answer: "지역과 적용 기준에 따라 보증금과 월세를 환산하는 방식이 달라질 수 있습니다. 거래 유형에 맞는 기준을 확인하세요." },
+    ],
+    relatedToolSlugs: ["brokerage-fee", "monthly-rent", "jeonse-vs-monthly"],
+    relatedGuideSlugs: ["jeonse-vs-monthly-cost-guide", "family-loan-io-document-guide"],
+    monetizationCategory: "real-estate",
+  },
+  {
+    slug: "loan-interest-comparison-guide",
+    title: "대출 이자 계산과 원리금균등·원금균등 비교 방법",
+    description: "대출 원금·금리·기간을 기준으로 월 상환액과 총이자를 비교하고 상환방식 차이를 이해하는 방법입니다.",
+    eyebrow: "FINANCE GUIDE",
+    intro: "대출 조건을 비교할 때 금리만 보는 것보다 상환방식과 기간에 따른 월 현금흐름, 총이자를 함께 확인하는 것이 중요합니다.",
+    coreAnswer: "같은 원금과 금리라도 상환방식과 기간에 따라 월 납입액과 총이자가 달라지므로 두 값을 같이 비교해야 합니다.",
+    example: "대출 원금·연이율·기간을 동일하게 넣고 원리금균등과 원금균등의 첫 달 납입액, 총이자를 비교하세요.",
+    caution: "실제 금융상품에는 우대금리, 변동금리, 거치기간, 중도상환수수료와 원 단위 절사 등이 반영될 수 있습니다.",
+    sections: [
+      { heading: "월 납입액과 총이자를 따로 보기", paragraphs: ["월 납입액이 낮아도 기간이 길면 총이자가 늘어날 수 있습니다. 반대로 초기 납입액이 높은 방식은 총이자가 줄어들 수 있어 현금흐름과 비용을 함께 봐야 합니다.", "대출 이자 계산기와 원리금 상환 계산기를 이용해 월 납입액과 총 상환액을 비교하세요."] },
+      { heading: "금리 비교 전에 동일 조건 만들기", paragraphs: ["대출금액, 기간, 거치기간, 금리 유형이 다르면 결과 비교가 어렵습니다. 먼저 동일한 조건을 입력한 뒤 한 요소씩 바꾸어 민감도를 확인합니다."] },
+    ],
+    faq: [
+      { question: "원리금균등이 항상 더 유리한가요?", answer: "월 현금흐름을 일정하게 관리하기 쉬운 방식일 수 있지만, 총이자와 초기 상환 부담은 개인 조건에 따라 달라집니다." },
+      { question: "계산기 결과가 금융기관 상환표와 다른 이유는 무엇인가요?", answer: "납입일, 금리 변동, 거치기간, 우대조건과 절사 규칙이 계산기의 가정과 다를 수 있기 때문입니다." },
+    ],
+    relatedToolSlugs: ["loan-interest", "loan-amortization", "monthly-rent"],
+    relatedGuideSlugs: ["family-loan-io-document-guide", "jeonse-vs-monthly-cost-guide"],
+    monetizationCategory: "finance",
+  },
+  {
+    slug: "retirement-income-tax-guide",
+    title: "퇴직소득세 계산 전 확인할 항목과 예상 수령액 보는 법",
+    description: "퇴직급여·근속연수·퇴직소득세를 계산할 때 결과를 해석하고 공식 정산과 구분하는 방법을 안내합니다.",
+    eyebrow: "RETIREMENT & TAX GUIDE",
+    intro: "퇴직급여에서 실제 수령액을 추정하려면 퇴직급여 총액뿐 아니라 근속연수와 과세 방식, 귀속연도별 기준을 함께 확인해야 합니다.",
+    coreAnswer: "퇴직소득세 계산기는 입력값에 따른 예상치이므로 퇴직급여·근속연수·세액·지방소득세를 단계별로 나누어 확인해야 합니다.",
+    example: "퇴직급여와 근속연수를 입력해 예상 세액을 확인한 뒤 회사 정산 내역과 국세청 안내를 비교하세요.",
+    caution: "중간정산, 과세이연, 특별한 퇴직 사유와 귀속연도별 세법에 따라 실제 세액이 달라질 수 있습니다.",
+    sections: [
+      { heading: "퇴직급여와 퇴직소득세 구분하기", paragraphs: ["퇴직급여는 세전 지급액이고 퇴직소득세는 과세 계산을 거친 공제 항목입니다. 지방소득세와 실제 원천징수 방식도 별도로 확인해야 합니다.", "퇴직소득세 계산기는 단순화된 입력값으로 예상 세액과 수령액을 보여주는 참고 도구입니다."] },
+      { heading: "근속연수와 정산 자료 확인하기", paragraphs: ["입사일·퇴사일, 중간정산 여부, 퇴직급여 구성 항목을 확인해야 합니다. 급여명세서와 회사의 퇴직소득 원천징수 내역을 보관하세요."] },
+    ],
+    faq: [
+      { question: "계산기 결과를 세금 신고 금액으로 사용해도 되나요?", answer: "아닙니다. 실제 신고와 원천징수는 공식 정산자료와 최신 세법을 기준으로 확인해야 합니다." },
+      { question: "퇴직금이 많으면 세율이 단순히 같은 비율로 오르나요?", answer: "퇴직소득은 일반 근로소득과 계산 구조가 다를 수 있어 금액·근속연수·공제 구조를 함께 확인해야 합니다." },
+    ],
+    relatedToolSlugs: ["retirement-income-tax", "retirement-pay", "annual-net"],
+    relatedGuideSlugs: ["pension-retirement-income-guide", "retirement-fund-how-much-guide"],
+    monetizationCategory: "tax",
+  },
+  {
+    slug: "commute-fuel-cost-guide",
+    title: "출퇴근 자동차 기름값 계산: 거리·연비·월 주행일수 기준",
+    description: "출퇴근 거리와 연비, 유가, 근무일수를 이용해 월 주유비를 비교하고 차량 유지비와 연결하는 방법입니다.",
+    eyebrow: "AUTOMOBILE GUIDE",
+    intro: "출퇴근 기름값은 하루 이동거리보다 왕복거리와 실제 운행일수, 차량 연비와 유가를 함께 넣어야 현실적인 월 비용에 가까워집니다.",
+    coreAnswer: "왕복거리 × 월 운행일수를 먼저 계산한 뒤 연비와 리터당 유가를 적용하면 월 주유비를 비교할 수 있습니다.",
+    example: "주유비 계산기에 왕복거리와 월 운행일수를 반영한 총거리, 연비와 유가를 입력하고 자동차 유지비 계산기에서 보험·세금·정비비를 더해 보세요.",
+    caution: "교통체증, 계절, 운전습관, 주차비·통행료와 실제 유가 변동은 계산 결과에 포함되지 않을 수 있습니다.",
+    sections: [
+      { heading: "출퇴근 거리는 왕복 기준으로 입력하기", paragraphs: ["편도 거리만 알고 있다면 왕복으로 환산한 뒤 실제 출근일수와 재택근무일을 반영합니다. 휴일·휴가·출장을 평균적으로 조정하면 월 비교가 더 현실적입니다.", "주유비 계산기는 거리·연비·유가로 예상 연료량과 주유비를 계산합니다."] },
+      { heading: "주유비와 보유비용을 나누어 보기", paragraphs: ["주유비는 변동비이고 자동차세·보험료·정비비는 월 또는 연간 환산이 필요한 비용입니다. 차량을 비교할 때는 자동차 유지비 계산기에서 같은 주행조건으로 확인하세요."] },
+    ],
+    faq: [
+      { question: "연비는 공인연비를 입력하면 되나요?", answer: "공인연비는 비교 기준으로 사용할 수 있지만 실제 도심·고속도로 비율과 운전습관에 따라 실연비가 달라질 수 있습니다." },
+      { question: "출퇴근 기름값만 보면 차량 선택이 가능한가요?", answer: "아닙니다. 보험료·세금·정비·주차·감가와 초기 구매비용을 함께 비교해야 합니다." },
+    ],
+    relatedToolSlugs: ["fuel-cost", "maintenance-cost", "parking-fee"],
+    relatedGuideSlugs: ["car-monthly-maintenance-cost-guide", "small-business-fixed-cost-guide"],
+    monetizationCategory: "automobile",
+  },
+  {
+    slug: "freelancer-project-quote-guide",
+    title: "프리랜서 프로젝트 견적 계산: 시급·예상시간·마진 정리",
+    description: "프리랜서와 소규모 사업자가 프로젝트 견적에 작업시간·추가비용·마진을 반영하는 방법을 안내합니다.",
+    eyebrow: "BUSINESS GUIDE",
+    intro: "프로젝트 견적은 작업시간만 곱하는 것이 아니라 회의·수정·프로젝트 관리와 외주·운영비를 포함해 산정해야 실제 수익성을 판단하기 쉽습니다.",
+    coreAnswer: "시간당 단가와 예상 작업시간에 추가 비용과 목표 마진을 일관된 기준으로 반영해야 견적과 실제 이익을 비교할 수 있습니다.",
+    example: "프로젝트 견적 계산기에 시간당 단가·예상시간·추가비용·마진율을 넣고 마진율 계산기와 손익분기점 계산기로 결과를 교차 확인하세요.",
+    caution: "부가세 포함 여부, 원천징수, 플랫폼 수수료, 수정 범위와 대금 지급 시점을 계약서에서 별도로 확인하세요.",
+    sections: [
+      { heading: "견적에 포함할 작업시간 범위", paragraphs: ["고객 미팅, 자료조사, 디자인·개발, 검수와 수정시간을 나누어 적습니다. 실제 작업 외 시간이 빠지면 시간당 실질 수익이 낮아질 수 있습니다.", "프로젝트 견적 계산기는 입력한 시간당 단가와 예상시간, 추가비용·마진을 기준으로 참고 견적을 계산합니다."] },
+      { heading: "마진과 현금흐름을 함께 확인하기", paragraphs: ["견적상 이익과 실제 현금 유입은 다를 수 있습니다. 선금·잔금, 플랫폼 수수료, 세금과 미수금 위험을 별도로 관리하세요."] },
+    ],
+    faq: [
+      { question: "시간당 단가는 어떻게 정하나요?", answer: "목표 월수입과 유급 작업시간, 운영비·세금·휴가 기간을 함께 고려해 기준을 정하고 프로젝트별 난이도와 책임 범위를 조정하세요." },
+      { question: "마진율과 마크업률은 같은가요?", answer: "판매가 대비 이익 비율과 원가에 더하는 비율은 계산 기준이 다릅니다. 마진율 계산기에서 두 값을 구분해 확인하세요." },
+    ],
+    relatedToolSlugs: ["project-quote", "margin", "break-even"],
+    relatedGuideSlugs: ["small-business-fixed-cost-guide", "roas-break-even-guide"],
+    monetizationCategory: "business",
+  },
+  {
+    slug: "small-business-roas-margin-guide",
+    title: "광고 ROAS와 마진율을 함께 보는 소상공인 광고비 계산",
+    description: "광고매출만 보는 대신 상품 마진·플랫폼 수수료·고정비를 함께 반영해 광고 효율을 판단하는 방법입니다.",
+    eyebrow: "BUSINESS GUIDE",
+    intro: "ROAS가 높아도 상품 마진이 낮거나 수수료와 배송비가 크면 광고 후 이익이 작을 수 있습니다. ROAS와 마진율을 같은 비용 기준으로 연결해 보세요.",
+    coreAnswer: "광고 의사결정은 ROAS 하나가 아니라 광고 후 이익, 상품 마진, 고정비 회수 가능성을 함께 확인해야 합니다.",
+    example: "ROAS 계산기에 광고비·매출·원가·수수료를 입력하고 마진율·손익분기점 계산기로 목표 판매량과 이익을 비교하세요.",
+    caution: "매출 집계 시점, 쿠폰·반품·무료배송·부가세 처리 범위를 캠페인마다 동일하게 맞추지 않으면 ROAS 비교가 왜곡될 수 있습니다.",
+    sections: [
+      { heading: "ROAS와 마진율을 같은 주문 기준으로 계산하기", paragraphs: ["광고 매출에서 상품 원가와 플랫폼 수수료, 배송·반품·쿠폰 비용을 차감한 금액이 광고비를 감당하는지 확인합니다.", "ROAS 계산기는 광고 후 이익과 손익분기 ROAS를 함께 확인할 수 있고, 마진율 계산기는 판매가와 원가의 관계를 보여줍니다."] },
+      { heading: "고정비 회수까지 연결하기", paragraphs: ["광고 후 이익이 양수여도 임대료·인건비·구독료 같은 고정비를 회수하지 못할 수 있습니다. 손익분기점 계산기로 월 목표 판매량까지 연결하세요."] },
+    ],
+    faq: [
+      { question: "ROAS가 300%면 광고를 늘려도 되나요?", answer: "상품 마진과 수수료, 재고·현금흐름과 광고 확장에 따른 효율 변화를 함께 확인해야 합니다. ROAS만으로 증액을 결정하지 마세요." },
+      { question: "광고비는 마진 계산에 어떻게 넣나요?", answer: "상품 단위 변동비와 광고비 배분 기준을 먼저 정한 뒤, 캠페인·기간·주문 기준을 일관되게 적용해야 합니다." },
+    ],
+    relatedToolSlugs: ["roas", "margin", "break-even"],
+    relatedGuideSlugs: ["roas-break-even-guide", "small-business-fixed-cost-guide"],
+    monetizationCategory: "business",
   },
 ];
 
