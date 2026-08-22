@@ -59,12 +59,27 @@ function renderHead(path: string) {
   ].join("\n    ");
 }
 
+function renderSeoFallback(path: string) {
+  const route = resolveSeoRoute(path, defaultCatalog);
+  const calculator = path.startsWith("/calculator/");
+  const guide = path.startsWith("/guides/");
+  const usage = calculator
+    ? "필요한 입력값을 입력한 뒤 계산하기 버튼을 누르면 예상 결과와 계산 근거를 확인할 수 있습니다."
+    : guide
+      ? "관련 계산기를 열어 필요한 값을 직접 입력하고, 아래 설명과 계산 예시를 함께 확인할 수 있습니다."
+      : "카테고리 또는 도구를 선택하면 필요한 기능을 바로 사용할 수 있습니다.";
+  const result = calculator
+    ? "표시되는 결과는 입력값에 따른 참고용 계산 결과이며 실제 금융·세금·계약·지급 결과와 다를 수 있습니다."
+    : "중요한 의사결정 전에는 관련 기관 또는 전문가의 최신 기준을 확인하세요.";
+  return `<noscript><main class="seo-fallback"><h1>${escapeHtml(route.title)}</h1><p>${escapeHtml(route.description)}</p><h2>사용 방법</h2><p>${escapeHtml(usage)}</p><h2>결과 안내</h2><p>${escapeHtml(result)}</p></main></noscript>`;
+}
+
 function injectRouteSeo(html: string, path: string) {
   const route = resolveSeoRoute(path, defaultCatalog);
   const metaPattern = /\s*<meta name="description"[\s\S]*?<title>[\s\S]*?<\/title>/;
   const replacement = `\n    ${renderHead(path)}`;
   if (!metaPattern.test(html)) throw new Error("기본 HTML에서 SEO 메타데이터 블록을 찾지 못했습니다.");
-  return html.replace(metaPattern, replacement).replace("<!--app-head-->", `<!--app-head--><!-- pre-rendered metadata: ${route.canonicalPath} -->`);
+  return html.replace(metaPattern, replacement).replace("<!--app-head-->", `<!--app-head--><!-- pre-rendered metadata: ${route.canonicalPath} -->${renderSeoFallback(path)}`);
 }
 
 const template = await readFile(resolve(distDir, "index.html"), "utf8");
