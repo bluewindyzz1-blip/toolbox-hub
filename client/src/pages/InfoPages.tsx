@@ -1,10 +1,11 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { Mail, Search, Send } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/ToolLayout";
 import { SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
 import { getCategoryPath, getToolPath } from "@shared/catalog";
+import { guideContents } from "@shared/content";
 import { getStaticRouteFaq } from "@shared/seo";
 
 const DEFAULT_SUPPORT_EMAIL = "infokokk1@naver.com";
@@ -71,20 +72,63 @@ export function InfoPage({ type }: { type: keyof typeof pages }) {
   return <div className="site-page"><SeoHead title={`${page.title} | 도구상자`} description={page.paragraphs[0]} path={path} kind="CollectionPage" /><SiteHeader /><main className="container info-page"><p className="eyebrow">INFORMATION / 2026</p><h1>{page.title}</h1><div className="info-copy">{page.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>{questions.length > 0 && <section className="faq-section info-faq"><p className="eyebrow">COMMON QUESTIONS</p><h2>도구상자 이용 FAQ</h2>{questions.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>}<Link href="/">도구상자 홈으로 돌아가기</Link></main><SiteFooter /></div>;
 }
 
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  월급: ["급여", "실수령", "연봉"], 급여: ["월급", "실수령", "연봉"],
+  전세: ["전세대출", "보증금", "임대"], 대출: ["이자", "상환", "원리금", "금리"],
+  집: ["주택", "아파트", "부동산", "취득세"], 세금: ["세율", "소득세", "부가세", "취득세"],
+  차: ["자동차", "차량", "주유", "유지비"], 자동차: ["차량", "주유", "유지비"],
+  마진: ["순이익", "수수료", "원가", "손익분기"], 파일: ["PDF", "문서", "이미지", "변환"],
+};
+const POPULAR_SEARCHES = ["전세대출 이자", "월급 실수령액", "취득세", "자동차 유지비", "PDF 변환", "스마트스토어 마진"];
+
+type SearchFilter = "all" | "calculator" | "guide";
+
+function searchTerms(query: string) {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  return Array.from(new Set(words.flatMap((word) => [word, ...(SEARCH_SYNONYMS[word] ?? [])])));
+}
+
 export function SearchPage() {
   const { data } = useCatalog();
   const [query, setQuery] = useState("");
-  const results = useMemo(() => {
-    const key = query.trim().toLowerCase();
-    if (!key || !data) return [];
-    return data.tools.filter((tool) => {
+  const [filter, setFilter] = useState<SearchFilter>("all");
+  useEffect(() => {
+    const focusSearch = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        document.querySelector<HTMLInputElement>(".search-page .search-input input")?.focus();
+      }
+    };
+    window.addEventListener("keydown", focusSearch);
+    return () => window.removeEventListener("keydown", focusSearch);
+  }, []);
+  const terms = useMemo(() => searchTerms(query.trim()), [query]);
+  const toolResults = useMemo(() => {
+    if (!data || !terms.length) return [];
+    return data.tools.map((tool) => {
       const category = data.categories.find((item) => item.id === tool.categoryId);
       const parent = category?.parentId ? data.categories.find((item) => item.id === category.parentId) : undefined;
       const haystack = [tool.title, tool.description, ...(tool.searchKeywords ?? []), category?.name ?? "", category?.description ?? "", parent?.name ?? "", parent?.description ?? ""].join(" ").toLowerCase();
-      return haystack.includes(key);
-    }).slice(0, 30);
+      const score = terms.reduce((total, term) => total + (haystack.includes(term) ? (tool.title.toLowerCase().includes(term) ? 4 : 1) : 0), 0);
+      return { tool, category, parent, score };
+    }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score || a.tool.sortOrder - b.tool.sortOrder).slice(0, 30);
+  }, [data, terms]);
+  const guideResults = useMemo(() => {
+    if (!terms.length) return [];
+    return guideContents.map((guide) => {
+      const haystack = [guide.title, guide.description, guide.intro, guide.coreAnswer ?? "", guide.eyebrow, guide.monetizationCategory].join(" ").toLowerCase();
+      const score = terms.reduce((total, term) => total + (haystack.includes(term) ? (guide.title.toLowerCase().includes(term) ? 4 : 1) : 0), 0);
+      return { guide, score };
+    }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 20);
+  }, [terms]);
+  const suggestions = useMemo(() => {
+    if (!query.trim()) return POPULAR_SEARCHES;
+    const typed = query.trim().toLowerCase();
+    return [...POPULAR_SEARCHES, ...data?.tools.flatMap((tool) => [tool.title, ...(tool.searchKeywords ?? [])]) ?? [], ...guideContents.map((guide) => guide.title)]
+      .filter((value, index, list) => list.indexOf(value) === index && value.toLowerCase().includes(typed)).slice(0, 6);
   }, [data, query]);
-  return <div className="site-page"><SeoHead title="도구 검색 | 도구상자" description="계산기, PDF, 이미지, 문서 변환과 단위 변환 도구를 검색합니다." path="/search" kind="CollectionPage" noindex /><SiteHeader /><main className="container search-page"><p className="eyebrow">TOOL FINDER</p><h1>도구 검색</h1><label className="search-input"><Search size={22} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="PDF 합치기, 사진 PDF, 엑셀, 전세대출" /></label>{query && <div className="search-results">{results.length ? results.map((tool) => { const category = data.categories.find((item) => item.id === tool.categoryId); const parent = category?.parentId ? data.categories.find((item) => item.id === category.parentId) : undefined; return <Link key={tool.id} href={getToolPath(tool, data.categories)}><span>{parent ? `${parent.name} · ${category?.name}` : category?.name}</span><strong>{tool.title}</strong><p>{tool.description}</p><small>바로가기 →</small></Link>; }) : <p>일치하는 공개 도구가 없습니다.</p>}</div>}</main><SiteFooter /></div>;
+  const total = toolResults.length + guideResults.length;
+  return <div className="site-page"><SeoHead title="도구 검색 | 도구상자" description="계산기, guide, PDF, 이미지, 문서 변환과 단위 변환 도구를 한 번에 검색합니다." path="/search" kind="CollectionPage" noindex /><SiteHeader /><main className="container search-page"><p className="eyebrow">TOOL FINDER / CALCULATOR + GUIDE</p><h1>필요한 도구를<br /><em>바로 찾기.</em></h1><p className="search-intro">계산기와 가이드를 함께 검색하고, 결과에서 바로 사용하세요.</p><label className="search-input"><Search size={22} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="전세대출 이자, 월급 실수령액, PDF 합치기" aria-label="계산기와 guide 검색" /><kbd>⌘K</kbd></label><div className="search-filter-row" role="group" aria-label="검색 결과 종류"><button type="button" className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>전체</button><button type="button" className={filter === "calculator" ? "active" : ""} onClick={() => setFilter("calculator")}>계산기·도구</button><button type="button" className={filter === "guide" ? "active" : ""} onClick={() => setFilter("guide")}>guide</button></div>{suggestions.length > 0 && <div className="search-suggestions" aria-label={query ? "검색 추천" : "인기 검색어"}>{suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => setQuery(suggestion)}>{suggestion}</button>)}</div>}{query.trim() ? <div className="search-results search-results-grouped">{total ? <>{filter !== "guide" && toolResults.length > 0 && <section><div className="search-results-heading"><span>CALCULATORS & TOOLS</span><strong>계산기·도구 <small>{toolResults.length}</small></strong></div>{toolResults.map(({ tool, category, parent }) => <Link key={tool.id} href={getToolPath(tool, data!.categories)}><span>{parent ? `${parent.name} · ${category?.name}` : category?.name}</span><strong>{tool.title}</strong><p>{tool.description}</p><small>바로 사용하기 →</small></Link>)}</section>}{filter !== "calculator" && guideResults.length > 0 && <section><div className="search-results-heading"><span>SEARCH GUIDES</span><strong>관련 guide <small>{guideResults.length}</small></strong></div>{guideResults.map(({ guide }) => <Link key={guide.slug} href={`/guides/${guide.slug}`}><span>{guide.eyebrow}</span><strong>{guide.title}</strong><p>{guide.coreAnswer ?? guide.description}</p><small>내용 확인하기 →</small></Link>)}</section>}</> : <div className="search-empty"><strong>“{query}”에 맞는 결과가 없습니다.</strong><p>다른 표현으로 검색하거나 아래 인기 검색어를 선택해 보세요.</p></div>}</div> : <div className="search-empty search-empty-guide"><strong>무엇을 계산하거나 변환할까요?</strong><p>검색어를 입력하거나 인기 검색어를 눌러 계산기와 guide를 함께 찾아보세요.</p></div>}</main><SiteFooter /></div>;
 }
 
 export function ContactPage() {

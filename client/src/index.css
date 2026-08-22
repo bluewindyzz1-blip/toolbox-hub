@@ -399,3 +399,32 @@ th:first-child,td:first-child { text-align:left; }
 .affiliate-slot { padding-top: .5rem; }
 @media (max-width: 900px) { .home-topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.home-topic-grid a:nth-child(4n) { border-right: var(--thin-line); }.home-topic-grid a:nth-child(2n) { border-right: 0; } }
 @media (max-width: 760px) { .home-topic-directory { margin-top: 2.5rem; }.home-topic-grid { grid-template-columns: 1fr; }.home-topic-grid a,.home-topic-grid a:nth-child(4n),.home-topic-grid a:nth-child(2n) { min-height: 112px; border-right: 0; }.calculator-layout { gap: 0; }.calculator-form { padding-bottom: 1.25rem; }.calculator-output { order: 2; min-height: 320px; margin-top: .5rem; }.calculator-output > strong { font-size: clamp(2.8rem, 15vw, 4.8rem); }.calculator-actions { position: sticky; bottom: .6rem; z-index: 4; padding: .65rem; border: var(--thin-line); background: color-mix(in srgb, var(--paper) 92%, transparent); box-shadow: 0 5px 20px rgba(0,0,0,.08); } }
+
+/* Integrated calculator + guide search */
+.search-intro { max-width: 38rem; margin: -.6rem 0 1.4rem; font-family: "Noto Sans KR", sans-serif; font-size: .9rem; line-height: 1.7; letter-spacing: -.05em; }
+.search-input { display:flex; align-items:center; gap:.8rem; min-height:64px; margin-top:1.5rem; padding:0 1.1rem; border:var(--line); background:var(--paper); }
+.search-input input { min-width:0; flex:1; border:0; outline:0; background:transparent; color:var(--ink); font:inherit; font-family:"Noto Sans KR",sans-serif; font-size:1rem; letter-spacing:-.04em; }
+.search-input kbd { display:inline-flex; align-items:center; min-height:25px; padding:.2rem .45rem; border:var(--thin-line); color:var(--muted); font-family:inherit; font-size:.65rem; white-space:nowrap; }
+.search-filter-row { display:flex; flex-wrap:wrap; gap:.45rem; margin:1rem 0 .7rem; }
+.search-filter-row button,.search-suggestions button { border:var(--thin-line); background:transparent; color:var(--ink); cursor:pointer; font-family:"Noto Sans KR",sans-serif; letter-spacing:-.04em; }
+.search-filter-row button { min-height:38px; padding:.45rem .8rem; font-size:.78rem; }
+.search-filter-row button:hover,.search-filter-row button.active { background:var(--ink); color:var(--paper); }
+.search-suggestions { display:flex; flex-wrap:wrap; gap:.45rem; margin-bottom:1.4rem; }
+.search-suggestions button { padding:.4rem .65rem; font-size:.7rem; }
+.search-suggestions button:hover { border-color:var(--signal); color:var(--signal); }
+.search-results-grouped { display:grid; gap:2.2rem; margin-top:1.5rem; }
+.search-results-grouped section { border-top:var(--line); }
+.search-results-heading { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; padding:1rem 0 .65rem; }
+.search-results-heading span { color:var(--signal); font-size:.65rem; font-weight:700; letter-spacing:.1em; }
+.search-results-heading strong { font-size:1.2rem; letter-spacing:-.07em; }
+.search-results-heading small { color:var(--muted); font-family:"Noto Sans KR",sans-serif; font-size:.7rem; }
+.search-results-grouped > section > a { display:block; padding:1rem 0; border-bottom:var(--thin-line); color:inherit; }
+.search-results-grouped > section > a:hover { padding-left:.6rem; background:color-mix(in srgb, var(--paper) 80%, var(--signal)); }
+.search-results-grouped > section > a > span { display:block; margin-bottom:.4rem; color:var(--muted); font-family:"Noto Sans KR",sans-serif; font-size:.68rem; }
+.search-results-grouped > section > a > strong { display:block; font-size:1.05rem; letter-spacing:-.07em; }
+.search-results-grouped > section > a > p { margin:.35rem 0 .5rem; color:var(--muted); font-family:"Noto Sans KR",sans-serif; font-size:.78rem; line-height:1.6; letter-spacing:-.05em; }
+.search-results-grouped > section > a > small { color:var(--signal); font-family:"Noto Sans KR",sans-serif; font-size:.7rem; font-weight:700; }
+.search-empty { margin-top:1.5rem; padding:2rem 1.2rem; border:var(--thin-line); background:#f4f1ea; }
+.search-empty strong { display:block; margin-bottom:.5rem; font-size:1.05rem; letter-spacing:-.06em; }
+.search-empty p { margin:0; color:var(--muted); font-family:"Noto Sans KR",sans-serif; font-size:.8rem; line-height:1.6; letter-spacing:-.05em; }
+@media (max-width:760px) { .search-page { padding-top:1.2rem; }.search-page h1 { font-size:clamp(2.5rem,13vw,4.2rem); }.search-input { min-height:58px; margin-top:1.2rem; padding:0 .8rem; }.search-input kbd { display:none; }.search-filter-row button { flex:1; min-width:0; }.search-suggestions { gap:.35rem; }.search-suggestions button { font-size:.65rem; }.search-results-heading { align-items:flex-start; flex-direction:column; gap:.25rem; }.search-results-grouped > section > a { padding:1rem .2rem; }.search-results-grouped > section > a:hover { padding-left:.2rem; } }
