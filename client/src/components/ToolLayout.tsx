@@ -44,21 +44,21 @@ export function SiteHeader() {
         <nav className="mobile-nav container" aria-label="모바일 주요 도구">
           {navItems.map((item, index) => item.href === "/convert" ? (
             <div className={`mobile-nav-group ${mobileConvertOpen ? "expanded" : ""}`} key={item.href}>
-              <button className="mobile-nav-disclosure" type="button" aria-expanded={mobileConvertOpen} onClick={() => setMobileConvertOpen((open) => !open)}>
-                <span>0{index + 1}</span><strong>{item.label}</strong><span className="mobile-nav-chevron" aria-hidden="true">{mobileConvertOpen ? "−" : "+"}</span>
+              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileConvertOpen} onClick={() => setMobileConvertOpen((open) => !open)}>
+                <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><span className="mobile-nav-chevron" aria-hidden="true">{mobileConvertOpen ? "−" : "+"}</span>
               </button>
               {mobileConvertOpen && <div className="mobile-nav-submenu">{mobileConvertGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href + subItem.label} href={subItem.href} onClick={() => setMobileOpen(false)}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
             </div>
           ) : item.href === "/units" ? (
             <div className={`mobile-nav-group ${mobileUnitOpen ? "expanded" : ""}`} key={item.href}>
-              <button className="mobile-nav-disclosure" type="button" aria-expanded={mobileUnitOpen} onClick={() => setMobileUnitOpen((open) => !open)}>
-                <span>0{index + 1}</span><strong>{item.label}</strong><span className="mobile-nav-chevron" aria-hidden="true">{mobileUnitOpen ? "−" : "+"}</span>
+              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileUnitOpen} onClick={() => setMobileUnitOpen((open) => !open)}>
+                <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><span className="mobile-nav-chevron" aria-hidden="true">{mobileUnitOpen ? "−" : "+"}</span>
               </button>
               {mobileUnitOpen && <div className="mobile-nav-submenu">{mobileUnitGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href} href={subItem.href} onClick={() => setMobileOpen(false)}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
             </div>
           ) : (
-            <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}>
-              <span>0{index + 1}</span>{item.label}<ArrowUpRight size={17} />
+            <Link key={item.href} href={item.href} className="mobile-nav-item" onClick={() => setMobileOpen(false)}>
+              <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><ArrowUpRight size={17} />
             </Link>
           ))}
         </nav>
