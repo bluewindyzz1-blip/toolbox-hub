@@ -1,11 +1,10 @@
 import { ArrowUpRight, FileQuestion } from "lucide-react";
 import { Link } from "wouter";
 import { lazy, Suspense } from "react";
-import { CatalogBreadcrumb, GuideDiscovery, SeoHead, categoryToolGroups } from "@/components/CatalogSupport";
+import { CatalogBreadcrumb, SeoHead, categoryToolGroups } from "@/components/CatalogSupport";
 import { SiteFooter, SiteHeader, ToolFrame } from "@/components/ToolLayout";
 import { useCatalog } from "@/hooks/useCatalog";
-import { CatalogSnapshot, getCategoryPath, getToolPath } from "@shared/catalog";
-import { resolveSeoRoute } from "@shared/seo";
+import { getCategoryPath, getToolPath } from "@shared/catalog";
 import AnnualNetCalculator from "./AnnualNetCalculator";
 import PyeongCalculator from "./PyeongCalculator";
 import RetirementPayCalculator from "./RetirementPayCalculator";
@@ -17,28 +16,15 @@ import UnitConverter from "./UnitConverter";
 import AdvancedCalculators from "./AdvancedCalculators";
 import FinanceRealEstateCalculators from "./FinanceRealEstateCalculators";
 import SalaryEmploymentCalculators from "./SalaryEmploymentCalculators";
-import TaxSocialCalculators from "./TaxSocialCalculators";
-import DateTimeCalculators from "./DateTimeCalculators";
-import DailyWorkCalculators from "./DailyWorkCalculators";
-import EverydayCalculators from "./EverydayCalculators";
-import ExpansionCalculators from "./ExpansionCalculators";
 
 const PdfTool = lazy(() => import("./PdfTool"));
-const DocumentTool = lazy(() => import("./DocumentTool"));
-const TextTransformTool = lazy(() => import("./TextTransformTool"));
 
 type RootKey = "calculator" | "convert" | "units";
 
-function CategorySeoSupport({ path, catalog }: { path: string; catalog: CatalogSnapshot }) {
-  const route = resolveSeoRoute(path, catalog);
-  if (!route.faq.length) return null;
-  return <section className="faq-section category-seo-faq"><p className="eyebrow">CATEGORY GUIDE</p><h2>자주 묻는 질문</h2>{route.faq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>;
-}
-
 const rootTitles: Record<RootKey, { title: string; description: string; index: string }> = {
-  calculator: { title: "생활 계산기 모음", description: "월급·퇴직금·대출·부동산·세금처럼 자주 필요한 계산기를 카테고리별로 찾아 바로 계산하세요.", index: "07" },
-  convert: { title: "파일 변환 도구", description: "PDF 합치기, 이미지 압축, CSV·Excel 변환 등 파일 작업을 브라우저 안에서 바로 처리하세요.", index: "08" },
-  units: { title: "단위 변환기", description: "길이·무게·온도·면적부터 데이터 용량까지 자주 쓰는 단위를 빠르게 환산하세요.", index: "09" },
+  calculator: { title: "계산기", description: "금융, 부동산, 급여, 세금 등 실생활에 필요한 계산기를 카테고리별로 탐색하세요.", index: "07" },
+  convert: { title: "파일 변환", description: "PDF, 이미지, 문서 변환 도구를 브라우저 안에서 바로 사용하세요.", index: "08" },
+  units: { title: "단위 변환", description: "길이부터 데이터 용량까지 자주 쓰는 단위를 빠르게 환산하세요.", index: "09" },
 };
 
 function RootPage({ rootSlug }: { rootSlug: RootKey }) {
@@ -46,9 +32,8 @@ function RootPage({ rootSlug }: { rootSlug: RootKey }) {
   const root = data?.categories.find((item) => item.slug === rootSlug && item.parentId === null);
   const info = rootTitles[rootSlug];
   if (!data || !root) return <CatalogLoading />;
-  const groups = categoryToolGroups(data.categories, data.tools, root).filter(({ tools }) => tools.length > 0);
-  const rootPath = getCategoryPath(root, data.categories);
-  return <div className="site-page"><SeoHead title={`${root.seoTitle ?? info.title} | 도구상자`} description={root.seoDescription ?? info.description} path={rootPath} kind="CollectionPage" /><SiteHeader /><main className="container catalog-page"><CatalogBreadcrumb rootSlug={rootSlug} /><section className="catalog-intro"><span>{info.index}</span><div><p className="eyebrow">CATALOG / {rootSlug.toUpperCase()}</p><h1>{info.title}</h1><p>{root.description ?? info.description}</p></div></section><div className="category-directory">{groups.map(({ subcategory, tools }) => <section key={subcategory.id} className="category-group"><div><p className="eyebrow">CATEGORY</p><h2>{subcategory.name}</h2><p>{subcategory.description}</p><Link href={getCategoryPath(subcategory, data.categories)}>카테고리 보기 <ArrowUpRight size={17} /></Link></div><div className="category-tool-list">{tools.map((tool) => <Link key={tool.id} href={getToolPath(tool, data.categories)}><span>{String(tool.sortOrder).padStart(2, "0")}</span><div><h3>{tool.title}</h3><p>{tool.description}</p></div><ArrowUpRight size={20} /></Link>)}</div></section>)}</div><GuideDiscovery tools={groups.flatMap(({ tools }) => tools)} title={`${info.title} 관련 활용 가이드`} /><CategorySeoSupport path={rootPath} catalog={data} /></main><SiteFooter /></div>;
+  const groups = categoryToolGroups(data.categories, data.tools, root);
+  return <div className="site-page"><SeoHead title={`${root.seoTitle ?? info.title} | 도구상자`} description={root.seoDescription ?? info.description} kind="CollectionPage" /><SiteHeader /><main className="container catalog-page"><CatalogBreadcrumb rootSlug={rootSlug} /><section className="catalog-intro"><span>{info.index}</span><div><p className="eyebrow">CATALOG / {rootSlug.toUpperCase()}</p><h1>{root.name}</h1><p>{root.description ?? info.description}</p></div></section><div className="category-directory">{groups.map(({ subcategory, tools }) => <section key={subcategory.id} className="category-group"><div><p className="eyebrow">CATEGORY</p><h2>{subcategory.name}</h2><p>{subcategory.description}</p><Link href={getCategoryPath(subcategory, data.categories)}>카테고리 보기 <ArrowUpRight size={17} /></Link></div><div className="category-tool-list">{tools.length ? tools.map((tool) => <Link key={tool.id} href={getToolPath(tool, data.categories)}><span>{String(tool.sortOrder).padStart(2, "0")}</span><div><h3>{tool.title}</h3><p>{tool.description}</p></div><ArrowUpRight size={20} /></Link>) : <p className="empty-copy">이 카테고리에 도구를 추가할 수 있습니다.</p>}</div></section>)}</div></main><SiteFooter /></div>;
 }
 
 function SubcategoryPage({ rootSlug, categorySlug }: { rootSlug: RootKey; categorySlug: string }) {
@@ -59,8 +44,7 @@ function SubcategoryPage({ rootSlug, categorySlug }: { rootSlug: RootKey; catego
   const directTools = data.tools.filter((tool) => tool.categoryId === category.id);
   const groups = data.categories.filter((item) => item.parentId === category.id).map((group) => ({ group, tools: data.tools.filter((tool) => tool.categoryId === group.id) }));
   const cards = (tools: typeof data.tools) => <div className="subcategory-tool-grid">{tools.map((tool) => <Link key={tool.id} href={getToolPath(tool, data.categories)}><span>{tool.kind.toUpperCase()}</span><h2>{tool.title}</h2><p>{tool.description}</p><ArrowUpRight size={22} /></Link>)}</div>;
-  const categoryPath = getCategoryPath(category, data.categories);
-  return <div className="site-page"><SeoHead title={`${category.seoTitle ?? category.name} | 도구상자`} description={category.seoDescription ?? category.description ?? "도구 목록"} path={categoryPath} kind="CollectionPage" /><SiteHeader /><main className="container catalog-page"><CatalogBreadcrumb rootSlug={rootSlug} categorySlug={categorySlug} /><section className="catalog-intro"><span>CAT</span><div><p className="eyebrow">{root.name.toUpperCase()} / SUBCATEGORY</p><h1>{category.name}</h1><p>{category.description}</p></div></section>{directTools.length > 0 && <section className="catalog-tool-section"><p className="eyebrow">ALL TOOLS</p><h2>주요 도구</h2>{cards(directTools)}</section>}{groups.map(({ group, tools }) => <section key={group.id} className="catalog-tool-section"><p className="eyebrow">{category.name.toUpperCase()} / GROUP</p><h2>{group.name}</h2><p>{group.description}</p>{cards(tools)}</section>)}<GuideDiscovery tools={[...directTools, ...groups.flatMap(({ tools }) => tools)]} title={`${category.name} 관련 활용 가이드`} /><CategorySeoSupport path={categoryPath} catalog={data} /></main><SiteFooter /></div>;
+  return <div className="site-page"><SeoHead title={`${category.seoTitle ?? category.name} | 도구상자`} description={category.seoDescription ?? category.description ?? "도구 목록"} kind="CollectionPage" /><SiteHeader /><main className="container catalog-page"><CatalogBreadcrumb rootSlug={rootSlug} categorySlug={categorySlug} /><section className="catalog-intro"><span>CAT</span><div><p className="eyebrow">{root.name.toUpperCase()} / SUBCATEGORY</p><h1>{category.name}</h1><p>{category.description}</p></div></section>{directTools.length > 0 && <section className="catalog-tool-section"><p className="eyebrow">ALL TOOLS</p><h2>주요 도구</h2>{cards(directTools)}</section>}{groups.map(({ group, tools }) => <section key={group.id} className="catalog-tool-section"><p className="eyebrow">{category.name.toUpperCase()} / GROUP</p><h2>{group.name}</h2><p>{group.description}</p>{cards(tools)}</section>)}</main><SiteFooter /></div>;
 }
 
 function CatalogLoading() { return <div className="site-page"><SiteHeader /><main className="container catalog-page"><p className="loading-copy">카탈로그를 불러오는 중입니다.</p></main><SiteFooter /></div>; }
@@ -74,32 +58,17 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
   if (["rent-conversion","jeonse-to-monthly","monthly-to-jeonse","loan-amortization","deposit-interest","savings"].includes(slug)) return <AdvancedCalculators kind={slug as any} />;
   if (["jeonse-loan-interest", "mortgage", "early-repayment-fee", "brokerage-fee", "acquisition-tax", "property-tax", "compound-interest", "equal-principal", "bullet-loan", "percentage"].includes(slug)) return <FinanceRealEstateCalculators kind={slug as any} />;
   if (["annual-take-home", "monthly-take-home", "retirement-income-tax", "weekly-holiday-pay", "annual-leave-pay", "hourly-wage", "work-hours", "four-insurance", "unemployment-benefit"].includes(slug)) return <SalaryEmploymentCalculators kind={slug as any} />;
-  if (["comprehensive-income-tax", "capital-gains-tax", "gift-tax", "inheritance-tax", "year-end-tax-refund", "national-pension", "health-insurance", "minimum-wage"].includes(slug)) return <TaxSocialCalculators kind={slug as any} />;
-  if (["date-calculator", "d-day", "age", "man-age", "date-difference", "time-calculator"].includes(slug)) return <DateTimeCalculators kind={slug as any} />;
-  if (["discount", "margin", "break-even", "fuel-cost", "split-bill", "average", "bmi", "bmr", "calories-burned", "gpa"].includes(slug)) return <DailyWorkCalculators kind={slug as any} />;
-  if (["unit-price", "fee", "parking-fee", "travel-budget", "recipe-servings", "sleep-duration", "electricity-usage", "paint-amount", "savings-goal", "simple-interest", "installment", "currency-exchange", "gpa-conversion", "target-score", "rank-percent", "labor-cost", "project-quote", "monthly-budget", "reward-points", "return-rate"].includes(slug)) return <EverydayCalculators kind={slug as any} />;
-  if (["jeonse-vs-monthly", "family-loan-interest", "roas", "maintenance-cost", "retirement-fund"].includes(slug)) return <ExpansionCalculators kind={slug as any} />;
   if (slug === "vat-calculator") return <VatCalculator />;
   return <Unavailable title="계산기를 준비하고 있습니다." />;
 }
 
 export function ConverterToolRoute({ slug }: { slug: string }) {
-  const pdfModeBySlug: Record<string, { mode: "to-images" | "images-to-pdf" | "merge" | "split" | "extract" | "delete" | "reorder" | "rotate" | "compress"; format?: "png" | "jpg" }> = { "pdf-convert": { mode: "to-images" }, "pdf-to-jpg": { mode: "to-images", format: "jpg" }, "pdf-to-png": { mode: "to-images", format: "png" }, "jpg-to-pdf": { mode: "images-to-pdf" }, "png-to-pdf": { mode: "images-to-pdf" }, "pdf-merge": { mode: "merge" }, "pdf-split": { mode: "split" }, "pdf-extract-pages": { mode: "extract" }, "pdf-delete-pages": { mode: "delete" }, "pdf-reorder-pages": { mode: "reorder" }, "pdf-rotate-pages": { mode: "rotate" }, "pdf-compress": { mode: "compress" } };
-  if (pdfModeBySlug[slug]) { const config = pdfModeBySlug[slug]; return <Suspense fallback={<ToolFrame index="01" tag="DOCUMENT ENGINE" title="PDF·파일 도구" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">PDF 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><PdfTool initialMode={config.mode} initialFormat={config.format} /></Suspense>; }
-  type ImageToolConfig = { mode: "convert" | "compress" | "resize" | "rotate" | "flip" | "grayscale" | "padding"; format?: "image/png" | "image/jpeg" | "image/webp" };
-  const imageModeBySlug: Record<string, ImageToolConfig> = {
-    "image-convert": { mode: "convert" }, "image-compress": { mode: "compress" }, "image-resize": { mode: "resize" },
-    "jpg-to-png": { mode: "convert", format: "image/png" }, "png-to-jpg": { mode: "convert", format: "image/jpeg" }, "jpg-to-webp": { mode: "convert", format: "image/webp" }, "png-to-webp": { mode: "convert", format: "image/webp" }, "webp-to-jpg": { mode: "convert", format: "image/jpeg" }, "webp-to-png": { mode: "convert", format: "image/png" },
-    "image-rotate": { mode: "rotate" }, "image-flip": { mode: "flip" }, "image-grayscale": { mode: "grayscale" }, "image-padding": { mode: "padding" },
+  const pdfOperations: Record<string, string> = {
+    "pdf-convert": "word", "pdf-to-excel": "excel", "pdf-to-hwp": "hwp", "pdf-merge": "merge", "pdf-split": "split", "pdf-extract-pages": "extract", "pdf-delete-pages": "delete", "pdf-reorder-pages": "reorder", "pdf-rotate-pages": "rotate", "pdf-page-edit": "reorder", "pdf-watermark": "watermark", "pdf-page-numbers": "page-numbers",
   };
-  if (imageModeBySlug[slug]) { const config = imageModeBySlug[slug]; return <ImageTool initialMode={config.mode} initialFormat={config.format} />; }
-  const documentModeBySlug: Record<string, "csv-excel" | "excel-csv" | "csv-json" | "json-csv" | "txt-pdf"> = { "csv-to-excel": "csv-excel", "excel-to-csv": "excel-csv", "csv-to-json": "csv-json", "json-to-csv": "json-csv", "txt-to-pdf": "txt-pdf" };
-  if (documentModeBySlug[slug]) return <Suspense fallback={<ToolFrame index="03" tag="DATA ENGINE" title="문서·데이터 변환" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">문서 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><DocumentTool initialMode={documentModeBySlug[slug]} /></Suspense>;
-  const textTransformSlugs = ["json-pretty", "json-minify", "csv-to-tsv", "tsv-to-csv", "csv-to-markdown", "json-to-markdown", "markdown-to-html", "html-to-text", "url-encode", "url-decode", "base64-encode", "base64-decode", "timestamp-to-date", "date-to-timestamp", "hex-to-rgb", "rgb-to-hex", "html-encode", "html-decode", "normalize-lines", "unique-lines"];
-  if (textTransformSlugs.includes(slug)) return <Suspense fallback={<ToolFrame index="04" tag="TEXT ENGINE" title="텍스트·웹 변환" description="브라우저 내 변환기를 준비하고 있습니다."><p className="client-tool-loading">텍스트 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><TextTransformTool initialMode={slug as any} /></Suspense>;
+  if (pdfOperations[slug]) return <Suspense fallback={<ToolFrame index="01" tag="DOCUMENT ENGINE" title="PDF 도구" description="브라우저 내 PDF 도구를 준비하고 있습니다."><p className="client-tool-loading">PDF 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><PdfTool initialOperation={pdfOperations[slug] as any} /></Suspense>;
+  if (slug === "image-convert") return <ImageTool />;
   if (slug === "unit-convert") return <UnitConverter />;
-  const unitCategoryBySlug: Record<string, string> = { "unit-area": "area", "unit-weight": "weight", "unit-volume": "volume", "unit-temperature": "temperature", "unit-speed": "speed", "unit-data": "data", "unit-time": "time", "unit-pressure": "pressure", "unit-energy": "energy" };
-  if (unitCategoryBySlug[slug]) return <UnitConverter initialCategory={unitCategoryBySlug[slug]} />;
   return <Unavailable title="이 도구는 준비 중입니다." />;
 }
 
