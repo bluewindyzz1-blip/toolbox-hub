@@ -64,7 +64,7 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
 
 export function ConverterToolRoute({ slug }: { slug: string }) {
   const pdfOperations: Record<string, string> = {
-    "pdf-convert": "word", "pdf-to-excel": "excel", "pdf-to-hwp": "hwp", "pdf-merge": "merge", "pdf-split": "split", "pdf-extract-pages": "extract", "pdf-delete-pages": "delete", "pdf-reorder-pages": "reorder", "pdf-rotate-pages": "rotate", "pdf-page-edit": "reorder", "pdf-watermark": "watermark", "pdf-page-numbers": "page-numbers",
+    "pdf-convert": "word", "images-to-pdf": "pdf", "pdf-to-images": "images", "pdf-to-excel": "excel", "pdf-to-hwp": "hwp", "pdf-merge": "merge", "pdf-split": "split", "pdf-extract-pages": "extract", "pdf-delete-pages": "delete", "pdf-reorder-pages": "reorder", "pdf-rotate-pages": "rotate", "pdf-page-edit": "reorder", "pdf-watermark": "watermark", "pdf-page-numbers": "page-numbers", "pdf-metadata": "metadata",
   };
   if (pdfOperations[slug]) return <Suspense fallback={<ToolFrame index="01" tag="DOCUMENT ENGINE" title="PDF 도구" description="브라우저 내 PDF 도구를 준비하고 있습니다."><p className="client-tool-loading">PDF 처리 모듈을 불러오는 중입니다.</p></ToolFrame>}><PdfTool initialOperation={pdfOperations[slug] as any} /></Suspense>;
   if (slug === "image-convert") return <ImageTool />;
@@ -79,4 +79,4 @@ export function ConverterCatalog() { return <RootPage rootSlug="convert" />; }
 export function UnitCatalog() { return <RootPage rootSlug="units" />; }
 export function CalculatorSubcategory({ slug }: { slug: string }) { return <SubcategoryPage rootSlug="calculator" categorySlug={slug} />; }
 export function ConverterSubcategory({ slug }: { slug: string }) { return <SubcategoryPage rootSlug="convert" categorySlug={slug} />; }
-export function UnitSubcategory({ slug }: { slug: string }) { return <SubcategoryPage rootSlug="units" categorySlug={slug} />; }
+export function UnitSubcategory({ slug }: { slug: string }) { return <UnitConverter initialCategory={slug} />; }
