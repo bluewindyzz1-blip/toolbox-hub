@@ -13,8 +13,15 @@ type Operation = "word" | "excel" | "hwp" | "images" | "pdf" | "merge" | "split"
 type RenderedPage = { number: number; url: string; blob: Blob };
 
 const operationLabels: Record<Operation, string> = {
-  word: "PDF → 워드 파일", excel: "PDF → 엑셀 파일", hwp: "PDF → 한글 파일", images: "PDF → 이미지", pdf: "이미지 → PDF", merge: "PDF 합치기", split: "PDF 분할", extract: "페이지 추출", delete: "페이지 삭제", reorder: "페이지 순서 변경", rotate: "페이지 회전", watermark: "워터마크", "page-numbers": "페이지 번호", metadata: "메타데이터",
+  word: "PDF → 워드 변환", excel: "PDF → 엑셀 변환", hwp: "PDF → 한글 변환", images: "PDF → JPG·PNG 변환", pdf: "JPG·PNG → PDF 변환", merge: "PDF 합치기", split: "PDF 분할", extract: "페이지 추출", delete: "페이지 제거", reorder: "PDF 구성", rotate: "PDF 회전", watermark: "워터마크 추가", "page-numbers": "페이지 수 추가", metadata: "PDF 메타데이터",
 };
+
+const toolGroups: Array<{ title: string; items: Operation[] }> = [
+  { title: "PDF로 변환", items: ["pdf"] },
+  { title: "PDF에서 변환", items: ["images", "word", "excel", "hwp"] },
+  { title: "PDF 구성", items: ["merge", "split", "delete", "extract", "reorder"] },
+  { title: "PDF 편집", items: ["rotate", "page-numbers", "watermark", "metadata"] },
+];
 
 function DropArea({ accept, multiple, onFiles, label, detail }: { accept: string; multiple?: boolean; onFiles: (files: File[]) => void; label: string; detail: string }) {
   const [dragging, setDragging] = useState(false);
@@ -51,7 +58,6 @@ export default function PdfTool({ initialOperation = "word" }: { initialOperatio
   const isImageToPdf = operation === "pdf";
   const accept = isImageToPdf ? "image/png,image/jpeg,image/webp" : "application/pdf";
   const selectionLabel = selected.length ? `${selected.length}개 파일 선택됨 · ${selected.map((file) => formatBytes(file.size)).join(" / ")}` : "";
-  const operationGroup: Operation[] = ["word", "excel", "hwp", "images", "pdf", "merge", "split", "extract", "delete", "reorder", "rotate", "watermark", "page-numbers", "metadata"];
 
   function chooseOperation(next: Operation) { setOperation(next); setSelected([]); setPages([]); setMessage(""); }
   async function readPdf(file: File) { return PDFDocument.load(await file.arrayBuffer()); }
@@ -118,7 +124,7 @@ export default function PdfTool({ initialOperation = "word" }: { initialOperatio
   async function processFiles() { if (!selected.length) return; setProcessing(true); setMessage(""); setPages([]); try { if (operation === "pdf") await convertImagesToPdf(selected); else if (operation === "images") await convertPdfToImages(selected[0]); else if (operation === "merge" || needsSinglePdf) await processPdfOperation(); } catch (error) { setMessage(error instanceof Error ? error.message : "처리 도중 오류가 발생했습니다."); } finally { setProcessing(false); } }
 
   return <ToolFrame index="01" tag="DOCUMENT ENGINE" title={operationLabels[operation]} description="선택한 파일은 현재 기기 안에서만 처리됩니다. 서버 업로드 없이 작업이 끝난 후 바로 다운로드하세요.">
-    <section className="tool-workbench"><div className="mode-tabs" role="tablist" aria-label="PDF 도구 선택">{operationGroup.map((item) => <button key={item} className={operation === item ? "selected" : ""} onClick={() => chooseOperation(item)}>{item === "images" ? <ImageIcon size={17} /> : item === "pdf" ? <FileOutput size={17} /> : <FileText size={17} />}{operationLabels[item]}</button>)}</div>
+    <section className="tool-workbench"><div className="tool-category-grid" role="tablist" aria-label="PDF 도구 선택">{toolGroups.map((group) => <section className="tool-category" key={group.title}><h2>{group.title}</h2><div className="tool-category-items">{group.items.map((item) => <button key={item} className={operation === item ? "selected" : ""} onClick={() => chooseOperation(item)}>{item === "images" || item === "pdf" ? <ImageIcon size={18} /> : item === "merge" || item === "split" || item === "delete" || item === "extract" || item === "reorder" ? <FileOutput size={18} /> : <FileText size={18} />}{operationLabels[item]}</button>)}</div></section>)}</div>
       <div className="work-grid"><div className="conversion-panel">
         {operation === "images" && <div className="inline-options"><span>출력 포맷</span><button className={format === "png" ? "selected" : ""} onClick={() => setFormat("png")}>PNG</button><button className={format === "jpeg" ? "selected" : ""} onClick={() => setFormat("jpeg")}>JPG</button></div>}
         {!["word", "excel", "hwp", "images", "pdf", "merge"].includes(operation) && <label className="inline-options"><span>페이지 번호</span><input value={pageInput} onChange={(event) => setPageInput(event.target.value)} placeholder="예: 1,3-5" /></label>}
