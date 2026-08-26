@@ -7,6 +7,8 @@ import { SITE } from "@shared/site";
 
 const mobileUnitGroups = [{ title: "단위 변환", items: [{ label: "길이", href: "/units/length" }, { label: "면적", href: "/units/area" }, { label: "무게", href: "/units/weight" }, { label: "부피", href: "/units/volume" }, { label: "온도", href: "/units/temperature" }, { label: "속도", href: "/units/speed" }, { label: "데이터", href: "/units/data" }] }];
 
+const mobileCalculatorGroups = [{ title: "계산기 카테고리", items: [{ label: "금융 계산기", href: "/calculator/finance" }, { label: "부동산 계산기", href: "/calculator/real-estate" }, { label: "급여·직장인 계산기", href: "/calculator/salary" }, { label: "세금 계산기", href: "/calculator/tax" }] }];
+
 const mobileConvertGroups = [
   { title: "PDF로 변환", items: [{ label: "JPG·PNG → PDF 변환", href: "/convert/pdf/images-to-pdf" }] },
   { title: "PDF에서 변환", items: [{ label: "PDF → JPG·PNG 변환", href: "/convert/pdf/pdf-to-images" }, { label: "PDF → 워드 변환", href: "/convert/pdf/pdf-convert" }, { label: "PDF → 엑셀 변환", href: "/convert/pdf/pdf-to-excel" }, { label: "PDF → 한글 변환", href: "/convert/pdf/pdf-to-hwp" }] },
@@ -16,8 +18,15 @@ const mobileConvertGroups = [
 export function SiteHeader() {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileCalculatorOpen, setMobileCalculatorOpen] = useState(false);
   const [mobileConvertOpen, setMobileConvertOpen] = useState(false);
   const [mobileUnitOpen, setMobileUnitOpen] = useState(false);
+  const closeMobileMenu = () => { setMobileOpen(false); setMobileCalculatorOpen(false); setMobileConvertOpen(false); setMobileUnitOpen(false); };
+  const toggleMobileGroup = (group: "calculator" | "convert" | "unit") => {
+    setMobileCalculatorOpen(group === "calculator" ? !mobileCalculatorOpen : false);
+    setMobileConvertOpen(group === "convert" ? !mobileConvertOpen : false);
+    setMobileUnitOpen(group === "unit" ? !mobileUnitOpen : false);
+  };
   const { data } = useCatalog();
   const navItems = [{ href: "/", label: "홈" }, ...(data?.categories.filter((item) => item.parentId === null).map((item) => ({ href: getCategoryPath(item, data.categories), label: item.name })) ?? []), { href: "/search", label: "검색" }, { href: "/about", label: "정보" }];
 
@@ -42,22 +51,29 @@ export function SiteHeader() {
       </div>
       {mobileOpen && (
         <nav className="mobile-nav container" aria-label="모바일 주요 도구">
-          {navItems.map((item, index) => item.href === "/convert" ? (
+          {navItems.map((item, index) => item.href === "/calculator" ? (
+            <div className={`mobile-nav-group ${mobileCalculatorOpen ? "expanded" : ""}`} key={item.href}>
+              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileCalculatorOpen} onClick={() => toggleMobileGroup("calculator")}>
+                <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><span className="mobile-nav-chevron" aria-hidden="true">{mobileCalculatorOpen ? "−" : "+"}</span>
+              </button>
+              {mobileCalculatorOpen && <div className="mobile-nav-submenu">{mobileCalculatorGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href} href={subItem.href} onClick={closeMobileMenu}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
+            </div>
+          ) : item.href === "/convert" ? (
             <div className={`mobile-nav-group ${mobileConvertOpen ? "expanded" : ""}`} key={item.href}>
-              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileConvertOpen} onClick={() => setMobileConvertOpen((open) => !open)}>
+              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileConvertOpen} onClick={() => toggleMobileGroup("convert")}>
                 <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><span className="mobile-nav-chevron" aria-hidden="true">{mobileConvertOpen ? "−" : "+"}</span>
               </button>
-              {mobileConvertOpen && <div className="mobile-nav-submenu">{mobileConvertGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href + subItem.label} href={subItem.href} onClick={() => setMobileOpen(false)}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
+              {mobileConvertOpen && <div className="mobile-nav-submenu">{mobileConvertGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href + subItem.label} href={subItem.href} onClick={closeMobileMenu}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
             </div>
           ) : item.href === "/units" ? (
             <div className={`mobile-nav-group ${mobileUnitOpen ? "expanded" : ""}`} key={item.href}>
-              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileUnitOpen} onClick={() => setMobileUnitOpen((open) => !open)}>
+              <button className="mobile-nav-item mobile-nav-disclosure" type="button" aria-expanded={mobileUnitOpen} onClick={() => toggleMobileGroup("unit")}>
                 <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><span className="mobile-nav-chevron" aria-hidden="true">{mobileUnitOpen ? "−" : "+"}</span>
               </button>
-              {mobileUnitOpen && <div className="mobile-nav-submenu">{mobileUnitGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href} href={subItem.href} onClick={() => setMobileOpen(false)}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
+              {mobileUnitOpen && <div className="mobile-nav-submenu">{mobileUnitGroups.map((group) => <section className="mobile-nav-subcategory" key={group.title}><h3>{group.title}</h3>{group.items.map((subItem) => <Link key={subItem.href} href={subItem.href} onClick={closeMobileMenu}>{subItem.label}<ArrowUpRight size={15} /></Link>)}</section>)}</div>}
             </div>
           ) : (
-            <Link key={item.href} href={item.href} className="mobile-nav-item" onClick={() => setMobileOpen(false)}>
+            <Link key={item.href} href={item.href} className="mobile-nav-item" onClick={closeMobileMenu}>
               <span>0{index + 1}</span><span className="mobile-nav-label">{item.label}</span><ArrowUpRight size={17} />
             </Link>
           ))}
