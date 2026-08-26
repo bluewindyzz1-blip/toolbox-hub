@@ -67,6 +67,36 @@ function downloadResultSummary(tool: CatalogTool) {
   recordToolEvent("download-summary");
 }
 
+type DocumentTemplate = { label: string; filename: string; title: string; sections: string[] };
+const documentTemplates: Record<string, DocumentTemplate[]> = {
+  "annual-net": [{ label: "급여 확인 메모", filename: "급여-실수령액-확인메모.txt", title: "급여 실수령액 확인 메모", sections: ["회사·직장명:", "확인할 급여월:", "급여명세서와 계산기 결과를 비교하세요."] }],
+  "monthly-take-home": [{ label: "급여 확인 메모", filename: "월급-실수령액-확인메모.txt", title: "월급 실수령액 확인 메모", sections: ["급여월:", "세전 급여:", "공제항목과 실제 급여명세서를 대조하세요."] }],
+  "retirement-pay": [{ label: "퇴직금 확인 체크리스트", filename: "퇴직금-확인체크리스트.txt", title: "퇴직금 확인 체크리스트", sections: ["입사일:", "퇴사 예정일:", "최근 급여명세서와 근속기간을 준비하세요.", "실제 지급액은 회사와 고용노동부 기준을 확인하세요."] }],
+  "unemployment-benefit": [{ label: "실업급여 준비 메모", filename: "실업급여-준비메모.txt", title: "실업급여 신청 준비 메모", sections: ["최종 근무일:", "이직 사유:", "피보험단위기간과 수급자격을 고용보험에서 확인하세요."] }],
+  "monthly-rent": [{ label: "임대차 비용 비교표", filename: "임대차-비용-비교표.txt", title: "임대차 비용 비교표", sections: ["주소:", "보증금:", "월세:", "관리비:", "계약서의 특약과 전환율을 별도로 확인하세요."] }],
+  "jeonse-loan-interest": [{ label: "전세대출 비교 메모", filename: "전세대출-비교메모.txt", title: "전세대출 비교 메모", sections: ["대출 희망금액:", "확인 금융기관:", "금리·보증료·중도상환 조건을 함께 비교하세요."] }],
+  "mortgage": [{ label: "주택자금 점검표", filename: "주택자금-점검표.txt", title: "주택자금 점검표", sections: ["주택 가격:", "대출 예정액:", "취득세·중개보수·이사비 등 부대비용을 함께 준비하세요."] }],
+  "acquisition-tax": [{ label: "취득 비용 준비표", filename: "취득비용-준비표.txt", title: "주택 취득 비용 준비표", sections: ["매매가격:", "주택 수:", "취득일 기준 세율과 감면 요건을 위택스에서 확인하세요."] }],
+  "vat": [{ label: "부가세 신고 준비 메모", filename: "부가세-신고준비메모.txt", title: "부가세 신고 준비 메모", sections: ["사업자등록번호:", "신고기간:", "매출·매입 증빙과 과세유형을 확인하세요."] }],
+  "loan-interest": [{ label: "대출 비교 메모", filename: "대출-비교메모.txt", title: "대출 조건 비교 메모", sections: ["금융기관:", "대출 금리:", "상환 방식:", "총이자뿐 아니라 보증료·수수료·우대조건을 비교하세요."] }],
+};
+
+function downloadDocumentTemplate(template: DocumentTemplate, tool: CatalogTool) {
+  const output = document.querySelector(".calculator-output")?.textContent?.replace(/\\s+/g, " ").trim() ?? "계산 전 결과 없음";
+  const inputs = Array.from(document.querySelectorAll(".calculator-form input, .calculator-form select")).map((element) => `${element.getAttribute("aria-label") ?? element.getAttribute("name") ?? "입력값"}: ${(element as HTMLInputElement).value}`).join("\\n");
+  const text = [template.title, `작성일: ${new Date().toLocaleDateString("ko-KR")}`, `도구: ${tool.title}`, "", ...template.sections, "", "입력값 요약", inputs || "입력값 없음", "", "계산 결과", output, "", "주의: 이 문서는 확인용 초안이며 계약·신고·지급 서류를 대신하지 않습니다."].join("\\n");
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = template.filename; anchor.click(); URL.revokeObjectURL(url);
+  recordToolEvent("download-template", { template: template.filename });
+}
+
+function DocumentTemplateActions({ tool }: { tool: CatalogTool }) {
+  const templates = documentTemplates[tool.logicKey ?? ""] ?? [];
+  if (!templates.length) return null;
+  return <section className="document-template-actions" aria-label="관련 문서 템플릿"><p className="eyebrow">DOCUMENT NEXT STEP</p><h3>다음 문서를 준비하세요.</h3><p>계산 결과와 입력값을 포함한 확인용 초안을 브라우저에서 저장할 수 있습니다.</p><div>{templates.map((template) => <button type="button" key={template.filename} onClick={() => downloadDocumentTemplate(template, tool)}><Download size={15} />{template.label}</button>)}</div><small>저장 파일은 확인용 초안이며 실제 계약서·신고서·법정 서식을 대신하지 않습니다.</small></section>;
+}
+
 const coreDecisionTools = [
   ["연봉 실수령액", "/calculator/salary/annual-net"], ["월급 실수령액", "/calculator/salary/monthly-take-home"], ["퇴직금", "/calculator/salary/retirement-pay"], ["실업급여", "/calculator/salary/unemployment-benefit"],
   ["대출 이자", "/calculator/finance/loan-interest"], ["원리금균등상환", "/calculator/finance/loan-amortization"], ["예금 이자", "/calculator/finance/deposit-interest"], ["적금 만기액", "/calculator/finance/savings"], ["복리", "/calculator/finance/compound-interest"], ["중도상환수수료", "/calculator/finance/early-repayment-fee"],
@@ -117,6 +147,7 @@ export function ToolKnowledge({ tool, method, example, caution, children }: Prop
     <AdSlot slot="AD_CONTENT" />
     <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>계산 공식</h2><p>{tool.formula ?? "입력값을 기준으로 계산합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>계산 방법</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>계산 예시</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>주의사항</h2><p>{caution}</p></article></div>
     <ResultDecisionSupport tool={tool} />
+    <DocumentTemplateActions tool={tool} />
     {children}
     <section className="faq-section"><p className="eyebrow">FAQ</p><h2>자주 묻는 질문</h2>{(tool.faq ?? []).map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
     <AdSlot slot="AD_RELATED" />
