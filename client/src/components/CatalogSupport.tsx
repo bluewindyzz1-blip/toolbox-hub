@@ -91,6 +91,15 @@ function downloadDocumentTemplate(template: DocumentTemplate, tool: CatalogTool)
   recordToolEvent("download-template", { template: template.filename });
 }
 
+const decisionFaqs: Record<string, [string, string][]> = {
+  "loan-interest": [["대출 금리 1%가 오르면 월 납입금은 얼마나 달라지나요?", "대출 원금과 기간이 같아도 금리와 상환 방식에 따라 월 납입금과 총이자가 달라집니다. 같은 조건으로 금리만 바꾸어 비교하세요."], ["계산 결과에 중도상환수수료도 포함되나요?", "이 계산은 기본 상환액과 이자를 기준으로 하며, 중도상환수수료·보증료·인지대는 금융기관 조건을 별도로 확인해야 합니다."]],
+  "annual-net": [["연봉 실수령액은 왜 사람마다 다른가요?", "부양가족, 비과세 수당, 소득공제와 회사 급여 항목에 따라 실제 공제액이 달라질 수 있습니다."], ["계산 결과를 급여명세서 대신 사용할 수 있나요?", "아니요. 계산 결과는 참고값이며 실제 지급액은 회사 급여명세서와 원천징수 내역을 우선 확인해야 합니다."]],
+  "retirement-pay": [["퇴직금 계산에 어떤 기간이 필요한가요?", "입사일·퇴사일과 평균임금 산정에 필요한 최근 임금 자료가 필요합니다. 실제 지급 기준은 근로계약과 고용노동부 안내를 확인하세요."]],
+  "acquisition-tax": [["취득세 계산 결과가 실제 고지액과 다른 이유는 무엇인가요?", "주택 수, 취득 유형, 감면, 세부담상한과 지방세 적용 조건에 따라 실제 세액이 달라질 수 있습니다."]],
+  "vat": [["부가세 계산에 매입세액도 반영되나요?", "과세 유형과 입력 항목에 따라 달라집니다. 신고 전 매출·매입 증빙과 공제 가능 여부를 국세청 기준으로 확인하세요."]],
+  "jeonse-loan-interest": [["전세대출 이자에 보증료도 포함되나요?", "기본 계산은 이자 중심이며 보증료와 부대비용은 상품별로 다르므로 금융기관의 총비용을 함께 비교해야 합니다."]],
+};
+
 function DocumentTemplateActions({ tool }: { tool: CatalogTool }) {
   const templates = documentTemplates[tool.logicKey ?? ""] ?? [];
   if (!templates.length) return null;
@@ -149,7 +158,7 @@ export function ToolKnowledge({ tool, method, example, caution, children }: Prop
     <ResultDecisionSupport tool={tool} />
     <DocumentTemplateActions tool={tool} />
     {children}
-    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>자주 묻는 질문</h2>{(tool.faq ?? []).map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
+    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>자주 묻는 질문</h2>{(tool.faq ?? []).map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}{(decisionFaqs[tool.logicKey ?? ""] ?? []).map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
     <AdSlot slot="AD_RELATED" />
     <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>관련 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
   </section>;
