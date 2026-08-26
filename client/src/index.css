@@ -489,3 +489,49 @@ th:first-child,td:first-child { text-align:left; }
 .condition-compare small { display:block; margin-top:.7rem; font-family:"Noto Sans KR",sans-serif; font-size:.67rem; line-height:1.6; letter-spacing:-.07em; }
 @media print { .site-header,.site-footer,.ad-slot,.calculator-actions,.decision-support-actions,.input-summary-actions,.next-actions,.core-tool-links,.document-template-actions,.faq-section,.related-tools { display:none!important; } .site-page { overflow:visible; } .calculator-layout,.knowledge-grid,.decision-support-grid { break-inside:avoid; } }
 @media (max-width:760px) { .guide-hub { padding-top:2rem; }.guide-hub-intro { padding:1.5rem; }.guide-hub-intro h1 { font-size:3.5rem; }.guide-flow,.guide-topic-grid,.guide-checklist>div { grid-template-columns:1fr; }.guide-flow span { min-height:54px; }.guide-topic-grid { margin-top:2rem; }.guide-topic-grid article { min-height:0; padding:1.25rem; }.guide-topic-grid h2 { margin:1.2rem 0 .65rem; font-size:1.75rem; }.guide-topic-grid article>div:last-child { margin-top:1.4rem; padding-top:0; }.input-summary-panel { padding:1rem; }.input-summary-panel dl { grid-template-columns:1fr 1fr; }.condition-compare p { grid-template-columns:1.1fr 1fr; }.condition-compare p em { display:none; }.condition-compare p b::before { content:"이전 "; font-family:"Noto Sans KR",sans-serif; font-weight:400; }.condition-compare p b:last-child::before { content:"현재 "; }.guide-checklist h2 { font-size:2.2rem; } }
+
+/* 생활·금융 계산 허브 및 대출 결과 비교 */
+.calculator-hub-directory { margin-top: 0; }
+.hub-topic-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: var(--line); border-left: var(--thin-line); }
+.hub-topic-card { min-width: 0; border-right: var(--thin-line); border-bottom: var(--thin-line); background: var(--paper); }
+.hub-topic-card.is-planned { background: #f5f5f5; }
+.hub-topic-main { position: relative; display: grid; gap: 10px; min-height: 170px; padding: 24px 26px 18px; color: inherit; text-decoration: none; }
+.hub-topic-main span { font-size: 12px; font-weight: 800; letter-spacing: .1em; }
+.hub-topic-main strong { max-width: calc(100% - 26px); font-size: clamp(24px, 2.4vw, 34px); line-height: 1; letter-spacing: -.06em; }
+.hub-topic-main small { max-width: 90%; color: #5a5a5a; font-size: 14px; line-height: 1.5; }
+.hub-topic-main svg { position: absolute; right: 23px; top: 23px; }
+.hub-topic-links { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 22px 22px; }
+.hub-topic-links a { border: var(--thin-line); padding: 7px 9px; color: var(--ink); font-size: 12px; line-height: 1.2; text-decoration: none; transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out); }
+.hub-topic-links a:hover, .hub-topic-links a:focus-visible { background: var(--ink); color: var(--paper); }
+.hub-topic-empty { margin: 0; padding: 0 22px 22px; color: #6b6b6b; font-size: 13px; }
+.loan-rate-comparison { margin: 22px 0; border: var(--thin-line); padding: 24px; background: var(--paper); }
+.loan-rate-comparison h2 { margin: 4px 0 8px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.055em; }
+.loan-rate-comparison > div:first-child > p:last-child { margin: 0; color: #555; line-height: 1.6; }
+.loan-rate-comparison .table-wrap { margin-top: 18px; }
+.loan-rate-comparison table { min-width: 580px; }
+.loan-rate-comparison th, .loan-rate-comparison td { padding: 13px 14px; text-align: right; border-bottom: 1px solid #d4d4d4; white-space: nowrap; }
+.loan-rate-comparison th:first-child, .loan-rate-comparison td:first-child { text-align: left; }
+.loan-rate-comparison th { background: var(--ink); color: var(--paper); font-size: 13px; }
+.loan-rate-comparison tbody tr.is-current-rate { background: #f0f0f0; font-weight: 800; }
+.loan-rate-comparison td small { display: inline-block; margin-left: 6px; padding: 2px 5px; background: var(--signal); color: var(--paper); font-size: 10px; }
+.loan-rate-comparison > small { display: block; margin-top: 12px; color: #666; line-height: 1.55; }
+.loan-share-action { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 14px; margin: 22px 0; border: var(--thin-line); padding: 16px; background: #f7f7f7; }
+.loan-share-action button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; border: var(--thin-line); background: var(--ink); color: var(--paper); padding: 0 14px; font-weight: 800; }
+.loan-share-action button:active { transform: scale(.98); }
+.loan-share-action p { margin: 0; font-size: 13px; font-weight: 700; }
+.loan-share-action small { grid-column: 1 / -1; color: #666; font-size: 12px; }
+@media (max-width: 720px) {
+  .hub-topic-grid { grid-template-columns: 1fr; }
+  .hub-topic-main { min-height: 128px; padding: 20px 20px 14px; }
+  .hub-topic-main strong { font-size: 28px; }
+  .hub-topic-main small { max-width: 95%; font-size: 13px; }
+  .hub-topic-links { padding: 0 18px 18px; }
+  .loan-rate-comparison { margin: 16px 0; padding: 18px; }
+  .loan-rate-comparison h2 { font-size: 27px; }
+  .loan-rate-comparison .table-wrap { margin-left: -18px; margin-right: -18px; padding: 0 18px; }
+  .loan-share-action { grid-template-columns: 1fr; margin: 16px 0; }
+  .loan-share-action button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hub-topic-links a, .loan-share-action button { transition: none; }
+}
