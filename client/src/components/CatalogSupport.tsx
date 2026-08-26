@@ -172,7 +172,7 @@ export function ToolMetaResolver({ slug, children }: { slug: string; children: (
 }
 
 export function GuideDiscovery() {
-  return <section className="guide-discovery" aria-label="계산 가이드"><div><p className="eyebrow">GUIDE</p><h2>계산 결과를 이해하고 다음 결정을 준비하세요.</h2><p>계산기 결과의 기준과 주의사항을 확인하고 필요한 다음 도구로 이동할 수 있습니다.</p></div><Link href="/guide">가이드 둘러보기 <span>↗</span></Link></section>;
+  return <section className="guide-discovery container" aria-label="계산 가이드"><div><p className="eyebrow">PRACTICAL GUIDES</p><h2>계산 후 필요한 내용을<br />한 번에 확인하세요.</h2><p>계산 기준과 주의사항을 읽고, 다음에 사용할 관련 도구로 자연스럽게 이동할 수 있습니다.</p></div><Link href="/guide">전체 가이드 보기 <span>↗</span></Link></section>;
 }
 
 export function categoryToolGroups(categories: CatalogCategory[], tools: CatalogTool[], root: CatalogCategory) {
