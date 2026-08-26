@@ -174,7 +174,9 @@ function guidePathFor(tool: CatalogTool) {
 
 function InputSummaryPanel({ tool }: { tool: CatalogTool }) {
   const [saved, setSaved] = useState<InputSummary[] | null>(null);
-  const current = readInputSummary();
+  const [ready, setReady] = useState(false);
+  useEffect(() => { const frame = window.requestAnimationFrame(() => setReady(true)); return () => window.cancelAnimationFrame(frame); }, [tool.slug]);
+  const current = ready ? readInputSummary() : [];
   if (!current.length) return null;
   const saveForComparison = () => { const snapshot = readInputSummary(); setSaved(snapshot); recordToolEvent("save-comparison", { tool: tool.slug }); };
   return <section className="input-summary-panel" aria-label="입력값 요약과 조건 비교"><div><p className="eyebrow">YOUR CONDITIONS</p><h3>현재 입력 조건</h3><p>결과를 해석하기 전, 비교 기준이 되는 값을 다시 확인하세요.</p></div><dl>{current.map((item) => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl><div className="input-summary-actions"><button type="button" onClick={saveForComparison}>현재 조건 저장</button><button type="button" onClick={() => { downloadResultSummary(tool); }}>결과 요약 저장</button></div>{saved && <div className="condition-compare"><strong>이전 저장 조건과 비교</strong><div>{current.map((item) => { const prior = saved.find((savedItem) => savedItem.label === item.label)?.value ?? "—"; return <p key={item.label}><span>{item.label}</span><b>{prior}</b><em>→</em><b>{item.value}</b></p>; })}</div><small>같은 도구에서 조건을 바꾼 뒤 다시 계산하면 현재 값과 저장한 값을 나란히 비교할 수 있습니다.</small></div>}</section>;
