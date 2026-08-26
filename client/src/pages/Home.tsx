@@ -22,6 +22,9 @@ export default function Home() {
   const recent = [...allTools].sort((a, b) => b.id - a.id).slice(0, 6);
   const recommended = allTools.filter((tool) => recommendationKeys.has(tool.logicKey ?? tool.slug)).slice(0, 6);
   const roots = categories.filter((item) => item.parentId === null).sort((a, b) => a.sortOrder - b.sortOrder);
+  const calculatorRoot = roots.find((category) => category.slug === "calculator");
+  const calculatorCategorySlugs = ["finance", "real-estate", "salary", "tax"];
+  const calculatorCategories = categories.filter((category) => category.parentId === calculatorRoot?.id && calculatorCategorySlugs.includes(category.slug));
   const [hoveredRootId, setHoveredRootId] = useState<number | null>(null);
   const [pinnedRootId, setPinnedRootId] = useState<number | null>(null);
   const activeRootId = pinnedRootId ?? hoveredRootId;
@@ -58,6 +61,7 @@ export default function Home() {
         <div className="home-category-branches">{activeBranches.map((branch, branchIndex) => <Link key={branch.id} href={getCategoryPath(branch, categories)}><span>{String(branchIndex + 1).padStart(2, "0")}</span><div><strong>{branch.name}</strong><p>{branch.description}</p></div><ArrowUpRight size={18} /></Link>)}</div>
       </div>}
     </section>
+    <section className="home-calculator-directory container" aria-label="계산기 카테고리 바로가기"><div className="directory-head"><div><p className="eyebrow">CALCULATOR CATEGORIES</p><h2>계산기 카테고리부터 찾으세요.</h2></div><p>금융·부동산·급여·세금처럼<br />필요한 분야를 먼저 선택할 수 있습니다.</p></div><div className="home-calculator-category-grid">{calculatorCategories.map((category, index) => <Link key={category.id} href={getCategoryPath(category, categories)} className="home-calculator-category-card"><span>{String(index + 1).padStart(2, "0")}</span><strong>{category.name}</strong><small>{category.description}</small><ArrowUpRight size={19} /></Link>)}</div></section>
     <section className="home-topic-directory calculator-hub-directory container" aria-label="생활 금융 계산 허브"><div className="directory-head"><div><p className="eyebrow">LIFE & FINANCE HUB</p><h2>상황에 맞는 계산기 찾기.</h2></div><p>대출·부동산부터 급여·생활까지<br />지금 필요한 숫자부터 바로 확인하세요.</p></div><div className="hub-topic-grid">{hubGroups.map((group, index) => { const groupTools = allTools.filter((tool) => group.logicKeys.includes(tool.logicKey ?? "")); const primaryTools = groupTools.slice(0, 4); const href = primaryTools[0] ? getToolPath(primaryTools[0], categories) : group.fallbackPath; return <article key={group.id} className={`hub-topic-card${group.status === "planned" ? " is-planned" : ""}`}><Link href={href} className="hub-topic-main"><span>{String(index + 1).padStart(2, "0")}</span><strong>{group.label}</strong><small>{group.description}</small><ArrowUpRight size={18} /></Link>{primaryTools.length > 0 ? <div className="hub-topic-links">{primaryTools.map((tool) => <Link key={tool.id} href={getToolPath(tool, categories)}>{tool.title}</Link>)}</div> : <p className="hub-topic-empty">현재 제공 도구를 먼저 살펴보세요.</p>}</article>; })}</div></section>
     <GuideDiscovery />
     <section className="tool-directory container"><div className="directory-head"><div><p className="eyebrow">POPULAR TOOLS</p><h2>자주 찾는 도구.</h2></div><p>관리자가 인기 표시와 정렬 순서를 관리하며,<br />주요 기능만 먼저 보여 드립니다.</p></div><ToolCards tools={popular} categories={categories} /></section>
