@@ -1,9 +1,7 @@
 import { Link } from "wouter";
-import { RotateCcw } from "lucide-react";
+import { Download, Printer, RotateCcw } from "lucide-react";
 import { PropsWithChildren, useEffect } from "react";
 import { CatalogCategory, CatalogTool, getCategoryLineage, getCategoryPath, getToolPath } from "@shared/catalog";
-import { getGuidePath, guideContents } from "@shared/content";
-import { getVisibleToolFaq, resolveSeoRoute, SeoPageKind, SITE_NAME, toAbsoluteUrl } from "@shared/seo";
 import { useCatalog } from "@/hooks/useCatalog";
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
@@ -15,48 +13,20 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
   Object.entries(attributes).forEach(([key, value]) => element?.setAttribute(key, value));
 }
 
-export function SeoHead({ title, description, path, kind = "WebApplication", noindex = false }: { title: string; description: string; path?: string; kind?: SeoPageKind; noindex?: boolean }) {
+export function SeoHead({ title, description, path, kind = "WebApplication" }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage" }) {
   useEffect(() => {
-    const targetPath = path ?? window.location.pathname;
-    const route = resolveSeoRoute(targetPath);
-    const resolvedTitle = route.title !== SITE_NAME ? route.title : title;
-    const resolvedDescription = route.title !== SITE_NAME ? route.description : description;
-    const resolvedKind = route.title !== SITE_NAME ? route.kind : kind;
-    const configuredOrigin = import.meta.env.VITE_CANONICAL_ORIGIN?.trim().replace(/\/$/, "");
-    const origin = configuredOrigin || window.location.origin;
-    const url = toAbsoluteUrl(route.canonicalPath, origin);
-    const robots = noindex || route.robots === "noindex,nofollow" ? "noindex,nofollow" : "index,follow";
-
-    document.title = resolvedTitle;
-    upsertMeta('meta[name="description"]', { name: "description", content: resolvedDescription });
-    upsertMeta('meta[property="og:title"]', { property: "og:title", content: resolvedTitle });
-    upsertMeta('meta[property="og:description"]', { property: "og:description", content: resolvedDescription });
+    document.title = title;
+    const url = `${window.location.origin}${path ?? window.location.pathname}`;
+    upsertMeta('meta[name="description"]', { name: "description", content: description });
+    upsertMeta('meta[property="og:title"]', { property: "og:title", content: title });
+    upsertMeta('meta[property="og:description"]', { property: "og:description", content: description });
     upsertMeta('meta[property="og:type"]', { property: "og:type", content: "website" });
-    upsertMeta('meta[property="og:site_name"]', { property: "og:site_name", content: SITE_NAME });
     upsertMeta('meta[property="og:url"]', { property: "og:url", content: url });
-    upsertMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary" });
     upsertMeta('link[rel="canonical"]', { rel: "canonical", href: url });
-    upsertMeta('meta[name="robots"]', { name: "robots", content: robots });
-
-    const pageEntity: Record<string, unknown> = { "@type": resolvedKind, name: resolvedTitle, description: resolvedDescription, url };
-    if (route.collectionItems.length) {
-      pageEntity.mainEntity = {
-        "@type": "ItemList",
-        numberOfItems: route.collectionItems.length,
-        itemListElement: route.collectionItems.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, url: toAbsoluteUrl(item.path, origin) })),
-      };
-    }
-    const graph: Record<string, unknown>[] = [pageEntity];
-    if (route.breadcrumbs.length > 1) {
-      graph.push({ "@type": "BreadcrumbList", itemListElement: route.breadcrumbs.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, item: toAbsoluteUrl(item.path, origin) })) });
-    }
-    if (route.faq.length) {
-      graph.push({ "@type": "FAQPage", mainEntity: route.faq.map((item) => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } })) });
-    }
     let jsonLd = document.getElementById("catalog-jsonld");
     if (!jsonLd) { jsonLd = document.createElement("script"); jsonLd.id = "catalog-jsonld"; jsonLd.setAttribute("type", "application/ld+json"); document.head.appendChild(jsonLd); }
-    jsonLd.textContent = JSON.stringify({ "@context": "https://schema.org", "@graph": graph });
-  }, [title, description, path, kind, noindex]);
+    jsonLd.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": kind, name: title, description, url });
+  }, [title, description, path, kind]);
   return null;
 }
 
@@ -71,122 +41,60 @@ export function CatalogBreadcrumb({ toolSlug, categorySlug, rootSlug }: { toolSl
   return <nav className="breadcrumb" aria-label="현재 위치">{items.map((item, index) => <span key={`${item.name}-${index}`}>{item.href ? <Link href={item.href}>{item.name}</Link> : item.name}{index < items.length - 1 && <b>/</b>}</span>)}</nav>;
 }
 
-type AdSlotName = "AD_TOP" | "AD_MIDDLE" | "AD_RESULT" | "AD_CONTENT" | "AD_RELATED";
-
-declare global { interface Window { adsbygoogle?: unknown[]; } }
-
-const adSlotIds: Partial<Record<AdSlotName, string | undefined>> = {
-  AD_TOP: import.meta.env.VITE_ADSENSE_SLOT_AD_TOP,
-  AD_MIDDLE: import.meta.env.VITE_ADSENSE_SLOT_AD_MIDDLE,
-  AD_RESULT: import.meta.env.VITE_ADSENSE_SLOT_AD_RESULT,
-  AD_CONTENT: import.meta.env.VITE_ADSENSE_SLOT_AD_CONTENT,
-  AD_RELATED: import.meta.env.VITE_ADSENSE_SLOT_AD_RELATED,
-};
-
-function validPublisherId(value?: string) { return Boolean(value && /^ca-pub-\d+$/.test(value)); }
-
-function ensureAdSenseScript(publisher: string) {
-  const scriptId = "toolbox-adsense-script";
-  const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
-  if (existing) return existing;
-  const script = document.createElement("script");
-  script.id = scriptId;
-  script.async = true;
-  script.crossOrigin = "anonymous";
-  script.dataset.adClient = publisher;
-  script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisher}`;
-  document.head.appendChild(script);
-  return script;
+export function AdSlot({ slot }: { slot: "AD_TOP" | "AD_MIDDLE" | "AD_RESULT" | "AD_CONTENT" | "AD_RELATED" }) {
+  return <aside className="ad-slot" aria-label={`${slot} 광고 영역`}><span>ADVERTISEMENT</span><strong>{slot}</strong><small>광고 코드 연결 영역</small></aside>;
 }
 
-/**
- * Loads the standard AdSense code globally when a valid Vercel publisher ID is present.
- * This makes AdSense Auto ads eligible on every public route while manual ad units continue
- * to render only in their intended content positions.
- */
-export function AdSenseAutoAds() {
-  const publisher = import.meta.env.VITE_ADSENSE_PUBLISHER_ID?.trim();
-  useEffect(() => {
-    if (!validPublisherId(publisher)) return;
-    ensureAdSenseScript(publisher);
-  }, [publisher]);
-  return null;
-}
-
-export function AdSlot({ slot }: { slot: AdSlotName }) {
-  const publisher = import.meta.env.VITE_ADSENSE_PUBLISHER_ID?.trim();
-  const slotId = adSlotIds[slot]?.trim();
-  const enabled = validPublisherId(publisher) && Boolean(slotId);
-  useEffect(() => {
-    if (!enabled || !publisher || !slotId) return;
-    ensureAdSenseScript(publisher);
-    const timer = window.setTimeout(() => {
-      try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch { /* 광고 차단기 또는 네트워크 오류에서는 콘텐츠 레이아웃을 유지합니다. */ }
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [enabled, publisher, slotId]);
-  if (!enabled || !publisher || !slotId) return null;
-  return <aside className="ad-slot" aria-label="광고"><ins className="adsbygoogle" style={{ display: "block" }} data-ad-client={publisher} data-ad-slot={slotId} data-ad-format="auto" data-full-width-responsive="true" /></aside>;
-}
-
-const officialReferenceGroups = [
-  { match: /종합소득세|양도소득세|증여세|상속세|부가세|연말정산|취득세|재산세/, label: "국세청·위택스 세금 안내", href: "https://www.nts.go.kr/" },
-  { match: /최저임금|주휴수당|연차수당|퇴직금|퇴직소득세|실업급여|근무시간|시급|연봉|월급|4대보험/, label: "고용노동부 노동 기준 안내", href: "https://www.moel.go.kr/" },
-  { match: /국민연금/, label: "국민연금공단 공식 안내", href: "https://www.nps.or.kr/" },
-  { match: /건강보험/, label: "국민건강보험공단 공식 안내", href: "https://www.nhis.or.kr/" },
-  { match: /중개수수료|전월세|주택담보|전세대출|월세/, label: "국토교통부 주택·부동산 안내", href: "https://www.molit.go.kr/" },
-];
-
-function OfficialReference({ tool }: { tool: CatalogTool }) {
-  const reference = officialReferenceGroups.find((item) => item.match.test(tool.title));
-  if (!reference) return null;
-  return <section className="official-reference"><p className="eyebrow">OFFICIAL REFERENCE</p><h2>공식 참고자료</h2><p>이 도구는 참고용 간이 계산입니다. 제도 적용·신고·계약 전에는 기준일과 세부 요건이 최신인지 아래 공식 안내에서 확인하세요.</p><a href={reference.href} target="_blank" rel="noreferrer">{reference.label} <span aria-hidden="true">↗</span></a></section>;
+function recordToolEvent(name: string, detail: Record<string, string> = {}) {
+  try {
+    window.dispatchEvent(new CustomEvent("carculate:tool-event", { detail: { name, path: window.location.pathname, ...detail } }));
+    const key = `carculate:event:${name}`;
+    localStorage.setItem(key, String(Number(localStorage.getItem(key) ?? "0") + 1));
+  } catch { /* 브라우저 저장소가 차단되어도 도구 사용은 계속합니다. */ }
 }
 
 export function CalculatorActions({ onCalculate, onReset }: { onCalculate: () => void; onReset: () => void }) {
-  return <div className="calculator-actions"><button className="primary-action" onClick={onCalculate}>계산하기</button><button className="reset-action" onClick={onReset}><RotateCcw size={16} />초기화</button></div>;
+  return <div className="calculator-actions"><button className="primary-action" onClick={() => { onCalculate(); recordToolEvent("calculate"); }}>계산하기</button><button className="reset-action" onClick={() => { onReset(); recordToolEvent("reset"); }}><RotateCcw size={16} />초기화</button></div>;
 }
 
-export function ToolKnowledge({ tool, formula, formulaLabel = "계산 공식", method, methodLabel = "계산 방법", example, exampleLabel = "계산 예시", caution, cautionLabel = "주의사항", children }: PropsWithChildren<{ tool: CatalogTool; formula?: string; formulaLabel?: string; method: string; methodLabel?: string; example: string; exampleLabel?: string; caution: string; cautionLabel?: string }>) {
-  const { data } = useCatalog();
-  const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
-  const visibleFaq = getVisibleToolFaq(tool);
-  const relatedGuides = guideContents.filter((guide) => guide.relatedToolSlugs.includes(tool.slug));
-  return <section className="tool-knowledge">
-    <AdSlot slot="AD_CONTENT" />
-    <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>{formulaLabel}</h2><p>{formula ?? tool.formula ?? "입력값을 기준으로 처리합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>{methodLabel}</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>{exampleLabel}</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>{cautionLabel}</h2><p>{caution}</p></article></div>
-    {children}
-    <OfficialReference tool={tool} />
-    {relatedGuides.length > 0 && <section className="guide-linked-content"><p className="eyebrow">RELATED GUIDES</p><h2>{tool.title} 활용 가이드</h2><div className="guide-card-grid compact">{relatedGuides.map((guide) => <Link key={guide.slug} href={getGuidePath(guide.slug)}><strong>{guide.title}</strong><small>{guide.description}</small></Link>)}</div></section>}
-    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>{tool.title} 자주 묻는 질문</h2>{visibleFaq.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}{tool.kind === "calculator" ? <><details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></> : <><details><summary>입력한 텍스트는 저장되나요?</summary><p>입력 텍스트와 변환 결과는 현재 브라우저에서 처리하며 서버에 업로드하거나 장기 저장하지 않습니다.</p></details><details><summary>변환 결과를 바로 사용해도 되나요?</summary><p>복사하거나 다운로드하기 전에 결과 형식과 내용이 목적에 맞는지 확인하세요. 특히 코드·URL·표 데이터는 사용하는 서비스의 형식 규칙이 우선합니다.</p></details></>}</section>
-    <AdSlot slot="AD_RELATED" />
-    <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>{tool.title}와 함께 쓰는 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
+function downloadResultSummary(tool: CatalogTool) {
+  const output = document.querySelector(".calculator-output")?.textContent?.replace(/\s+/g, " ").trim() ?? "결과 화면이 아직 없습니다.";
+  const inputs = Array.from(document.querySelectorAll(".calculator-form input, .calculator-form select")).map((element) => `${element.getAttribute("aria-label") ?? element.getAttribute("name") ?? "입력값"}: ${(element as HTMLInputElement).value}`).join("\n");
+  const text = [`Carculate 결과 요약`, `도구: ${tool.title}`, `주소: ${window.location.href}`, `확인일: ${new Date().toLocaleDateString("ko-KR")}`, ``, `입력값`, inputs || "입력값 없음", ``, `결과`, output, ``, `참고`, "이 결과는 입력값에 따른 참고용 계산이며 실제 계약·세금·금융기관 결과를 대신하지 않습니다."].join("\n");
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${tool.title.replace(/\s+/g, "-")}-결과요약.txt`; anchor.click(); URL.revokeObjectURL(url);
+  recordToolEvent("download-summary");
+}
+
+const coreDecisionTools = [
+  ["연봉 실수령액", "/calculator/salary/annual-net"], ["월급 실수령액", "/calculator/salary/monthly-take-home"], ["퇴직금", "/calculator/salary/retirement-pay"], ["실업급여", "/calculator/salary/unemployment-benefit"],
+  ["대출 이자", "/calculator/finance/loan-interest"], ["원리금균등상환", "/calculator/finance/loan-amortization"], ["예금 이자", "/calculator/finance/deposit-interest"], ["적금 만기액", "/calculator/finance/savings"], ["복리", "/calculator/finance/compound-interest"], ["중도상환수수료", "/calculator/finance/early-repayment-fee"],
+  ["전세대출 이자", "/calculator/real-estate/jeonse-loan-interest"], ["주택담보대출", "/calculator/real-estate/mortgage"], ["전월세 전환", "/calculator/real-estate/monthly-rent"], ["취득세", "/calculator/real-estate/acquisition-tax"], ["중개보수", "/calculator/real-estate/brokerage-fee"],
+  ["부가세", "/calculator/tax/vat-calculator"], ["재산세", "/calculator/real-estate/property-tax"], ["평수 변환", "/calculator/real-estate/pyeong"], ["퍼센트", "/calculator/finance/percentage"], ["PDF 합치기", "/convert/pdf-edit/pdf-merge"],
+] as const;
+
+function ResultDecisionSupport({ tool }: { tool: CatalogTool }) {
+  return <section className="decision-support" aria-label="결과 활용 안내">
+    <div className="decision-support-head"><div><p className="eyebrow">DECISION SUPPORT</p><h2>결과를 다음 행동으로 연결하세요.</h2></div><div className="decision-support-actions"><button type="button" onClick={() => downloadResultSummary(tool)}><Download size={15} />결과 요약 저장</button><button type="button" onClick={() => { window.print(); recordToolEvent("print"); }}><Printer size={15} />인쇄</button></div></div>
+    <div className="decision-support-grid"><article><strong>계산 근거</strong><p>{tool.formula ?? "입력한 값을 기준으로 도구에 등록된 산식을 적용합니다."}</p></article><article><strong>적용 가정</strong><p>입력값과 안내된 계산 방법을 기준으로 한 예상치입니다. 수수료·개별 계약조건·공식 고시값은 별도 확인이 필요합니다.</p></article><article><strong>기준일·검토</strong><p>페이지에 표시된 계산 기준을 우선 적용합니다. 금융·세금·부동산 결과는 실제 이용 전 관련 기관의 최신 기준을 확인하세요.</p></article></div>
+    <div className="next-actions"><strong>다음에 확인할 것</strong><div><Link href="/search">관련 도구 다시 찾기</Link><Link href="/guide">계산 가이드 보기</Link><Link href="/contact">결과 또는 기능 문의하기</Link><Link href="/disclaimer">계산 결과 이용 안내</Link></div></div>
+    <div className="core-tool-links"><p className="eyebrow">NEXT TOOL</p><h3>다음 결정을 위한 대표 도구</h3><div>{coreDecisionTools.filter(([, href]) => href !== window.location.pathname).slice(0, 5).map(([label, href]) => <Link key={href} href={href}>{label}<span>↗</span></Link>)}</div></div>
   </section>;
 }
 
-type AffiliateOffer = { title: string; description: string; href: string; category?: string; label?: string };
-
-function getAffiliateOffers(): AffiliateOffer[] {
-  const raw = import.meta.env.VITE_AFFILIATE_OFFERS_JSON?.trim();
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is AffiliateOffer => Boolean(item && typeof item.title === "string" && typeof item.description === "string" && typeof item.href === "string" && /^https?:\/\//.test(item.href)));
-  } catch { return []; }
-}
-
-export function AffiliateSlot({ category, title = "관련 서비스" }: { category?: string; title?: string }) {
-  const offers = getAffiliateOffers().filter((item) => !category || !item.category || item.category === category).slice(0, 3);
-  if (!offers.length) return null;
-  return <section className="affiliate-slot" aria-label={title}><p className="eyebrow">PARTNER SERVICES</p><h2>{title}</h2><p className="affiliate-disclosure">이 영역에는 제휴 링크가 포함될 수 있습니다. 서비스 이용 전 조건과 수수료를 직접 확인하세요.</p><div className="affiliate-grid">{offers.map((offer) => <a key={`${offer.href}-${offer.title}`} href={offer.href} target="_blank" rel="sponsored nofollow noreferrer"><span>{offer.label || "추천 서비스"}</span><strong>{offer.title}</strong><small>{offer.description}</small></a>)}</div></section>;
-}
-
-export function GuideDiscovery({ tools, title = "계산 결과를 더 잘 이해하는 가이드", limit = 6 }: { tools?: CatalogTool[]; title?: string; limit?: number }) {
-  const candidates = tools?.length ? guideContents.filter((guide) => tools.some((tool) => guide.relatedToolSlugs.includes(tool.slug))) : guideContents;
-  const guides = candidates.slice(0, limit);
-  if (!guides.length) return null;
-  return <section className="guide-discovery" aria-label={title}><div className="directory-head"><div><p className="eyebrow">PRACTICAL GUIDES</p><h2>{title}</h2></div><Link href="/guides">전체 가이드 보기 <span aria-hidden="true">→</span></Link></div><div className="guide-card-grid compact">{guides.map((guide) => <Link key={guide.slug} href={getGuidePath(guide.slug)}><span>{guide.eyebrow}</span><strong>{guide.title}</strong><small>{guide.description}</small><b>가이드 읽기 →</b></Link>)}</div></section>;
+export function ToolKnowledge({ tool, method, example, caution, children }: PropsWithChildren<{ tool: CatalogTool; method: string; example: string; caution: string }>) {
+  const { data } = useCatalog();
+  const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
+  return <section className="tool-knowledge">
+    <AdSlot slot="AD_CONTENT" />
+    <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>계산 공식</h2><p>{tool.formula ?? "입력값을 기준으로 계산합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>계산 방법</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>계산 예시</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>주의사항</h2><p>{caution}</p></article></div>
+    <ResultDecisionSupport tool={tool} />
+    {children}
+    <section className="faq-section"><p className="eyebrow">FAQ</p><h2>자주 묻는 질문</h2>{(tool.faq ?? []).map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}<details><summary>계산 결과를 실제 계약 또는 지급 금액으로 사용해도 되나요?</summary><p>이 도구는 입력값에 따른 참고용 결과를 제공합니다. 실제 계약, 세금, 금융 상품 조건은 관련 기관 또는 전문가에게 확인하세요.</p></details><details><summary>입력한 정보는 저장되나요?</summary><p>계산 입력값은 현재 브라우저에서만 사용되며, 카테고리나 도구 데이터와 별도로 저장하지 않습니다.</p></details></section>
+    <AdSlot slot="AD_RELATED" />
+    <section className="related-tools"><p className="eyebrow">RELATED TOOLS</p><h2>관련 도구</h2>{related.length ? <div>{related.map((item) => <Link key={item.id} href={getToolPath(item, data?.categories ?? [])}><span>{item.kind.toUpperCase()}</span><strong>{item.title}</strong><small>{item.description}</small></Link>)}</div> : <p className="empty-copy">같은 카테고리의 도구를 카테고리 관리 화면에서 연결할 수 있습니다.</p>}</section>
+  </section>;
 }
 
 export function ToolMetaResolver({ slug, children }: { slug: string; children: (tool: CatalogTool) => React.ReactNode }) {
