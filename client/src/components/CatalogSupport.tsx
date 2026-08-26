@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Download, Printer, RotateCcw } from "lucide-react";
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { CatalogCategory, CatalogTool, getCategoryLineage, getCategoryPath, getToolPath } from "@shared/catalog";
 import { useCatalog } from "@/hooks/useCatalog";
 
@@ -47,9 +47,12 @@ export function AdSlot({ slot }: { slot: "AD_TOP" | "AD_MIDDLE" | "AD_RESULT" | 
 
 function recordToolEvent(name: string, detail: Record<string, string> = {}) {
   try {
-    window.dispatchEvent(new CustomEvent("carculate:tool-event", { detail: { name, path: window.location.pathname, ...detail } }));
+    const payload = { name, path: window.location.pathname, ...detail };
+    window.dispatchEvent(new CustomEvent("carculate:tool-event", { detail: payload }));
     const key = `carculate:event:${name}`;
     localStorage.setItem(key, String(Number(localStorage.getItem(key) ?? "0") + 1));
+    const gtag = (window as typeof window & { gtag?: (...args: unknown[]) => void }).gtag;
+    if (typeof gtag === "function") gtag("event", `carculate_${name}`, payload);
   } catch { /* 브라우저 저장소가 차단되어도 도구 사용은 계속합니다. */ }
 }
 
@@ -81,14 +84,27 @@ const documentTemplates: Record<string, DocumentTemplate[]> = {
   "loan-interest": [{ label: "대출 비교 메모", filename: "대출-비교메모.txt", title: "대출 조건 비교 메모", sections: ["금융기관:", "대출 금리:", "상환 방식:", "총이자뿐 아니라 보증료·수수료·우대조건을 비교하세요."] }],
 };
 
-function downloadDocumentTemplate(template: DocumentTemplate, tool: CatalogTool) {
+function documentTemplateText(template: DocumentTemplate, tool: CatalogTool) {
   const output = document.querySelector(".calculator-output")?.textContent?.replace(/\\s+/g, " ").trim() ?? "계산 전 결과 없음";
-  const inputs = Array.from(document.querySelectorAll(".calculator-form input, .calculator-form select")).map((element) => `${element.getAttribute("aria-label") ?? element.getAttribute("name") ?? "입력값"}: ${(element as HTMLInputElement).value}`).join("\\n");
-  const text = [template.title, `작성일: ${new Date().toLocaleDateString("ko-KR")}`, `도구: ${tool.title}`, "", ...template.sections, "", "입력값 요약", inputs || "입력값 없음", "", "계산 결과", output, "", "주의: 이 문서는 확인용 초안이며 계약·신고·지급 서류를 대신하지 않습니다."].join("\\n");
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const inputs = readInputSummary().map((item) => `${item.label}: ${item.value}`).join("\\n");
+  return [template.title, `작성일: ${new Date().toLocaleDateString("ko-KR")}`, `도구: ${tool.title}`, "", ...template.sections, "", "입력값 요약", inputs || "입력값 없음", "", "계산 결과", output, "", "주의: 이 문서는 확인용 초안이며 계약·신고·지급 서류를 대신하지 않습니다."].join("\\n");
+}
+
+function downloadDocumentTemplate(template: DocumentTemplate, tool: CatalogTool) {
+  const blob = new Blob([documentTemplateText(template, tool)], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a"); anchor.href = url; anchor.download = template.filename; anchor.click(); URL.revokeObjectURL(url);
   recordToolEvent("download-template", { template: template.filename });
+}
+
+function printDocumentTemplate(template: DocumentTemplate, tool: CatalogTool) {
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" })[character] ?? character);
+  const printWindow = window.open("", "_blank", "noopener,noreferrer");
+  if (!printWindow) return;
+  const body = escapeHtml(documentTemplateText(template, tool)).replace(/\\n/g, "<br />");
+  printWindow.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${escapeHtml(template.title)}</title><style>body{margin:40px;color:#0b0b0b;font-family:Arial,'Noto Sans KR',sans-serif;line-height:1.75}h1{font-size:26px;border-bottom:2px solid #0b0b0b;padding-bottom:14px}p{font-size:14px}.notice{margin-top:32px;padding-top:14px;border-top:1px solid #0b0b0b;font-size:12px}@media print{body{margin:20mm}}</style></head><body><h1>${escapeHtml(template.title)}</h1><p>${body}</p><p class="notice">확인용 초안입니다. 실제 계약서·신고서·법정 서식을 대신하지 않습니다.</p></body></html>`);
+  printWindow.document.close(); printWindow.focus(); printWindow.print();
+  recordToolEvent("print-template", { template: template.filename });
 }
 
 const decisionFaqs: Record<string, [string, string][]> = {
@@ -103,7 +119,7 @@ const decisionFaqs: Record<string, [string, string][]> = {
 function DocumentTemplateActions({ tool }: { tool: CatalogTool }) {
   const templates = documentTemplates[tool.logicKey ?? ""] ?? [];
   if (!templates.length) return null;
-  return <section className="document-template-actions" aria-label="관련 문서 템플릿"><p className="eyebrow">DOCUMENT NEXT STEP</p><h3>다음 문서를 준비하세요.</h3><p>계산 결과와 입력값을 포함한 확인용 초안을 브라우저에서 저장할 수 있습니다.</p><div>{templates.map((template) => <button type="button" key={template.filename} onClick={() => downloadDocumentTemplate(template, tool)}><Download size={15} />{template.label}</button>)}</div><small>저장 파일은 확인용 초안이며 실제 계약서·신고서·법정 서식을 대신하지 않습니다.</small></section>;
+  return <section className="document-template-actions" aria-label="관련 문서 템플릿"><p className="eyebrow">DOCUMENT NEXT STEP</p><h3>다음 문서를 준비하세요.</h3><p>계산 결과와 입력값을 포함한 확인용 초안을 저장하거나 인쇄용 화면으로 열 수 있습니다.</p><div>{templates.map((template) => <span key={template.filename}><button type="button" onClick={() => downloadDocumentTemplate(template, tool)}><Download size={15} />{template.label} 저장</button><button className="template-print" type="button" onClick={() => printDocumentTemplate(template, tool)}><Printer size={15} />인쇄용 보기</button></span>)}</div><small>저장·인쇄 파일은 확인용 초안이며 실제 계약서·신고서·법정 서식을 대신하지 않습니다.</small></section>;
 }
 
 const coreDecisionTools = [
@@ -139,13 +155,43 @@ const decisionMeta: Record<string, DecisionMeta> = {
   "pdf-excel": { interpretation: "텍스트 PDF에서 읽을 수 있는 내용을 CSV 형태로 추출하는 기능입니다. 표의 열·행과 서식은 원본과 달라질 수 있습니다.", reviewDate: "상시 기준", sourceLabel: "브라우저 내 처리 안내", nextAction: "CSV를 Excel에서 열어 열 구분과 숫자 형식을 확인하세요.", guidePath: "/guide" },
 };
 
+type InputSummary = { label: string; value: string };
+
+function readInputSummary(): InputSummary[] {
+  return Array.from(document.querySelectorAll(".calculator-form input, .calculator-form select"))
+    .filter((element) => (element as HTMLInputElement).type !== "hidden")
+    .map((element, index) => ({ label: element.getAttribute("aria-label") ?? element.getAttribute("name") ?? `입력 ${index + 1}`, value: (element as HTMLInputElement).value || "—" }));
+}
+
+function guidePathFor(tool: CatalogTool) {
+  const key = tool.logicKey ?? "";
+  if (["loan-interest", "loan-amortization", "equal-principal", "bullet-loan", "deposit-interest", "savings", "compound-interest", "early-repayment-fee"].includes(key)) return "/guide#guide-finance";
+  if (["monthly-rent", "rent-conversion", "jeonse-to-monthly", "monthly-to-jeonse", "jeonse-loan-interest", "mortgage", "acquisition-tax", "property-tax", "brokerage-fee", "pyeong"].includes(key)) return "/guide#guide-real-estate";
+  if (["annual-net", "annual-take-home", "monthly-take-home", "retirement-pay", "unemployment-benefit", "four-insurance"].includes(key)) return "/guide#guide-salary";
+  if (["vat", "vat-calculator"].includes(key)) return "/guide#guide-tax";
+  return "/guide#guide-pdf";
+}
+
+function InputSummaryPanel({ tool }: { tool: CatalogTool }) {
+  const [saved, setSaved] = useState<InputSummary[] | null>(null);
+  const current = readInputSummary();
+  if (!current.length) return null;
+  const saveForComparison = () => { const snapshot = readInputSummary(); setSaved(snapshot); recordToolEvent("save-comparison", { tool: tool.slug }); };
+  return <section className="input-summary-panel" aria-label="입력값 요약과 조건 비교"><div><p className="eyebrow">YOUR CONDITIONS</p><h3>현재 입력 조건</h3><p>결과를 해석하기 전, 비교 기준이 되는 값을 다시 확인하세요.</p></div><dl>{current.map((item) => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl><div className="input-summary-actions"><button type="button" onClick={saveForComparison}>현재 조건 저장</button><button type="button" onClick={() => { downloadResultSummary(tool); }}>결과 요약 저장</button></div>{saved && <div className="condition-compare"><strong>이전 저장 조건과 비교</strong><div>{current.map((item) => { const prior = saved.find((savedItem) => savedItem.label === item.label)?.value ?? "—"; return <p key={item.label}><span>{item.label}</span><b>{prior}</b><em>→</em><b>{item.value}</b></p>; })}</div><small>같은 도구에서 조건을 바꾼 뒤 다시 계산하면 현재 값과 저장한 값을 나란히 비교할 수 있습니다.</small></div>}</section>;
+}
+
 function ResultDecisionSupport({ tool }: { tool: CatalogTool }) {
+  const { data } = useCatalog();
   const meta = decisionMeta[tool.logicKey ?? ""];
+  const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
+  const sameCategory = (data?.tools ?? []).filter((item) => item.categoryId === tool.categoryId && item.id !== tool.id);
+  const nextTools = [...related, ...sameCategory, ...(data?.tools ?? []).filter((item) => item.isPopular)].filter((item, index, items) => item.id !== tool.id && items.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 5);
   return <section className="decision-support" aria-label="결과 활용 안내">
     <div className="decision-support-head"><div><p className="eyebrow">DECISION SUPPORT</p><h2>결과를 다음 행동으로 연결하세요.</h2></div><div className="decision-support-actions"><button type="button" onClick={() => downloadResultSummary(tool)}><Download size={15} />결과 요약 저장</button><button type="button" onClick={() => { window.print(); recordToolEvent("print"); }}><Printer size={15} />인쇄</button></div></div>
+    <InputSummaryPanel tool={tool} />
     <div className="decision-support-grid"><article><strong>결과 해석</strong><p>{meta?.interpretation ?? "입력값에 따른 참고용 결과입니다. 결과의 의미는 각 도구의 계산 방법과 주의사항을 함께 확인하세요."}</p></article><article><strong>계산 근거·적용 가정</strong><p>{tool.formula ?? "입력한 값을 기준으로 도구에 등록된 산식을 적용합니다."} 입력값과 안내된 계산 방법을 기준으로 한 예상치이며 수수료·개별 계약조건은 별도 확인이 필요합니다.</p></article><article><strong>기준일·마지막 검토</strong><p>{meta?.reviewDate ?? "상시 기준"} 기준 안내입니다. 제도·세율·상품 조건은 변경될 수 있으므로 실제 이용 전 최신 공식 정보를 확인하세요.</p>{meta?.sourceUrl && <a className="official-source" href={meta.sourceUrl} target="_blank" rel="noreferrer">공식 확인: {meta.sourceLabel} ↗</a>}</article></div>
-    <div className="next-actions"><strong>다음 행동</strong><p>{meta?.nextAction ?? "관련 조건과 결과를 다시 확인하세요."}</p><div><Link href="/guide">관련 계산 가이드 보기</Link><Link href="/search">관련 도구 다시 찾기</Link><Link href="/contact">결과 또는 기능 문의하기</Link><Link href="/disclaimer">계산 결과 이용 안내</Link></div></div>
-    <div className="core-tool-links"><p className="eyebrow">NEXT TOOL</p><h3>다음 결정을 위한 대표 도구</h3><div>{coreDecisionTools.filter(([, href]) => href !== window.location.pathname).slice(0, 5).map(([label, href]) => <Link key={href} href={href}>{label}<span>↗</span></Link>)}</div></div>
+    <div className="next-actions"><strong>다음 행동</strong><p>{meta?.nextAction ?? "관련 조건과 결과를 다시 확인하세요."}</p><div><Link href={guidePathFor(tool)}>이 결과에 맞는 가이드 보기</Link><Link href="/search">관련 도구 다시 찾기</Link><Link href="/contact">결과 또는 기능 문의하기</Link><Link href="/disclaimer">계산 결과 이용 안내</Link></div></div>
+    <div className="core-tool-links"><p className="eyebrow">NEXT TOOL</p><h3>이 결과 다음에 확인할 도구</h3><div>{nextTools.map((nextTool) => <Link key={nextTool.id} href={getToolPath(nextTool, data?.categories ?? [])}>{nextTool.title}<span>↗</span></Link>)}</div></div>
   </section>;
 }
 
