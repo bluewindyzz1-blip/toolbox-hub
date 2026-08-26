@@ -430,3 +430,20 @@ th:first-child,td:first-child { text-align:left; }
   .tool-card { min-height: 185px; }
   .card-bottom h3 { font-size: 1.32rem; }
 }
+
+/* Conversion flow: make the file drop area the first visible action. */
+.conversion-primary { border-top: var(--line); }
+.conversion-lead { margin: 0 0 1.35rem; }
+.conversion-lead h2 { margin: .45rem 0 .45rem; font-size: clamp(1.65rem, 3vw, 2.6rem); line-height: 1; letter-spacing: -.09em; }
+.conversion-lead p:not(.eyebrow) { margin: 0; font-family: "Noto Sans KR", sans-serif; font-size: .78rem; line-height: 1.65; letter-spacing: -.06em; }
+.conversion-options { margin-top: 1.2rem; }
+.conversion-options:empty { display: none; }
+.tool-category-grid-secondary { margin-top: clamp(2.5rem, 6vw, 4rem); border-top: var(--line); border-left: var(--thin-line); }
+.tool-category-grid-secondary .tool-category { border-bottom: var(--thin-line); }
+@media (max-width: 760px) {
+  .conversion-primary { grid-template-columns: 1fr; }
+  .conversion-primary .conversion-panel { padding: 1.2rem; }
+  .conversion-primary .drop-area { min-height: 250px; }
+  .conversion-lead h2 { font-size: 2rem; }
+  .tool-category-grid-secondary { margin-top: 2.5rem; }
+}
