@@ -21,7 +21,7 @@ export default function LoanCalculator() {
   const reset = () => { setAmount(30000); setRate(4.2); setYears(3); setMethod("annuity"); setApplied({ amount: 30000, rate: 4.2, years: 3, method: "annuity" }); };
   return (
     <ToolMetaResolver slug="loan-interest">{(tool) => <ToolFrame index="04" tag="LOAN CALCULATOR" title="대출 이자 계산기" description="원리금균등·원금균등 상환 방식을 비교하고 월별 원금과 이자를 확인하세요.">
-      <SeoHead title={tool.seoTitle ?? tool.title} description={tool.seoDescription ?? tool.description} /><CatalogBreadcrumb toolSlug={tool.slug} />
+      <SeoHead title={tool.seoTitle ?? tool.title} description={tool.seoDescription ?? tool.description} breadcrumbs={[{ name: "홈", path: "/" }, { name: "계산기", path: "/calculator" }, { name: "금융 계산기", path: "/calculator/finance" }, { name: tool.title }]} /><CatalogBreadcrumb toolSlug={tool.slug} />
       <section className="calculator-layout loan-layout">
         <div className="calculator-form">
           <p className="eyebrow">LOAN SETTINGS</p>
