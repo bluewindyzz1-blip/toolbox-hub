@@ -104,6 +104,10 @@ export function ToolMetaResolver({ slug, children }: { slug: string; children: (
   return <>{children(tool)}</>;
 }
 
+export function GuideDiscovery() {
+  return <section className="guide-discovery" aria-label="계산 가이드"><div><p className="eyebrow">GUIDE</p><h2>계산 결과를 이해하고 다음 결정을 준비하세요.</h2><p>계산기 결과의 기준과 주의사항을 확인하고 필요한 다음 도구로 이동할 수 있습니다.</p></div><Link href="/guide">가이드 둘러보기 <span>↗</span></Link></section>;
+}
+
 export function categoryToolGroups(categories: CatalogCategory[], tools: CatalogTool[], root: CatalogCategory) {
   const descendants = (id: number): number[] => {
     const children = categories.filter((item) => item.parentId === id);
