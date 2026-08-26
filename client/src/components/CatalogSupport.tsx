@@ -1,8 +1,10 @@
 import { Link } from "wouter";
-import { Download, Printer, RotateCcw } from "lucide-react";
+import { Download, Printer, RotateCcw, Share2 } from "lucide-react";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { CatalogCategory, CatalogTool, getCategoryLineage, getCategoryPath, getToolPath } from "@shared/catalog";
 import { useCatalog } from "@/hooks/useCatalog";
+import { copySharedLoanUrl, getContextualRelatedTools, SharedLoanValues, standardFor } from "@/lib/calculatorHub";
+import { calculateLoan, LoanMethod } from "@shared/toolbox";
 
 function upsertMeta(selector: string, attributes: Record<string, string>) {
   let element = document.head.querySelector(selector) as HTMLMetaElement | HTMLLinkElement | null;
@@ -58,6 +60,23 @@ function recordToolEvent(name: string, detail: Record<string, string> = {}) {
 
 export function CalculatorActions({ onCalculate, onReset }: { onCalculate: () => void; onReset: () => void }) {
   return <div className="calculator-actions"><button className="primary-action" onClick={() => { onCalculate(); recordToolEvent("calculate"); }}>계산하기</button><button className="reset-action" onClick={() => { onReset(); recordToolEvent("reset"); }}><RotateCcw size={16} />초기화</button></div>;
+}
+
+export function LoanShareAction({ values }: { values: SharedLoanValues }) {
+  const [message, setMessage] = useState("");
+  const share = async () => {
+    const copied = await copySharedLoanUrl(values);
+    setMessage(copied ? "현재 조건의 공유 링크를 복사했습니다." : "링크 복사에 실패했습니다. 주소창의 주소를 직접 복사해 주세요.");
+    recordToolEvent("share-result");
+  };
+  return <div className="loan-share-action"><button type="button" onClick={share}><Share2 size={16} />조건 공유 링크 복사</button>{message && <p role="status">{message}</p>}<small>입력값은 주소에만 포함되며 서버에 저장되지 않습니다.</small></div>;
+}
+
+export function LoanRateComparison({ amount, years, method, activeRate }: { amount: number; years: number; method: LoanMethod; activeRate: number }) {
+  const won = new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 });
+  const rows = [3, 4, 5, 6].map((rate) => ({ rate, result: calculateLoan(amount * 10000, rate, years * 12, method) }));
+  const paymentLabel = method === "bullet" ? "월 이자" : "첫 달 납입액";
+  return <section className="loan-rate-comparison" aria-label="금리별 대출 결과 비교"><div><p className="eyebrow">RATE COMPARISON</p><h2>금리별 결과 비교</h2><p>현재 적용 금리 {activeRate}%를 기준으로, 같은 원금·기간·상환방식에서 연 3%부터 6%까지 같은 계산식으로 비교합니다.</p></div><div className="table-wrap"><table><thead><tr><th>연 이자율</th><th>{paymentLabel}</th><th>전체 이자</th><th>총 상환액</th></tr></thead><tbody>{rows.map(({ rate, result }) => <tr key={rate} className={Math.abs(rate - activeRate) < 0.001 ? "is-current-rate" : ""}><td>{rate}%{Math.abs(rate - activeRate) < 0.001 && <small>현재</small>}</td><td>{won.format(result.firstPayment)}원</td><td>{won.format(result.totalInterest)}원</td><td>{won.format(result.totalPayment)}원</td></tr>)}</tbody></table></div><small>비교표는 입력한 조건을 기준으로 한 참고값입니다. 실제 적용금리와 수수료는 금융기관 약정이 우선합니다.</small></section>;
 }
 
 function downloadResultSummary(tool: CatalogTool) {
@@ -185,13 +204,13 @@ function InputSummaryPanel({ tool }: { tool: CatalogTool }) {
 function ResultDecisionSupport({ tool }: { tool: CatalogTool }) {
   const { data } = useCatalog();
   const meta = decisionMeta[tool.logicKey ?? ""];
-  const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
-  const sameCategory = (data?.tools ?? []).filter((item) => item.categoryId === tool.categoryId && item.id !== tool.id);
-  const nextTools = [...related, ...sameCategory, ...(data?.tools ?? []).filter((item) => item.isPopular)].filter((item, index, items) => item.id !== tool.id && items.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 5);
+  const allTools = data?.tools ?? [];
+  const nextTools = getContextualRelatedTools(tool, allTools).slice(0, 5);
+  const standard = standardFor(tool);
   return <section className="decision-support" aria-label="결과 활용 안내">
     <div className="decision-support-head"><div><p className="eyebrow">DECISION SUPPORT</p><h2>결과를 다음 행동으로 연결하세요.</h2></div><div className="decision-support-actions"><button type="button" onClick={() => downloadResultSummary(tool)}><Download size={15} />결과 요약 저장</button><button type="button" onClick={() => { window.print(); recordToolEvent("print"); }}><Printer size={15} />인쇄</button></div></div>
     <InputSummaryPanel tool={tool} />
-    <div className="decision-support-grid"><article><strong>결과 해석</strong><p>{meta?.interpretation ?? "입력값에 따른 참고용 결과입니다. 결과의 의미는 각 도구의 계산 방법과 주의사항을 함께 확인하세요."}</p></article><article><strong>계산 근거·적용 가정</strong><p>{tool.formula ?? "입력한 값을 기준으로 도구에 등록된 산식을 적용합니다."} 입력값과 안내된 계산 방법을 기준으로 한 예상치이며 수수료·개별 계약조건은 별도 확인이 필요합니다.</p></article><article><strong>기준일·마지막 검토</strong><p>{meta?.reviewDate ?? "상시 기준"} 기준 안내입니다. 제도·세율·상품 조건은 변경될 수 있으므로 실제 이용 전 최신 공식 정보를 확인하세요.</p>{meta?.sourceUrl && <a className="official-source" href={meta.sourceUrl} target="_blank" rel="noreferrer">공식 확인: {meta.sourceLabel} ↗</a>}</article></div>
+    <div className="decision-support-grid"><article><strong>결과 해석</strong><p>{meta?.interpretation ?? "입력값에 따른 참고용 결과입니다. 결과의 의미는 각 도구의 계산 방법과 주의사항을 함께 확인하세요."}</p></article><article><strong>계산 근거·적용 가정</strong><p>{tool.formula ?? "입력한 값을 기준으로 도구에 등록된 산식을 적용합니다."} 입력값과 안내된 계산 방법을 기준으로 한 예상치이며 수수료·개별 계약조건은 별도 확인이 필요합니다.</p></article><article><strong>기준일·마지막 검토</strong><p>{standard.basis} · 마지막 업데이트 {standard.lastUpdated}. 제도·세율·상품 조건은 변경될 수 있으므로 실제 이용 전 최신 공식 정보를 확인하세요.</p>{meta?.sourceUrl && <a className="official-source" href={meta.sourceUrl} target="_blank" rel="noreferrer">공식 확인: {meta.sourceLabel} ↗</a>}</article></div>
     <div className="next-actions"><strong>다음 행동</strong><p>{meta?.nextAction ?? "관련 조건과 결과를 다시 확인하세요."}</p><div><Link href={guidePathFor(tool)}>이 결과에 맞는 가이드 보기</Link><Link href="/search">관련 도구 다시 찾기</Link><Link href="/contact">결과 또는 기능 문의하기</Link><Link href="/disclaimer">계산 결과 이용 안내</Link></div></div>
     <div className="core-tool-links"><p className="eyebrow">NEXT TOOL</p><h3>이 결과 다음에 확인할 도구</h3><div>{nextTools.map((nextTool) => <Link key={nextTool.id} href={getToolPath(nextTool, data?.categories ?? [])}>{nextTool.title}<span>↗</span></Link>)}</div></div>
   </section>;
@@ -199,7 +218,7 @@ function ResultDecisionSupport({ tool }: { tool: CatalogTool }) {
 
 export function ToolKnowledge({ tool, method, example, caution, children }: PropsWithChildren<{ tool: CatalogTool; method: string; example: string; caution: string }>) {
   const { data } = useCatalog();
-  const related = (tool.relatedToolIds ?? []).map((id) => data?.tools.find((item) => item.id === id)).filter((item): item is CatalogTool => Boolean(item));
+  const related = getContextualRelatedTools(tool, data?.tools ?? []);
   return <section className="tool-knowledge">
     <AdSlot slot="AD_CONTENT" />
     <div className="knowledge-grid"><article><p className="eyebrow">FORMULA</p><h2>계산 공식</h2><p>{tool.formula ?? "입력값을 기준으로 계산합니다."}</p></article><article><p className="eyebrow">METHOD</p><h2>계산 방법</h2><p>{method}</p></article><article><p className="eyebrow">EXAMPLE</p><h2>계산 예시</h2><p>{example}</p></article><article><p className="eyebrow">NOTICE</p><h2>주의사항</h2><p>{caution}</p></article></div>
