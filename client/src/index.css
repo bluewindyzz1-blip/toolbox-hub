@@ -447,3 +447,45 @@ th:first-child,td:first-child { text-align:left; }
   .conversion-lead h2 { font-size: 2rem; }
   .tool-category-grid-secondary { margin-top: 2.5rem; }
 }
+
+/* Decision-completion guide hub, conditions and comparison */
+.guide-hub { flex:1; padding-top:clamp(3rem,8vw,7rem); padding-bottom:clamp(5rem,10vw,9rem); }
+.guide-hub-intro { padding:clamp(2rem,6vw,5rem); border:var(--line); }
+.guide-hub-intro h1 { max-width:780px; margin:.8rem 0 1.35rem; font-size:clamp(3.6rem,8vw,7.2rem); line-height:.86; letter-spacing:-.11em; }
+.guide-hub-intro>p:not(.eyebrow) { max-width:680px; margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.94rem; line-height:1.85; letter-spacing:-.07em; }
+.guide-flow { display:grid; grid-template-columns:repeat(4,1fr); margin-top:2.5rem; border-top:var(--thin-line); border-left:var(--thin-line); }
+.guide-flow span { min-height:70px; padding:1rem; display:flex; align-items:center; border-right:var(--thin-line); border-bottom:var(--thin-line); font-size:.72rem; font-weight:700; letter-spacing:-.04em; }
+.guide-topic-grid { display:grid; grid-template-columns:repeat(2,1fr); margin-top:3rem; border-top:var(--line); border-left:var(--thin-line); }
+.guide-topic-grid article { min-height:335px; padding:1.5rem; border-right:var(--thin-line); border-bottom:var(--thin-line); display:flex; flex-direction:column; }
+.guide-topic-head { display:flex; align-items:center; gap:.65rem; }
+.guide-topic-head .eyebrow { font-size:.64rem; }
+.guide-topic-grid h2 { max-width:520px; margin:1.6rem 0 .7rem; font-size:clamp(1.6rem,3vw,2.7rem); line-height:1.05; letter-spacing:-.09em; }
+.guide-topic-grid>article>p { max-width:520px; margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.78rem; line-height:1.75; letter-spacing:-.07em; }
+.guide-topic-grid article>div:last-child { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:auto; padding-top:1.7rem; }
+.guide-topic-grid article>div:last-child a { display:inline-flex; align-items:center; gap:.35rem; padding:.6rem .7rem; border:var(--thin-line); font-family:"Noto Sans KR",sans-serif; font-size:.72rem; font-weight:700; letter-spacing:-.06em; transition:background .16s var(--ease-out),color .16s var(--ease-out); }
+.guide-topic-grid article>div:last-child a:hover { background:var(--ink); color:var(--paper); }
+.guide-checklist { margin-top:3rem; padding:2rem 0 0; border-top:var(--line); }
+.guide-checklist h2 { margin:.65rem 0 1.5rem; font-size:clamp(2rem,4vw,3.7rem); letter-spacing:-.1em; }
+.guide-checklist>div { display:grid; grid-template-columns:repeat(3,1fr); border-top:var(--thin-line); border-left:var(--thin-line); }
+.guide-checklist article { min-height:175px; padding:1.3rem; border-right:var(--thin-line); border-bottom:var(--thin-line); }
+.guide-checklist strong { font-size:1rem; letter-spacing:-.07em; }
+.guide-checklist p { margin:.8rem 0 0; font-family:"Noto Sans KR",sans-serif; font-size:.74rem; line-height:1.7; letter-spacing:-.07em; }
+.input-summary-panel { margin:1.3rem 0; padding:1.3rem; border:var(--thin-line); background:#f7f7f5; }
+.input-summary-panel h3 { margin:.45rem 0; font-size:1.22rem; letter-spacing:-.08em; }
+.input-summary-panel>div>p:not(.eyebrow) { margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.75rem; line-height:1.65; letter-spacing:-.07em; }
+.input-summary-panel dl { display:grid; grid-template-columns:repeat(3,1fr); margin:1.2rem 0 0; border-top:var(--thin-line); border-left:var(--thin-line); }
+.input-summary-panel dl>div { min-height:70px; padding:.75rem; border-right:var(--thin-line); border-bottom:var(--thin-line); }
+.input-summary-panel dt { font-family:"Noto Sans KR",sans-serif; font-size:.68rem; font-weight:700; letter-spacing:-.06em; }
+.input-summary-panel dd { margin:.4rem 0 0; font-family:"Space Grotesk","Noto Sans KR",sans-serif; font-size:1rem; font-weight:700; letter-spacing:-.06em; overflow-wrap:anywhere; }
+.input-summary-actions { display:flex; flex-wrap:wrap; gap:.55rem; margin-top:1rem; }
+.input-summary-actions button,.document-template-actions .template-print { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:0 .85rem; border:var(--thin-line); background:var(--paper); color:var(--ink); font-family:"Noto Sans KR",sans-serif; font-size:.72rem; font-weight:700; letter-spacing:-.06em; }
+.input-summary-actions button:first-child { background:var(--ink); color:var(--paper); }
+.condition-compare { margin-top:1rem; padding-top:1rem; border-top:var(--thin-line); }
+.condition-compare>strong { font-size:.8rem; }
+.condition-compare>div { margin-top:.7rem; border-top:var(--thin-line); }
+.condition-compare p { display:grid; grid-template-columns:1.2fr 1fr auto 1fr; gap:.55rem; margin:0; padding:.6rem 0; border-bottom:var(--thin-line); font-family:"Noto Sans KR",sans-serif; font-size:.7rem; letter-spacing:-.06em; }
+.condition-compare p b { text-align:right; font-family:"Space Grotesk","Noto Sans KR",sans-serif; }
+.condition-compare p em { font-style:normal; text-align:center; }
+.condition-compare small { display:block; margin-top:.7rem; font-family:"Noto Sans KR",sans-serif; font-size:.67rem; line-height:1.6; letter-spacing:-.07em; }
+@media print { .site-header,.site-footer,.ad-slot,.calculator-actions,.decision-support-actions,.input-summary-actions,.next-actions,.core-tool-links,.document-template-actions,.faq-section,.related-tools { display:none!important; } .site-page { overflow:visible; } .calculator-layout,.knowledge-grid,.decision-support-grid { break-inside:avoid; } }
+@media (max-width:760px) { .guide-hub { padding-top:2rem; }.guide-hub-intro { padding:1.5rem; }.guide-hub-intro h1 { font-size:3.5rem; }.guide-flow,.guide-topic-grid,.guide-checklist>div { grid-template-columns:1fr; }.guide-flow span { min-height:54px; }.guide-topic-grid { margin-top:2rem; }.guide-topic-grid article { min-height:0; padding:1.25rem; }.guide-topic-grid h2 { margin:1.2rem 0 .65rem; font-size:1.75rem; }.guide-topic-grid article>div:last-child { margin-top:1.4rem; padding-top:0; }.input-summary-panel { padding:1rem; }.input-summary-panel dl { grid-template-columns:1fr 1fr; }.condition-compare p { grid-template-columns:1.1fr 1fr; }.condition-compare p em { display:none; }.condition-compare p b::before { content:"이전 "; font-family:"Noto Sans KR",sans-serif; font-weight:400; }.condition-compare p b:last-child::before { content:"현재 "; }.guide-checklist h2 { font-size:2.2rem; } }
