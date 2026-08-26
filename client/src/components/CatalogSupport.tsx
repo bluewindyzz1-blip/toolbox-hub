@@ -15,7 +15,9 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
   Object.entries(attributes).forEach(([key, value]) => element?.setAttribute(key, value));
 }
 
-export function SeoHead({ title, description, path, kind = "WebApplication" }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage" }) {
+type SeoBreadcrumb = { name: string; path?: string };
+
+export function SeoHead({ title, description, path, kind = "WebApplication", breadcrumbs = [] }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage"; breadcrumbs?: SeoBreadcrumb[] }) {
   useEffect(() => {
     document.title = title;
     const url = `${window.location.origin}${path ?? window.location.pathname}`;
@@ -27,8 +29,10 @@ export function SeoHead({ title, description, path, kind = "WebApplication" }: {
     upsertMeta('link[rel="canonical"]', { rel: "canonical", href: url });
     let jsonLd = document.getElementById("catalog-jsonld");
     if (!jsonLd) { jsonLd = document.createElement("script"); jsonLd.id = "catalog-jsonld"; jsonLd.setAttribute("type", "application/ld+json"); document.head.appendChild(jsonLd); }
-    jsonLd.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": kind, name: title, description, url });
-  }, [title, description, path, kind]);
+    const webApplication = { "@context": "https://schema.org", "@type": kind, name: title, description, url };
+    const breadcrumb = breadcrumbs.length ? { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: breadcrumbs.map((item, index) => ({ "@type": "ListItem", position: index + 1, name: item.name, ...(item.path ? { item: `${window.location.origin}${item.path}` } : {}) })) } : null;
+    jsonLd.textContent = JSON.stringify(breadcrumb ? [webApplication, breadcrumb] : webApplication);
+  }, [title, description, path, kind, breadcrumbs]);
   return null;
 }
 
