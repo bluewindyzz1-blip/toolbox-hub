@@ -364,3 +364,69 @@ th:first-child,td:first-child { text-align:left; }
 .document-template-actions small { display: block; margin-top: .75rem; color: #666; line-height: 1.5; }
 .official-source { display: inline-block; margin-top: .55rem; font-size: .85rem; font-weight: 700; text-decoration: underline; }
 @media (max-width: 720px) { .document-template-actions { padding: 1rem; } .document-template-actions > div { display: grid; grid-template-columns: 1fr; } .document-template-actions button { width: 100%; justify-content: center; } }
+
+/* Home discovery layout: preserve the editorial card system on every screen size. */
+.home-category-explorer { margin-top: clamp(2rem, 5vw, 4rem); border-top: var(--line); border-bottom: var(--thin-line); }
+.home-quick-links { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.home-category-entry { position: relative; display: grid; grid-template-columns: 1fr auto; min-width: 0; border-right: var(--thin-line); border-bottom: var(--thin-line); background: var(--paper); }
+.home-category-entry:nth-child(4n) { border-right: 0; }
+.home-category-link { min-width: 0; min-height: 76px; padding: 1rem 1.05rem; display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: .7rem; }
+.home-category-link > span { display: grid; gap: .1rem; min-width: 0; font-family: "Noto Sans KR", sans-serif; font-size: .92rem; font-weight: 800; letter-spacing: -.06em; }
+.home-category-link small { font-family: "Space Grotesk", sans-serif; font-size: .62rem; font-weight: 700; letter-spacing: .08em; }
+.home-category-link svg { flex: none; }
+.home-category-toggle { width: 50px; border: 0; border-left: var(--thin-line); background: transparent; color: inherit; display: grid; place-items: center; cursor: pointer; }
+.home-category-entry.active .home-category-toggle, .home-category-entry:hover .home-category-link { background: var(--ink); color: var(--paper); }
+.home-category-entry.active .home-category-toggle svg { transform: rotate(180deg); }
+.home-category-panel { z-index: 3; background: var(--paper); border: var(--line); }
+.desktop-category-panel { margin: -1px 0 0; }
+.mobile-category-panel { display: none; }
+.home-category-panel-head { padding: clamp(1.25rem, 3vw, 2.2rem); display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; border-bottom: var(--thin-line); }
+.home-category-panel-head h2 { margin: .45rem 0; font-size: clamp(1.7rem, 3vw, 3.1rem); line-height: .98; letter-spacing: -.09em; }
+.home-category-panel-head h2 em { color: var(--signal); font-style: normal; }
+.home-category-panel-head p:not(.eyebrow) { max-width: 530px; margin: 0; font-family: "Noto Sans KR", sans-serif; font-size: .78rem; line-height: 1.65; letter-spacing: -.06em; }
+.home-category-panel-head > a { display: inline-flex; align-items: center; gap: .45rem; flex: none; padding: .7rem .85rem; border: var(--thin-line); font-size: .75rem; font-weight: 700; }
+.home-category-branches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.home-category-branches > a { min-height: 145px; padding: 1.1rem; display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: .75rem; border-right: var(--thin-line); }
+.home-category-branches > a:last-child { border-right: 0; }
+.home-category-branches > a:hover { background: var(--ink); color: var(--paper); }
+.home-category-branches > a > span { font-size: .62rem; font-weight: 700; letter-spacing: .08em; }
+.home-category-branches strong { display: block; margin-bottom: .3rem; font-family: "Noto Sans KR", sans-serif; font-size: .95rem; letter-spacing: -.06em; }
+.home-category-branches p { margin: 0; font-family: "Noto Sans KR", sans-serif; font-size: .72rem; line-height: 1.55; letter-spacing: -.07em; }
+.home-topic-directory { padding-top: clamp(3.5rem, 7vw, 6rem); }
+.home-topic-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: var(--line); border-left: var(--thin-line); }
+.home-topic-grid > a { min-height: 170px; padding: 1.15rem; display: flex; flex-direction: column; border-right: var(--thin-line); border-bottom: var(--thin-line); background: var(--paper); transition: background .18s var(--ease-out), color .18s var(--ease-out); }
+.home-topic-grid > a:hover { background: var(--ink); color: var(--paper); }
+.home-topic-grid span { font-size: .62rem; font-weight: 700; letter-spacing: .08em; }
+.home-topic-grid strong { margin: auto 0 .35rem; font-family: "Noto Sans KR", sans-serif; font-size: 1.18rem; letter-spacing: -.07em; }
+.home-topic-grid small { min-height: 2.8em; font-family: "Noto Sans KR", sans-serif; font-size: .72rem; line-height: 1.5; letter-spacing: -.07em; }
+.home-topic-grid svg { align-self: flex-end; margin-top: .85rem; }
+@media (max-width: 760px) {
+  .home-category-explorer { margin-top: 1.25rem; }
+  .home-quick-links { grid-template-columns: 1fr; }
+  .home-category-entry, .home-category-entry:nth-child(4n) { border-right: 0; }
+  .home-category-entry:last-child { border-bottom: 0; }
+  .home-category-link { min-height: 66px; padding: .8rem 1.1rem; }
+  .home-category-link > span { font-size: .94rem; }
+  .home-category-toggle { width: 58px; }
+  .desktop-category-panel { display: none; }
+  .home-category-entry.active { grid-template-columns: 1fr auto; }
+  .mobile-category-panel { display: block; grid-column: 1 / -1; border: 0; border-top: var(--thin-line); }
+  .home-category-panel-head { padding: 1.15rem; align-items: flex-start; flex-direction: column; gap: .9rem; }
+  .home-category-panel-head h2 { font-size: 2rem; }
+  .home-category-panel-head > a { width: 100%; justify-content: space-between; }
+  .home-category-branches { grid-template-columns: 1fr; }
+  .home-category-branches > a { min-height: 0; padding: .9rem 1.05rem; border-right: 0; border-bottom: var(--thin-line); }
+  .home-category-branches > a:last-child { border-bottom: 0; }
+  .home-topic-directory { padding-top: 3.2rem; }
+  .home-topic-grid { grid-template-columns: 1fr 1fr; }
+  .home-topic-grid > a { min-height: 145px; padding: .95rem; }
+  .home-topic-grid strong { font-size: 1rem; }
+  .home-topic-grid small { min-height: 0; font-size: .68rem; }
+  .guide-discovery { margin-top: 3.2rem; padding: 1.5rem 0; gap: 1.1rem; }
+  .guide-discovery h2 { font-size: 2.35rem; line-height: 1.02; }
+  .guide-discovery p:not(.eyebrow) { font-size: .78rem; }
+  .guide-discovery > a { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: .95rem 1rem; }
+  .tool-directory { padding-top: 3.2rem; padding-bottom: 3.2rem; }
+  .tool-card { min-height: 185px; }
+  .card-bottom h3 { font-size: 1.32rem; }
+}
