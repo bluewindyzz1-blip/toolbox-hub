@@ -347,3 +347,10 @@ th:first-child,td:first-child { text-align:left; }
 .core-tool-links a:hover { background:var(--signal); color:var(--paper); }
 .core-tool-links a span { font-size:1rem; }
 @media (max-width:720px) { .core-tool-links>div { grid-template-columns:repeat(2,1fr); } .core-tool-links a { min-height:48px; } }
+
+.guide-discovery { margin-top:clamp(3rem,7vw,6rem); display:flex; align-items:end; justify-content:space-between; gap:2rem; padding:clamp(1.5rem,4vw,3rem) 0; border-top:var(--line); border-bottom:var(--line); }
+.guide-discovery h2 { max-width:620px; margin:.6rem 0 .7rem; font-size:clamp(1.8rem,4vw,3.7rem); line-height:.95; letter-spacing:-.09em; }
+.guide-discovery p:not(.eyebrow) { max-width:560px; margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.82rem; line-height:1.7; letter-spacing:-.06em; }
+.guide-discovery>a { flex:none; padding:.8rem 1rem; border:var(--thin-line); background:var(--ink); color:var(--paper); font-size:.75rem; font-weight:700; }
+.guide-discovery>a:hover { background:var(--signal); border-color:var(--signal); }
+@media (max-width:720px) { .guide-discovery { align-items:flex-start; flex-direction:column; gap:1.2rem; } .guide-discovery>a { width:100%; text-align:center; } }
