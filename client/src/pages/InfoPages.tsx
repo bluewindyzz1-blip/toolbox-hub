@@ -1,149 +1,44 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { Link } from "wouter";
-import { Mail, Search, Send } from "lucide-react";
+import { ArrowUpRight, Calculator, FileText, Landmark, Mail, Search, Send, WalletCards } from "lucide-react";
 import { SiteFooter, SiteHeader } from "@/components/ToolLayout";
 import { SeoHead } from "@/components/CatalogSupport";
 import { useCatalog } from "@/hooks/useCatalog";
-import { getCategoryPath, getToolPath } from "@shared/catalog";
-import { guideContents } from "@shared/content";
-import { getStaticRouteFaq } from "@shared/seo";
-
-const DEFAULT_SUPPORT_EMAIL = "infokokk1@naver.com";
+import { getToolPath } from "@shared/catalog";
 
 const pages = {
-  about: {
-    title: "도구상자 소개",
-    paragraphs: [
-      "도구상자는 생활 계산, 세금·급여 참고 계산, PDF·이미지·문서 변환, 단위 환산을 한곳에서 제공하는 온라인 유틸리티 모음입니다.",
-      "계산 도구는 결과와 산식·주의사항을 함께 제공하며, 파일 도구는 현재 브라우저에서만 처리되는 기능을 우선 제공합니다. 실제로 제공하지 않는 복잡한 문서 구조 변환을 완료된 기능처럼 표시하지 않습니다.",
-      "세금·급여·보험·부동산처럼 제도와 기준이 바뀔 수 있는 도구는 참고용 간이 계산으로 제공하며, 실제 신고·계약·지급 전에는 각 도구에 안내된 공식 기관 또는 전문가 기준을 확인해야 합니다.",
-    ],
-  },
-  guide: {
-    title: "이용방법",
-    paragraphs: [
-      "상단 메뉴, 홈페이지 카테고리 또는 도구 검색으로 원하는 기능을 찾은 뒤 필요한 값을 입력하거나 파일을 선택하세요. 계산기에서는 계산하기를 누르고, 파일 도구에서는 처리 시작 후 결과 다운로드 버튼을 누르면 됩니다.",
-      "파일 도구는 지원 형식과 파일 크기 제한을 먼저 확인하세요. PDF → Word·Excel·한글처럼 원본 구조 보존이 필요한 복잡한 변환은 현재 제공하지 않으며, 단순 확장자 변경 방식의 결과를 만들지 않습니다.",
-      "세금·급여·보험·부동산 계산기의 결과는 입력값을 바탕으로 한 참고용 간이 추정입니다. 기준일, 반영 범위와 제외 항목을 확인하고 중요한 의사결정 전에는 공식 기관의 최신 안내를 확인하세요.",
-    ],
-  },
-  faq: {
-    title: "자주 묻는 질문",
-    paragraphs: [
-      "계산 결과는 입력값을 바탕으로 한 참고용 정보입니다. 세금, 금융, 부동산, 급여, 건강과 관련된 실제 판단·신고·계약 전에는 공식 기관 또는 전문가의 최신 기준을 확인하세요.",
-      "현재 제공되는 파일 도구는 브라우저 로컬 처리 방식입니다. 선택 파일과 처리 결과는 서버에 업로드·저장되지 않으며, 탭을 닫거나 초기화하면 작업 데이터가 사라집니다.",
-    ],
-  },
-  privacy: {
-    title: "개인정보처리방침",
-    paragraphs: [
-      "도구상자는 현재 파일 변환·이미지 처리·문서 변환을 브라우저의 메모리 안에서 수행합니다. 사용자가 선택한 파일은 서버로 업로드하거나 데이터베이스·스토리지에 저장하지 않으며, 공개 URL·다운로드 링크·검색엔진 색인 대상 파일을 만들지 않습니다. 파일은 형식과 크기를 확인한 뒤 현재 탭에서만 읽고, 초기화·새로고침·탭 종료 시 미리보기와 처리 데이터가 사라집니다.",
-      "계산기 입력값도 현재 브라우저에서만 사용됩니다. 문의 페이지는 사이트 서버에 내용을 전송·저장하지 않으며, 사용자가 메일 작성 버튼을 누르면 기기에 설정된 이메일 앱 또는 웹메일 서비스가 열립니다. 이메일 발송 뒤의 수집·보관은 사용자가 선택한 이메일 서비스의 정책에 따릅니다.",
-      "광고가 활성화되면 Google AdSense 등 제3자 광고 서비스가 자체 정책에 따라 쿠키 또는 유사 기술을 사용할 수 있습니다. 현재 Publisher ID와 광고 슬롯 ID가 설정되지 않은 환경에서는 광고 스크립트를 불러오지 않습니다. 광고·분석 또는 문의 처리 방식이 바뀌면 이 페이지를 실제 동작에 맞춰 갱신합니다.",
-    ],
-  },
-  terms: {
-    title: "이용약관",
-    paragraphs: [
-      "도구상자는 온라인 계산 및 브라우저 기반 파일 처리 기능을 제공합니다. 이용자는 관련 법령과 타인의 권리를 침해하지 않는 범위에서 서비스를 이용해야 하며, 악성 파일·불법 콘텐츠·타인의 개인정보를 무단으로 처리해서는 안 됩니다.",
-      "서비스는 기능 변경, 보안 점검, 브라우저 호환성 또는 외부 정책 변화에 따라 일부 기능이 변경·중단될 수 있습니다. 이용자는 중요한 원본 파일을 별도로 보관하고, 변환 결과의 완전성과 적합성을 필요한 경우 직접 확인해야 합니다.",
-    ],
-  },
-  disclaimer: {
-    title: "면책조항",
-    paragraphs: [
-      "계산 결과와 정보 콘텐츠는 참고용이며 개인의 실제 금융, 세무, 법률, 급여, 부동산 계약, 건강 상태 또는 제도 적용 결과를 확정하지 않습니다. 대출, 전월세, 세금, 연봉, 퇴직금, 보험, 건강 지표 등 중요한 의사결정 전에는 금융기관, 정부기관, 의료기관, 세무 전문가 또는 관련 기관의 최신 기준을 확인하세요.",
-      "파일 도구는 사용자의 기기와 브라우저 안에서 처리됩니다. 복잡한 PDF·문서의 글꼴, 레이아웃, 암호화, 손상 상태 또는 브라우저 메모리 제한에 따라 일부 처리가 실패하거나 결과 품질이 달라질 수 있습니다. 원본 파일은 항상 별도로 보관하세요.",
-    ],
-  },
-  cookie: {
-    title: "쿠키 및 광고 안내",
-    paragraphs: [
-      "도구상자는 서비스 품질과 방문 통계를 위해 브라우저 기반 분석 도구를 사용할 수 있습니다. 광고 영역은 Google AdSense Publisher ID와 슬롯 ID가 실제 배포 환경변수로 설정된 경우에만 활성화됩니다. 임의의 광고 ID나 테스트 ID는 소스에 넣지 않습니다.",
-      "광고가 활성화된 경우 광고 제공업체는 맞춤 광고, 빈도 제한, 측정 등을 위해 쿠키 또는 유사 기술을 사용할 수 있습니다. 광고는 콘텐츠와 구분된 위치에만 표시하며, 광고 클릭을 유도하는 문구나 UI는 제공하지 않습니다. 필요한 지역별 동의 관리 방식과 광고·쿠키 처리 방식이 변경되면 이 페이지를 갱신합니다.",
-    ],
-  },
+  about: { title: "도구상자 소개", body: "도구상자는 생활에 필요한 계산기와 파일 변환 도구를 한곳에서 이용할 수 있도록 만든 온라인 유틸리티 모음입니다. 각 도구는 목적에 맞는 입력, 계산 결과, 참고 정보와 함께 제공됩니다." },
+  faq: { title: "자주 묻는 질문", body: "계산 결과는 입력값을 바탕으로 한 참고용 결과입니다. 파일 변환은 현재 브라우저에서 처리되며, 탭을 닫으면 결과 파일도 유지되지 않습니다." },
+  privacy: { title: "개인정보처리방침", body: "도구상자는 현재 회원가입이나 사용자 프로필 정보를 운영 목적으로 수집하지 않습니다. 계산 입력값과 파일 변환 대상은 브라우저 안에서 처리하며 서버에 저장하지 않습니다. 문의하기 화면은 현재 전송 기능을 제공하지 않으며, 이메일과 문의 내용이 서버에 저장되지 않습니다. 향후 문의 접수 또는 분석 기능이 추가되면 실제 처리 방식에 맞춰 이 안내를 갱신합니다." },
+  terms: { title: "이용약관", body: "도구상자는 온라인 계산 및 파일 변환 기능을 제공합니다. 이용자는 관련 법령과 타인의 권리를 침해하지 않는 범위에서 서비스를 이용해야 합니다. 기능 변경, 점검 또는 개선에 따라 서비스의 일부가 변경되거나 중단될 수 있습니다." },
+  disclaimer: { title: "면책조항", body: "계산 결과는 참고용 정보이며 개인의 실제 금융, 세무, 법률, 급여, 부동산 계약 또는 제도 적용 결과와 다를 수 있습니다. 대출, 전월세, 세금, 연봉, 퇴직금 등 중요한 의사결정 전에는 금융기관, 정부기관, 세무 전문가 또는 관련 기관의 최신 기준을 확인하세요. 도구상자는 공식적인 법률·세무·금융 자문을 제공하지 않습니다." },
+  cookie: { title: "쿠키 및 광고 안내", body: "현재 도구상자는 서비스 품질과 방문 통계를 위해 브라우저 기반 분석 도구를 사용할 수 있습니다. 광고 영역은 향후 광고 서비스를 연결할 수 있도록 마련되어 있으나 현재 광고 코드는 삽입하지 않았습니다. 광고 또는 쿠키 처리 방식이 변경되면 이 페이지에 반영합니다." },
 };
 
-export function InfoPage({ type }: { type: keyof typeof pages }) {
-  const page = pages[type];
-  const path = `/${type === "about" ? "about" : type === "guide" ? "guide" : type === "faq" ? "faq" : type === "cookie" ? "cookie-policy" : type}`;
-  const questions = getStaticRouteFaq(path);
-  return <div className="site-page"><SeoHead title={`${page.title} | 도구상자`} description={page.paragraphs[0]} path={path} kind="CollectionPage" /><SiteHeader /><main className="container info-page"><p className="eyebrow">INFORMATION / 2026</p><h1>{page.title}</h1><div className="info-copy">{page.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>{questions.length > 0 && <section className="faq-section info-faq"><p className="eyebrow">COMMON QUESTIONS</p><h2>도구상자 이용 FAQ</h2>{questions.map((item) => <details key={item.question}><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>}<Link href="/">도구상자 홈으로 돌아가기</Link></main><SiteFooter /></div>;
-}
+const guideTopics = [
+  { id: "guide-finance", icon: Landmark, eyebrow: "LOAN · FINANCE", title: "대출과 이자, 무엇을 비교해야 할까요?", description: "월 납입금만 보지 말고 상환 방식, 총이자, 중도상환수수료와 우대 조건까지 같은 기준으로 확인하세요.", slugs: ["loan-interest", "loan-amortization", "equal-principal", "early-repayment-fee"] },
+  { id: "guide-real-estate", icon: Calculator, eyebrow: "REAL ESTATE", title: "집 계약 전 실제 현금흐름을 확인하세요.", description: "전월세 비용, 전세대출 이자, 취득세와 중개보수까지 함께 계산해야 계약 후 부담을 줄일 수 있습니다.", slugs: ["monthly-rent", "jeonse-loan-interest", "mortgage", "acquisition-tax", "brokerage-fee"] },
+  { id: "guide-salary", icon: WalletCards, eyebrow: "SALARY · EMPLOYMENT", title: "급여와 퇴직, 내 숫자를 확인하세요.", description: "연봉·월급 실수령액은 급여명세서와 대조하고, 퇴직금과 실업급여는 근속·가입 조건을 함께 확인하세요.", slugs: ["annual-take-home", "monthly-take-home", "retirement-pay", "unemployment-benefit"] },
+  { id: "guide-tax", icon: FileText, eyebrow: "TAX · BUSINESS", title: "세금과 사업 비용은 증빙부터 준비하세요.", description: "부가세와 취득세 결과는 참고값입니다. 신고·납부 전에는 과세 유형, 감면과 증빙을 공식 기준으로 확인하세요.", slugs: ["vat-calculator", "acquisition-tax", "property-tax"] },
+  { id: "guide-pdf", icon: FileText, eyebrow: "PDF · FILE", title: "파일 변환 후에는 결과 파일을 검수하세요.", description: "PDF 변환과 병합은 브라우저에서 처리됩니다. 변환 후 페이지 순서, 글자, 표와 서식을 반드시 열어 확인하세요.", slugs: ["pdf-convert", "pdf-to-excel", "pdf-to-hwp", "pdf-merge"] },
+] as const;
 
-const SEARCH_SYNONYMS: Record<string, string[]> = {
-  월급: ["급여", "실수령", "연봉"], 급여: ["월급", "실수령", "연봉"],
-  전세: ["전세대출", "보증금", "임대"], 대출: ["이자", "상환", "원리금", "금리"],
-  집: ["주택", "아파트", "부동산", "취득세"], 세금: ["세율", "소득세", "부가세", "취득세"],
-  차: ["자동차", "차량", "주유", "유지비"], 자동차: ["차량", "주유", "유지비"],
-  마진: ["순이익", "수수료", "원가", "손익분기"], 파일: ["PDF", "문서", "이미지", "변환"],
-};
-const POPULAR_SEARCHES = ["전세대출 이자", "월급 실수령액", "취득세", "자동차 유지비", "PDF 변환", "스마트스토어 마진"];
-
-type SearchFilter = "all" | "calculator" | "guide";
-
-function searchTerms(query: string) {
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  return Array.from(new Set(words.flatMap((word) => [word, ...(SEARCH_SYNONYMS[word] ?? [])])));
-}
-
-export function SearchPage() {
+function GuideHub() {
   const { data } = useCatalog();
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<SearchFilter>("all");
-  useEffect(() => {
-    const focusSearch = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        document.querySelector<HTMLInputElement>(".search-page .search-input input")?.focus();
-      }
-    };
-    window.addEventListener("keydown", focusSearch);
-    return () => window.removeEventListener("keydown", focusSearch);
-  }, []);
-  const terms = useMemo(() => searchTerms(query.trim()), [query]);
-  const toolResults = useMemo(() => {
-    if (!data || !terms.length) return [];
-    return data.tools.map((tool) => {
-      const category = data.categories.find((item) => item.id === tool.categoryId);
-      const parent = category?.parentId ? data.categories.find((item) => item.id === category.parentId) : undefined;
-      const haystack = [tool.title, tool.description, ...(tool.searchKeywords ?? []), category?.name ?? "", category?.description ?? "", parent?.name ?? "", parent?.description ?? ""].join(" ").toLowerCase();
-      const score = terms.reduce((total, term) => total + (haystack.includes(term) ? (tool.title.toLowerCase().includes(term) ? 4 : 1) : 0), 0);
-      return { tool, category, parent, score };
-    }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score || a.tool.sortOrder - b.tool.sortOrder).slice(0, 30);
-  }, [data, terms]);
-  const guideResults = useMemo(() => {
-    if (!terms.length) return [];
-    return guideContents.map((guide) => {
-      const haystack = [guide.title, guide.description, guide.intro, guide.coreAnswer ?? "", guide.eyebrow, guide.monetizationCategory].join(" ").toLowerCase();
-      const score = terms.reduce((total, term) => total + (haystack.includes(term) ? (guide.title.toLowerCase().includes(term) ? 4 : 1) : 0), 0);
-      return { guide, score };
-    }).filter((item) => item.score > 0).sort((a, b) => b.score - a.score).slice(0, 20);
-  }, [terms]);
-  const suggestions = useMemo(() => {
-    if (!query.trim()) return POPULAR_SEARCHES;
-    const typed = query.trim().toLowerCase();
-    return [...POPULAR_SEARCHES, ...data?.tools.flatMap((tool) => [tool.title, ...(tool.searchKeywords ?? [])]) ?? [], ...guideContents.map((guide) => guide.title)]
-      .filter((value, index, list) => list.indexOf(value) === index && value.toLowerCase().includes(typed)).slice(0, 6);
-  }, [data, query]);
-  const total = toolResults.length + guideResults.length;
-  return <div className="site-page"><SeoHead title="도구 검색 | 도구상자" description="계산기, guide, PDF, 이미지, 문서 변환과 단위 변환 도구를 한 번에 검색합니다." path="/search" kind="CollectionPage" noindex /><SiteHeader /><main className="container search-page"><p className="eyebrow">TOOL FINDER / CALCULATOR + GUIDE</p><h1>필요한 도구를<br /><em>바로 찾기.</em></h1><p className="search-intro">계산기와 가이드를 함께 검색하고, 결과에서 바로 사용하세요.</p><label className="search-input"><Search size={22} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="전세대출 이자, 월급 실수령액, PDF 합치기" aria-label="계산기와 guide 검색" /><kbd>⌘K</kbd></label><div className="search-filter-row" role="group" aria-label="검색 결과 종류"><button type="button" className={filter === "all" ? "active" : ""} onClick={() => setFilter("all")}>전체</button><button type="button" className={filter === "calculator" ? "active" : ""} onClick={() => setFilter("calculator")}>계산기·도구</button><button type="button" className={filter === "guide" ? "active" : ""} onClick={() => setFilter("guide")}>guide</button></div>{suggestions.length > 0 && <div className="search-suggestions" aria-label={query ? "검색 추천" : "인기 검색어"}>{suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => setQuery(suggestion)}>{suggestion}</button>)}</div>}{query.trim() ? <div className="search-results search-results-grouped">{total ? <>{filter !== "guide" && toolResults.length > 0 && <section><div className="search-results-heading"><span>CALCULATORS & TOOLS</span><strong>계산기·도구 <small>{toolResults.length}</small></strong></div>{toolResults.map(({ tool, category, parent }) => <Link key={tool.id} href={getToolPath(tool, data!.categories)}><span>{parent ? `${parent.name} · ${category?.name}` : category?.name}</span><strong>{tool.title}</strong><p>{tool.description}</p><small>바로 사용하기 →</small></Link>)}</section>}{filter !== "calculator" && guideResults.length > 0 && <section><div className="search-results-heading"><span>SEARCH GUIDES</span><strong>관련 guide <small>{guideResults.length}</small></strong></div>{guideResults.map(({ guide }) => <Link key={guide.slug} href={`/guides/${guide.slug}`}><span>{guide.eyebrow}</span><strong>{guide.title}</strong><p>{guide.coreAnswer ?? guide.description}</p><small>내용 확인하기 →</small></Link>)}</section>}</> : <div className="search-empty"><strong>“{query}”에 맞는 결과가 없습니다.</strong><p>다른 표현으로 검색하거나 아래 인기 검색어를 선택해 보세요.</p></div>}</div> : <div className="search-empty search-empty-guide"><strong>무엇을 계산하거나 변환할까요?</strong><p>검색어를 입력하거나 인기 검색어를 눌러 계산기와 guide를 함께 찾아보세요.</p></div>}</main><SiteFooter /></div>;
+  const tools = data?.tools ?? [];
+  const categories = data?.categories ?? [];
+  return <div className="site-page"><SeoHead title="계산 결과 활용 가이드 | 도구상자" description="대출, 부동산, 급여, 세금과 PDF 도구의 계산 결과를 확인하고 다음 행동으로 연결하는 실용 가이드입니다." path="/guide" kind="CollectionPage" /><SiteHeader /><main className="container guide-hub">
+    <section className="guide-hub-intro"><p className="eyebrow">PRACTICAL GUIDES / 2026</p><h1>계산 후, 무엇을<br />확인해야 할까요?</h1><p>도구의 결과를 저장하는 데서 끝내지 않고, 비교할 조건과 공식 확인 항목, 다음에 사용할 도구까지 한 번에 정리했습니다.</p><div className="guide-flow"><span>01 결과 확인</span><span>02 조건 비교</span><span>03 공식 기준 확인</span><span>04 다음 문서 준비</span></div></section>
+    <section className="guide-topic-grid" aria-label="주제별 계산 결과 활용 가이드">{guideTopics.map((topic) => { const Icon = topic.icon; const linked = topic.slugs.map((slug) => tools.find((tool) => tool.slug === slug)).filter(Boolean); return <article key={topic.id} id={topic.id}><div className="guide-topic-head"><Icon size={24} /><p className="eyebrow">{topic.eyebrow}</p></div><h2>{topic.title}</h2><p>{topic.description}</p><div>{linked.map((tool) => tool ? <Link key={tool.id} href={getToolPath(tool, categories)}>{tool.title}<ArrowUpRight size={16} /></Link> : null)}</div></article>; })}</section>
+    <section className="guide-checklist"><p className="eyebrow">BEFORE YOU DECIDE</p><h2>중요한 숫자는 이렇게 확인하세요.</h2><div><article><strong>계산기 결과</strong><p>입력값과 결과 요약을 저장하거나 인쇄해 비교 기준으로 남기세요.</p></article><article><strong>공식 기준</strong><p>세율, 수수료, 대출 조건과 자격 요건은 결과 화면의 공식 확인 링크를 우선 확인하세요.</p></article><article><strong>실제 계약·신고</strong><p>계약서, 급여명세서, 고지서와 증빙은 계산 결과보다 우선합니다.</p></article></div></section>
+  </main><SiteFooter /></div>;
 }
 
-export function ContactPage() {
-  const [openedMailer, setOpenedMailer] = useState(false);
-  const supportEmail = import.meta.env.VITE_CONTACT_EMAIL?.trim() || DEFAULT_SUPPORT_EMAIL;
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const type = String(form.get("type") ?? "기타 문의");
-    const replyEmail = String(form.get("replyEmail") ?? "");
-    const message = String(form.get("message") ?? "");
-    const subject = `[도구상자 문의] ${type}`;
-    const body = `문의 유형: ${type}\n답변 받을 이메일: ${replyEmail}\n\n문의 내용:\n${message}`;
-    setOpenedMailer(true);
-    window.location.href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  };
-  return <div className="site-page"><SeoHead title="문의하기 | 도구상자" description="도구상자 오류, 개인정보 처리와 서비스 개선 의견을 운영 이메일로 보낼 수 있습니다." path="/contact" kind="CollectionPage" /><SiteHeader /><main className="container info-page contact-page"><p className="eyebrow">CONTACT / EMAIL</p><h1>문의하기</h1><div className="info-copy"><p>계산 오류, 기능 오류, 파일 변환 오류, 개인정보 문의와 개선 의견은 운영 이메일로 보낼 수 있습니다. 이 사이트는 문의 내용을 서버에 저장하지 않으며, 아래 양식은 사용자의 이메일 앱 또는 웹메일 작성을 도와줍니다.</p><p>운영 문의: <a href={`mailto:${supportEmail}`}>{supportEmail}</a></p></div><form onSubmit={submit}><label>문의 유형<select name="type" required><option>계산 오류</option><option>기능 오류</option><option>파일 변환 오류</option><option>개인정보 문의</option><option>기타 문의</option></select></label><label>이메일<input name="replyEmail" type="email" required placeholder="답변 받을 이메일" /></label><label>문의 내용<textarea name="message" required minLength={10} placeholder="재현 방법과 사용한 입력값을 함께 적어주세요." /></label><button className="primary-action" type="submit"><Send size={17} />이메일 작성하기</button></form>{openedMailer && <p className="form-notice"><Mail size={17} />이메일 앱이 열리지 않으면 위 운영 이메일 주소를 복사해 직접 보내주세요.</p>}</main><SiteFooter /></div>;
+export function InfoPage({ type }: { type: keyof typeof pages | "guide" }) {
+  if (type === "guide") return <GuideHub />;
+  const page = pages[type];
+  return <div className="site-page"><SeoHead title={`${page.title} | 도구상자`} description={page.body} path={`/${type === "about" ? "about" : type === "faq" ? "faq" : type === "cookie" ? "cookie-policy" : type}`} kind="CollectionPage" /><SiteHeader /><main className="container info-page"><p className="eyebrow">INFORMATION / 2026</p><h1>{page.title}</h1><p>{page.body}</p><Link href="/">도구상자 홈으로 돌아가기</Link></main><SiteFooter /></div>;
 }
+
+export function SearchPage() { const { data } = useCatalog(); const [query, setQuery] = useState(""); const results = useMemo(() => { const key=query.trim().toLowerCase(); if(!key || !data) return []; return data.tools.filter(tool => { const category = data.categories.find((item) => item.id === tool.categoryId); const parent = category?.parentId ? data.categories.find((item) => item.id === category.parentId) : undefined; const haystack = [tool.title, tool.description, ...(tool.searchKeywords ?? []), category?.name ?? "", category?.description ?? "", parent?.name ?? "", parent?.description ?? ""].join(" ").toLowerCase(); return haystack.includes(key); }).slice(0,30); },[data,query]); return <div className="site-page"><SeoHead title="도구 검색 | 도구상자" description="계산기와 파일 변환 도구를 검색합니다."/><SiteHeader/><main className="container search-page"><p className="eyebrow">TOOL FINDER</p><h1>도구 검색</h1><label className="search-input"><Search size={22}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="전세대출, 주담대, 취득세, 복리, PDF"/></label>{query && <div className="search-results">{results.length?results.map(tool=>{const cat=data.categories.find(c=>c.id===tool.categoryId);const parent=cat?.parentId?data.categories.find(c=>c.id===cat.parentId):undefined;return <Link key={tool.id} href={getToolPath(tool,data.categories)}><span>{parent ? `${parent.name} · ${cat?.name}` : cat?.name}</span><strong>{tool.title}</strong><p>{tool.description}</p><small>바로가기 →</small></Link>}):<p>일치하는 도구가 없습니다.</p>}</div>}</main><SiteFooter/></div>; }
+export function ContactPage() { const [sent,setSent]=useState(false); const submit=(e:FormEvent)=>{e.preventDefault();setSent(true);}; return <div className="site-page"><SeoHead title="문의하기 | 도구상자" description="도구상자 오류와 개선 의견을 확인합니다."/><SiteHeader/><main className="container info-page contact-page"><p className="eyebrow">CONTACT / LOCAL FORM</p><h1>문의하기</h1><p>계산 오류, 기능 오류, 파일 변환 오류, 개인정보 문의, 기타 의견을 정리할 수 있습니다. 현재 이 양식은 서버에 저장하거나 이메일을 전송하지 않습니다.</p><form onSubmit={submit}><label>문의 유형<select required><option>계산 오류</option><option>기능 오류</option><option>파일 변환 오류</option><option>개인정보 문의</option><option>기타 문의</option></select></label><label>이메일<input type="email" required placeholder="답변 받을 이메일"/></label><label>문의 내용<textarea required minLength={10} placeholder="재현 방법과 사용한 입력값을 함께 적어주세요."/></label><button className="primary-action"><Send size={17}/>문의 내용 확인</button></form>{sent&&<p className="form-notice"><Mail size={17}/>현재 전송은 설정되지 않았습니다. 관리자 이메일 연결 후 실제 전송 기능을 활성화할 수 있습니다.</p>}</main><SiteFooter/></div>; }
