@@ -535,3 +535,23 @@ th:first-child,td:first-child { text-align:left; }
 @media (prefers-reduced-motion: reduce) {
   .hub-topic-links a, .loan-share-action button { transition: none; }
 }
+
+
+/* 홈페이지 계산기 카테고리: 모바일 메뉴의 4개 핵심 분류를 카드로 바로 연결 */
+.home-calculator-directory { padding-top: clamp(3.2rem, 7vw, 5.5rem); }
+.home-calculator-category-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: var(--line); border-left: var(--thin-line); }
+.home-calculator-category-card { position: relative; display: grid; align-content: start; gap: .7rem; min-height: 180px; padding: 1.2rem; border-right: var(--thin-line); border-bottom: var(--thin-line); background: var(--paper); color: var(--ink); text-decoration: none; transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out); }
+.home-calculator-category-card > span { font-size: .65rem; font-weight: 800; letter-spacing: .1em; }
+.home-calculator-category-card strong { max-width: calc(100% - 26px); margin-top: auto; font-family: "Noto Sans KR", sans-serif; font-size: clamp(1.05rem, 1.65vw, 1.35rem); line-height: 1.18; letter-spacing: -.07em; }
+.home-calculator-category-card small { min-height: 2.9em; color: #5a5a5a; font-family: "Noto Sans KR", sans-serif; font-size: .72rem; line-height: 1.55; letter-spacing: -.07em; }
+.home-calculator-category-card svg { position: absolute; top: 1.1rem; right: 1.1rem; }
+.home-calculator-category-card:hover, .home-calculator-category-card:focus-visible { background: var(--ink); color: var(--paper); }
+.home-calculator-category-card:hover small, .home-calculator-category-card:focus-visible small { color: var(--paper); }
+@media (max-width: 760px) {
+  .home-calculator-directory { padding-top: 3.2rem; }
+  .home-calculator-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .home-calculator-category-card { min-height: 150px; padding: 1rem; }
+  .home-calculator-category-card strong { font-size: 1.08rem; }
+  .home-calculator-category-card small { min-height: 0; font-size: .68rem; }
+  .home-calculator-category-card svg { top: .9rem; right: .9rem; }
+}
