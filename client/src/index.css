@@ -308,3 +308,42 @@ th:first-child,td:first-child { text-align:left; }
 .insurance-table-wrap { overflow-x:auto; margin-top:1.4rem; border:var(--thin-line); }.insurance-table-wrap table { width:100%; min-width:520px; border-collapse:collapse; font-family:"Noto Sans KR",sans-serif; font-size:.8rem; letter-spacing:-.05em; }.insurance-table-wrap th,.insurance-table-wrap td { padding:.8rem; border-right:var(--thin-line); border-bottom:var(--thin-line); text-align:right; white-space:nowrap; }.insurance-table-wrap th:first-child,.insurance-table-wrap td:first-child { text-align:left; }.insurance-table-wrap thead { background:var(--ink); color:white; }.insurance-table-wrap .total { background:#f1f1ee; font-weight:800; }
 @media (max-width:760px) { .salary-breakdown { padding:1rem; }.salary-breakdown-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.date-pair { grid-template-columns:1fr; gap:0; } .calculator-form input[type="date"], .calculator-form input[type="time"] { min-height:48px; font-size:1rem; } .insurance-table-wrap { margin-left:-.5rem; margin-right:-.5rem; } }
 @media (max-width:420px) { .salary-breakdown-grid { grid-template-columns:1fr; }.salary-breakdown-grid p { padding:.75rem; } }
+
+/* Decision-complete tool support */
+.decision-support { margin-top:clamp(1.5rem,4vw,3rem); border:var(--thin-line); background:#f7f7f5; }
+.decision-support-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1.25rem 1.35rem; border-bottom:var(--thin-line); }
+.decision-support-head h2 { margin:.45rem 0 0; font-size:clamp(1.35rem,3vw,2.25rem); letter-spacing:-.08em; }
+.decision-support-actions { display:flex; gap:.45rem; flex-wrap:wrap; }
+.decision-support-actions button,.next-actions a { display:inline-flex; align-items:center; justify-content:center; gap:.35rem; min-height:38px; padding:.55rem .75rem; border:var(--thin-line); background:var(--paper); color:var(--ink); font-size:.72rem; font-weight:700; }
+.decision-support-actions button:hover,.next-actions a:hover { background:var(--ink); color:var(--paper); }
+.decision-support-grid { display:grid; grid-template-columns:repeat(3,1fr); }
+.decision-support-grid article { min-height:150px; padding:1.15rem 1.25rem; border-right:var(--thin-line); }
+.decision-support-grid article:last-child { border-right:0; }
+.decision-support-grid strong,.next-actions>strong { display:block; margin-bottom:.55rem; font-size:.78rem; letter-spacing:-.04em; }
+.decision-support-grid p { margin:0; font-family:"Noto Sans KR",sans-serif; font-size:.75rem; line-height:1.7; letter-spacing:-.06em; }
+.next-actions { display:flex; align-items:center; gap:.7rem; padding:1rem 1.25rem; border-top:var(--thin-line); }
+.next-actions>strong { margin:0 auto 0 0; white-space:nowrap; }
+.next-actions div { display:flex; gap:.45rem; flex-wrap:wrap; justify-content:flex-end; }
+@media (max-width:720px) {
+  .decision-support-head { align-items:flex-start; flex-direction:column; }
+  .decision-support-actions { width:100%; }
+  .decision-support-actions button { flex:1; }
+  .decision-support-grid { grid-template-columns:1fr; }
+  .decision-support-grid article { min-height:auto; border-right:0; border-bottom:var(--thin-line); }
+  .decision-support-grid article:last-child { border-bottom:0; }
+  .next-actions { align-items:flex-start; flex-direction:column; }
+  .next-actions div { width:100%; justify-content:flex-start; }
+  .next-actions a { flex:1; }
+}
+@media print {
+  .site-header,.site-footer,.ad-slot,.decision-support-actions,.next-actions { display:none !important; }
+  .decision-support { margin-top:1rem; }
+}
+
+.core-tool-links { padding:1rem 1.25rem 1.25rem; border-top:var(--thin-line); }
+.core-tool-links h3 { margin:.45rem 0 .8rem; font-size:1.1rem; letter-spacing:-.07em; }
+.core-tool-links>div { display:grid; grid-template-columns:repeat(5,1fr); border-left:var(--thin-line); }
+.core-tool-links a { display:flex; align-items:center; justify-content:space-between; gap:.5rem; min-height:44px; padding:.65rem .7rem; border-right:var(--thin-line); border-bottom:var(--thin-line); background:var(--paper); font-family:"Noto Sans KR",sans-serif; font-size:.72rem; font-weight:700; letter-spacing:-.06em; }
+.core-tool-links a:hover { background:var(--signal); color:var(--paper); }
+.core-tool-links a span { font-size:1rem; }
+@media (max-width:720px) { .core-tool-links>div { grid-template-columns:repeat(2,1fr); } .core-tool-links a { min-height:48px; } }
