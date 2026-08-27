@@ -14,6 +14,7 @@ import VatCalculator from "./pages/VatCalculator";
 import { CalculatorCatalog, CalculatorSubcategory, CalculatorToolRoute, ConverterCatalog, ConverterSubcategory, ConverterToolRoute, UnitCatalog, UnitSubcategory } from "./pages/CatalogPages";
 import AdminCategories from "./pages/AdminCategories";
 import { ContactPage, InfoPage, SearchPage } from "./pages/InfoPages";
+import { GuideCatalog, GuidePage } from "./pages/GuidePages";
 
 const PdfTool = lazy(() => import("./pages/PdfTool"));
 const PdfToolRoute = () => <Suspense fallback={<div className="client-tool-loading">PDF 변환 도구를 준비하는 중입니다.</div>}><PdfTool /></Suspense>;
@@ -41,6 +42,8 @@ function Router() {
       <Route path={"/search"} component={SearchPage} />
       <Route path={"/about"}>{() => <InfoPage type="about" />}</Route>
       <Route path={"/guide"}>{() => <InfoPage type="guide" />}</Route>
+      <Route path={"/guides"} component={GuideCatalog} />
+      <Route path={"/guides/:slug"}>{(params) => <GuidePage slug={params.slug} />}</Route>
       <Route path={"/faq"}>{() => <InfoPage type="faq" />}</Route>
       <Route path={"/privacy"}>{() => <InfoPage type="privacy" />}</Route>
       <Route path={"/terms"}>{() => <InfoPage type="terms" />}</Route>
