@@ -22,7 +22,13 @@ function buildHead(meta) {
   };
   const app = { "@context": "https://schema.org", "@type": meta.type, name: meta.title, description: meta.description, url: canonical };
   const jsonLd = JSON.stringify([app, breadcrumb]).replace(/</g, "\\u003c");
-  return `<title>${escapeHtml(meta.title)}</title><meta name="description" content="${escapeHtml(meta.description)}"><link rel="canonical" href="${escapeHtml(canonical)}"><meta property="og:type" content="website"><meta property="og:title" content="${escapeHtml(meta.title)}"><meta property="og:description" content="${escapeHtml(meta.description)}"><meta property="og:url" content="${escapeHtml(canonical)}"><meta name="twitter:card" content="summary"><script type="application/ld+json">${jsonLd}</script>`;
+  return `<title>${escapeHtml(meta.title)}</title><meta name="description" content="${escapeHtml(meta.description)}"><meta name="robots" content="index,follow"><link rel="canonical" href="${escapeHtml(canonical)}"><meta property="og:type" content="website"><meta property="og:title" content="${escapeHtml(meta.title)}"><meta property="og:description" content="${escapeHtml(meta.description)}"><meta property="og:url" content="${escapeHtml(canonical)}"><meta name="twitter:card" content="summary"><script type="application/ld+json">${jsonLd}</script>`;
+}
+
+function injectHead(template, meta) {
+  const defaultHeadPattern = /\s*<meta name="description"[\s\S]*?<title>[\s\S]*?<\/title>/;
+  if (!defaultHeadPattern.test(template)) throw new Error("기본 HTML head 메타 블록을 찾지 못했습니다.");
+  return template.replace(defaultHeadPattern, `\n    ${buildHead(meta)}`);
 }
 
 let renderedCount = 0;
@@ -30,7 +36,7 @@ for (const rawPath of staticPaths) {
   const route = rawPath.split("?")[0].replace(/\/$/, "") || "/";
   const meta = serverEntry.getStaticPageMeta(route);
   const body = serverEntry.render(route);
-  const html = htmlTemplate.replace("<!--app-head-->", buildHead(meta)).replace("<!--app-html-->", body);
+  const html = injectHead(htmlTemplate, meta).replace("<!--app-head-->", "").replace("<!--app-html-->", body);
   const destination = route === "/" ? path.join(publicDir, "index.html") : path.join(publicDir, route.slice(1), "index.html");
   await fs.mkdir(path.dirname(destination), { recursive: true });
   await fs.writeFile(destination, html);

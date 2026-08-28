@@ -403,3 +403,105 @@ export function calculateUnemploymentBenefit(monthlyWage: number, age: number, i
   else if (months >= 120) payableDays = group === "senior" ? 270 : 240;
   return { monthlyWage: wage, age: ageAtSeparation, insuredMonths: months, averageDailyWage, rawDailyBenefit, dailyBenefit: payableDays > 0 ? dailyBenefit : 0, payableDays, totalBenefit: payableDays > 0 ? dailyBenefit * payableDays : 0, eligibleByMonths: months >= 6, ageGroup: group };
 }
+
+
+type CalendarDate = { year: number; month: number; day: number };
+
+function parseCalendarDate(value: string): CalendarDate | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const check = new Date(Date.UTC(year, month - 1, day));
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day) return null;
+  return { year, month, day };
+}
+
+function calendarDayNumber(date: CalendarDate) {
+  return Math.floor(Date.UTC(date.year, date.month - 1, date.day) / 86_400_000);
+}
+
+function daysInMonth(year: number, month: number) {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+function addCalendarMonths(date: CalendarDate, months: number): CalendarDate {
+  const monthIndex = date.year * 12 + (date.month - 1) + Math.trunc(months);
+  const year = Math.floor(monthIndex / 12);
+  const month = ((monthIndex % 12) + 12) % 12 + 1;
+  return { year, month, day: Math.min(date.day, daysInMonth(year, month)) };
+}
+
+function formatCalendarDate(date: CalendarDate) {
+  return `${String(date.year).padStart(4, "0")}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
+}
+
+export function calculateDateOperation(baseDate: string, years: number, months: number, days: number, mode: "add" | "subtract") {
+  const base = parseCalendarDate(baseDate);
+  if (!base) return { valid: false, resultDate: "", baseDate: "", differenceDays: 0, message: "유효한 기준일을 입력하세요." };
+  const direction = mode === "add" ? 1 : -1;
+  const monthDelta = direction * (Math.max(0, Math.trunc(Number.isFinite(years) ? years : 0)) * 12 + Math.max(0, Math.trunc(Number.isFinite(months) ? months : 0)));
+  const dayDelta = direction * Math.max(0, Math.trunc(Number.isFinite(days) ? days : 0));
+  const shifted = addCalendarMonths(base, monthDelta);
+  const resultDateObject = new Date(Date.UTC(shifted.year, shifted.month - 1, shifted.day));
+  resultDateObject.setUTCDate(resultDateObject.getUTCDate() + dayDelta);
+  const result: CalendarDate = { year: resultDateObject.getUTCFullYear(), month: resultDateObject.getUTCMonth() + 1, day: resultDateObject.getUTCDate() };
+  return { valid: true, resultDate: formatCalendarDate(result), baseDate: formatCalendarDate(base), differenceDays: calendarDayNumber(result) - calendarDayNumber(base), message: "" };
+}
+
+export function calculateDDay(baseDate: string, targetDate: string) {
+  const base = parseCalendarDate(baseDate);
+  const target = parseCalendarDate(targetDate);
+  if (!base || !target) return { valid: false, label: "", days: 0, weeks: 0, remainingDays: 0, message: "유효한 기준일과 목표일을 입력하세요." };
+  const days = calendarDayNumber(target) - calendarDayNumber(base);
+  const absoluteDays = Math.abs(days);
+  const label = days === 0 ? "D-Day" : days > 0 ? `D-${days}` : `D+${absoluteDays}`;
+  return { valid: true, label, days, weeks: Math.floor(absoluteDays / 7), remainingDays: absoluteDays % 7, message: "" };
+}
+
+export function calculateAge(birthDate: string, referenceDate: string) {
+  const birth = parseCalendarDate(birthDate);
+  const reference = parseCalendarDate(referenceDate);
+  if (!birth || !reference) return { valid: false, fullAge: 0, koreanAge: 0, yearAge: 0, nextBirthdayDays: 0, birthdayPassed: false, message: "유효한 생년월일과 기준일을 입력하세요." };
+  if (calendarDayNumber(birth) > calendarDayNumber(reference)) return { valid: false, fullAge: 0, koreanAge: 0, yearAge: 0, nextBirthdayDays: 0, birthdayPassed: false, message: "생년월일은 기준일보다 늦을 수 없습니다." };
+  const birthdayMonthDay: CalendarDate = { year: reference.year, month: birth.month, day: Math.min(birth.day, daysInMonth(reference.year, birth.month)) };
+  const birthdayPassed = calendarDayNumber(birthdayMonthDay) <= calendarDayNumber(reference);
+  const fullAge = reference.year - birth.year - (birthdayPassed ? 0 : 1);
+  const nextBirthday = birthdayPassed
+    ? { year: reference.year + 1, month: birth.month, day: Math.min(birth.day, daysInMonth(reference.year + 1, birth.month)) }
+    : birthdayMonthDay;
+  return { valid: true, fullAge, koreanAge: reference.year - birth.year + 1, yearAge: reference.year - birth.year, nextBirthdayDays: calendarDayNumber(nextBirthday) - calendarDayNumber(reference), birthdayPassed, message: "" };
+}
+
+export function calculateDateDifference(startDate: string, endDate: string, inclusive = false) {
+  const start = parseCalendarDate(startDate);
+  const end = parseCalendarDate(endDate);
+  if (!start || !end) return { valid: false, selectedDays: 0, days: 0, weeks: 0, remainingDays: 0, months: 0, monthRemainingDays: 0, message: "유효한 시작일과 종료일을 입력하세요." };
+  const days = calendarDayNumber(end) - calendarDayNumber(start);
+  if (days < 0) return { valid: false, selectedDays: 0, days, weeks: 0, remainingDays: 0, months: 0, monthRemainingDays: 0, message: "종료일은 시작일보다 빠를 수 없습니다." };
+  const selectedDays = inclusive ? days + 1 : days;
+  let months = (end.year - start.year) * 12 + end.month - start.month;
+  const endIsMonthEnd = end.day === daysInMonth(end.year, end.month);
+  if (end.day < start.day && !endIsMonthEnd) months -= 1;
+  months = Math.max(0, months);
+  const monthAnchor = addCalendarMonths(start, months);
+  return { valid: true, selectedDays, days, weeks: Math.floor(selectedDays / 7), remainingDays: selectedDays % 7, months, monthRemainingDays: Math.max(0, calendarDayNumber(end) - calendarDayNumber(monthAnchor)), message: "" };
+}
+
+function parseClock(value: string) {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  return hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60 ? hours * 60 + minutes : null;
+}
+
+export function calculateTimeOperation(baseTime: string, hours: number, minutes: number, mode: "add" | "subtract") {
+  const base = parseClock(baseTime);
+  if (base === null) return { valid: false, resultTime: "", totalMinutes: 0, dayOffset: 0, message: "유효한 기준 시각을 입력하세요." };
+  const direction = mode === "add" ? 1 : -1;
+  const totalMinutes = base + direction * (Math.max(0, Math.trunc(Number.isFinite(hours) ? hours : 0)) * 60 + Math.max(0, Math.trunc(Number.isFinite(minutes) ? minutes : 0)));
+  const normalized = ((totalMinutes % 1_440) + 1_440) % 1_440;
+  return { valid: true, resultTime: `${String(Math.floor(normalized / 60)).padStart(2, "0")}:${String(normalized % 60).padStart(2, "0")}`, totalMinutes: Math.abs(totalMinutes - base), dayOffset: Math.floor(totalMinutes / 1_440), message: "" };
+}

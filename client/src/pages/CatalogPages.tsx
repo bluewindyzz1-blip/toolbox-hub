@@ -16,6 +16,7 @@ import UnitConverter from "./UnitConverter";
 import AdvancedCalculators from "./AdvancedCalculators";
 import FinanceRealEstateCalculators from "./FinanceRealEstateCalculators";
 import SalaryEmploymentCalculators from "./SalaryEmploymentCalculators";
+import DateTimeCalculators from "./DateTimeCalculators";
 
 const PdfTool = lazy(() => import("./PdfTool"));
 
@@ -58,6 +59,7 @@ export function CalculatorToolRoute({ slug }: { slug: string }) {
   if (["rent-conversion","jeonse-to-monthly","monthly-to-jeonse","loan-amortization","deposit-interest","savings"].includes(slug)) return <AdvancedCalculators kind={slug as any} />;
   if (["jeonse-loan-interest", "mortgage", "early-repayment-fee", "brokerage-fee", "acquisition-tax", "property-tax", "compound-interest", "equal-principal", "bullet-loan", "percentage"].includes(slug)) return <FinanceRealEstateCalculators kind={slug as any} />;
   if (["annual-take-home", "monthly-take-home", "retirement-income-tax", "weekly-holiday-pay", "annual-leave-pay", "hourly-wage", "work-hours", "four-insurance", "unemployment-benefit"].includes(slug)) return <SalaryEmploymentCalculators kind={slug as any} />;
+  if (["date-calculator", "d-day", "age", "man-age", "date-difference", "time-calculator"].includes(slug)) return <DateTimeCalculators kind={slug as "date-calculator" | "d-day" | "age" | "man-age" | "date-difference" | "time-calculator"} />;
   if (slug === "vat-calculator") return <VatCalculator />;
   return <Unavailable title="계산기를 준비하고 있습니다." />;
 }
