@@ -1,5 +1,77 @@
 {
+  
   "buildCommand": "pnpm build",
+  
   "outputDirectory": "dist/public",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  
+  "redirects": [
+    
+    {
+      
+      "source": "/calculator/salary/annual-net",
+      
+      "destination": "/calculator/salary/annual-take-home",
+      
+      "permanent": true
+      
+    },
+    
+    {
+      
+      "source": "/2026/07/blog-post_912.html",
+      
+      "destination": "/calculator/salary/retirement-pay",
+      
+      "permanent": true
+      
+    },
+    
+    {
+      
+      "source": "/2026/07/blog-post_259.html",
+      
+      "destination": "/calculator/finance/deposit-interest",
+      
+      "permanent": true
+      
+    },
+    
+    {
+      
+      "source": "/2026/07/blog-post_86.html",
+      
+      "destination": "/calculator/finance/savings",
+      
+      "permanent": true
+      
+    }
+    
+  ]
+  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

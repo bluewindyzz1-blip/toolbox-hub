@@ -10,7 +10,7 @@ const categoryPaths = defaultCatalog.categories
   .filter((category) => category.parentId === null || defaultCatalog.categories.some((root) => root.id === category.parentId && root.parentId === null))
   .filter((category) => defaultCatalog.tools.some((tool) => descendantCategoryIds(category.id).includes(tool.categoryId)))
   .map((category) => getCategoryPath(category, defaultCatalog.categories));
-const toolPaths = defaultCatalog.tools.map((tool) => getToolPath(tool, defaultCatalog.categories));
+const toolPaths = defaultCatalog.tools.filter((tool) => tool.status === "active").map((tool) => getToolPath(tool, defaultCatalog.categories));
 const guidePaths = guideContents.map((guide) => getGuidePath(guide.slug));
 const paths = [...new Set([...staticPaths, ...categoryPaths, ...toolPaths, ...guidePaths])].sort();
 const today = new Date().toISOString().slice(0, 10);

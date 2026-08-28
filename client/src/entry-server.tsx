@@ -4,6 +4,7 @@ import { renderToString } from "react-dom/server";
 import superjson from "superjson";
 import { Router } from "wouter";
 import { defaultCatalog, getCategoryLineage, getCategoryPath, getToolPath, legacyToolPaths } from "@shared/catalog";
+import { getGuideContent, getGuidePath, guideContents } from "@shared/content";
 import App from "./App";
 import { trpc } from "./lib/trpc";
 
@@ -11,7 +12,7 @@ export type StaticPageMeta = {
   title: string;
   description: string;
   canonicalPath: string;
-  type: "WebApplication" | "CollectionPage";
+  type: "WebApplication" | "CollectionPage" | "WebPage";
   breadcrumb: Array<{ name: string; path: string }>;
 };
 
@@ -53,7 +54,24 @@ export function getStaticPageMeta(url: string): StaticPageMeta {
     breadcrumb: categoryBreadcrumb(category.id),
   };
 
-  const tool = defaultCatalog.tools.find((item) => {
+  if (pathname === "/guides") return {
+  title: "계산기 활용 가이드 | 도구상자",
+  description: "계산 결과를 해석하고 관련 금융·부동산·세금·사업·은퇴 정보를 확인하는 실용 가이드입니다.",
+  canonicalPath: "/guides",
+  type: "CollectionPage",
+  breadcrumb: [{ name: "홈", path: "/" }, { name: "계산기 활용 가이드", path: "/guides" }],
+};
+
+const guide = pathname.startsWith("/guides/") ? getGuideContent(pathname.slice("/guides/".length)) : undefined;
+if (guide) return {
+  title: `${guide.title} | 도구상자`,
+  description: guide.description,
+  canonicalPath: getGuidePath(guide.slug),
+  type: "WebPage",
+  breadcrumb: [{ name: "홈", path: "/" }, { name: "계산기 활용 가이드", path: "/guides" }, { name: guide.title, path: getGuidePath(guide.slug) }],
+};
+
+const tool = defaultCatalog.tools.find((item) => {
     const toolPath = getToolPath(item, defaultCatalog.categories);
     return pathname === toolPath || pathname === legacyToolPaths[item.slug];
   });
@@ -73,8 +91,9 @@ export function getStaticPageMeta(url: string): StaticPageMeta {
 
 export function getStaticPrerenderPaths() {
   const categoryPaths = defaultCatalog.categories.map((item) => getCategoryPath(item, defaultCatalog.categories));
-  const toolPaths = defaultCatalog.tools.flatMap((item) => [getToolPath(item, defaultCatalog.categories), legacyToolPaths[item.slug]].filter(Boolean));
-  return Array.from(new Set(["/", ...categoryPaths, ...toolPaths]));
+  const toolPaths = defaultCatalog.tools.filter((item) => item.status === "active").flatMap((item) => [getToolPath(item, defaultCatalog.categories), legacyToolPaths[item.slug]].filter(Boolean));
+  const guidePaths = ["/guides", ...guideContents.map((guide) => getGuidePath(guide.slug))];
+  return Array.from(new Set(["/", ...categoryPaths, ...toolPaths, ...guidePaths]));
 }
 
 export function render(url: string) {

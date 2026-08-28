@@ -17,7 +17,7 @@ function upsertMeta(selector: string, attributes: Record<string, string>) {
 
 type SeoBreadcrumb = { name: string; path?: string };
 
-export function SeoHead({ title, description, path, kind = "WebApplication", breadcrumbs = [] }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage"; breadcrumbs?: SeoBreadcrumb[] }) {
+export function SeoHead({ title, description, path, kind = "WebApplication", breadcrumbs = [] }: { title: string; description: string; path?: string; kind?: "WebApplication" | "CollectionPage" | "WebPage"; breadcrumbs?: SeoBreadcrumb[] }) {
   useEffect(() => {
     document.title = title;
     const url = `${window.location.origin}${path ?? window.location.pathname}`;
