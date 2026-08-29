@@ -36,6 +36,14 @@ export function getStaticPageMeta(url: string): StaticPageMeta {
   const pathname = url.split("?")[0].replace(/\/$/, "") || "/";
   if (pathname === "/") return homeMeta;
 
+  if (pathname === "/search") return {
+    title: "도구 검색 | 도구상자",
+    description: "계산기와 파일 변환 도구를 검색합니다.",
+    canonicalPath: "/search",
+    type: "CollectionPage",
+    breadcrumb: [{ name: "홈", path: "/" }, { name: "도구 검색", path: "/search" }],
+  };
+
   const root = defaultCatalog.categories.find((item) => item.parentId === null && getCategoryPath(item, defaultCatalog.categories) === pathname);
   if (root) return {
     title: `${root.seoTitle ?? root.name} | 도구상자`,
@@ -93,7 +101,7 @@ export function getStaticPrerenderPaths() {
   const categoryPaths = defaultCatalog.categories.map((item) => getCategoryPath(item, defaultCatalog.categories));
   const toolPaths = defaultCatalog.tools.filter((item) => item.status === "active").flatMap((item) => [getToolPath(item, defaultCatalog.categories), legacyToolPaths[item.slug]].filter(Boolean));
   const guidePaths = ["/guides", ...guideContents.map((guide) => getGuidePath(guide.slug))];
-  return Array.from(new Set(["/", ...categoryPaths, ...toolPaths, ...guidePaths]));
+  return Array.from(new Set(["/", "/search", ...categoryPaths, ...toolPaths, ...guidePaths]));
 }
 
 export function render(url: string) {
