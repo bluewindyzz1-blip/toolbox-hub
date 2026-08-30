@@ -47,8 +47,35 @@ export function CatalogBreadcrumb({ toolSlug, categorySlug, rootSlug }: { toolSl
   return <nav className="breadcrumb" aria-label="현재 위치">{items.map((item, index) => <span key={`${item.name}-${index}`}>{item.href ? <Link href={item.href}>{item.name}</Link> : item.name}{index < items.length - 1 && <b>/</b>}</span>)}</nav>;
 }
 
+const ADSENSE_PUBLISHER_ID = import.meta.env.VITE_ADSENSE_PUBLISHER_ID || "ca-pub-6469222540662479";
+const ADSENSE_SLOT_ENV: Record<string, string | undefined> = {
+  AD_TOP: import.meta.env.VITE_ADSENSE_SLOT_AD_TOP,
+  AD_MIDDLE: import.meta.env.VITE_ADSENSE_SLOT_AD_MIDDLE ?? import.meta.env.VITE_ADSENSE_SLOT_AD_CONTENT,
+  AD_RESULT: import.meta.env.VITE_ADSENSE_SLOT_AD_RESULT ?? import.meta.env.VITE_ADSENSE_SLOT_AD_CONTENT,
+  AD_CONTENT: import.meta.env.VITE_ADSENSE_SLOT_AD_CONTENT,
+  AD_RELATED: import.meta.env.VITE_ADSENSE_SLOT_AD_RELATED,
+};
+
 export function AdSlot({ slot }: { slot: "AD_TOP" | "AD_MIDDLE" | "AD_RESULT" | "AD_CONTENT" | "AD_RELATED" }) {
-  return <aside className="ad-slot" aria-label={`${slot} 광고 영역`}><span>ADVERTISEMENT</span><strong>{slot}</strong><small>광고 코드 연결 영역</small></aside>;
+  const adSlot = ADSENSE_SLOT_ENV[slot];
+  useEffect(() => {
+    if (!adSlot) return;
+    try {
+      const adsbygoogle = (window as typeof window & { adsbygoogle?: unknown[] }).adsbygoogle ?? [];
+      (window as typeof window & { adsbygoogle?: unknown[] }).adsbygoogle = adsbygoogle;
+      adsbygoogle.push({});
+    } catch {
+      // 광고 스크립트가 차단되거나 아직 로드되지 않아도 계산기 기능은 계속합니다.
+    }
+  }, [adSlot]);
+
+  if (!adSlot) {
+    return <aside className="ad-slot" aria-label={`${slot} 광고 영역`}><span>ADVERTISEMENT</span><strong>{slot}</strong><small>AdSense 슬롯 ID 설정 후 광고가 표시됩니다.</small></aside>;
+  }
+
+  return <aside className="ad-slot ad-slot-live" aria-label={`${slot} 광고 영역`}>
+    <ins className="adsbygoogle" style={{ display: "block" }} data-ad-client={ADSENSE_PUBLISHER_ID} data-ad-slot={adSlot} data-ad-format="auto" data-full-width-responsive="true" />
+  </aside>;
 }
 
 function recordToolEvent(name: string, detail: Record<string, string> = {}) {
