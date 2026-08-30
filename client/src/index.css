@@ -236,6 +236,8 @@ th:first-child,td:first-child { text-align:left; }
 .ad-slot { min-height:96px; margin:2.5rem 0; display:flex; align-items:center; justify-content:center; gap:.75rem; border:var(--thin-line); background:repeating-linear-gradient(-45deg,var(--paper),var(--paper) 8px,var(--ink) 8px,var(--ink) 9px); color:var(--ink); font-size:.68rem; font-weight:700; letter-spacing:.12em; }
 .ad-slot strong { color:var(--signal); }
 .ad-slot small { font-family:"Noto Sans KR",sans-serif; font-size:.65rem; letter-spacing:-.06em; }
+.ad-slot-live { border:0; background:transparent; }
+.ad-slot-live .adsbygoogle { min-height:96px; }
 .knowledge-grid { display:grid; grid-template-columns:repeat(4,1fr); border-top:var(--line); border-left:var(--thin-line); }
 .knowledge-grid article { min-height:205px; padding:1.35rem; border-right:var(--thin-line); border-bottom:var(--thin-line); }
 .knowledge-grid h2,.faq-section h2,.related-tools h2 { margin:.75rem 0 1rem; font-size:1.35rem; letter-spacing:-.08em; }
