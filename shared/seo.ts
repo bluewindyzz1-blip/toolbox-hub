@@ -46,7 +46,6 @@ const staticRouteMeta: Record<string, Pick<SeoRoute, "title" | "description" | "
   "/disclaimer": { title: "면책조항 | 도구상자", description: "도구상자 계산 결과와 파일 처리 기능의 참고 범위 및 이용 시 유의사항을 안내합니다.", kind: "WebPage", robots: "index,follow" },
   "/cookie-policy": { title: "쿠키 및 광고 안내 | 도구상자", description: "도구상자의 쿠키, 방문 통계와 Google AdSense 광고 처리 안내입니다.", kind: "WebPage", robots: "index,follow" },
   "/contact": { title: "문의하기 | 도구상자", description: "계산 오류, 파일 변환 오류, 개인정보 문의와 서비스 개선 의견을 도구상자 운영 이메일로 보낼 수 있습니다.", kind: "WebPage", robots: "index,follow" },
-  "/document": { title: "문서 변환 도구 | CSV·Excel·JSON·TXT 변환 | 도구상자", description: "CSV·Excel·JSON·TXT 파일을 브라우저에서 형식에 맞게 변환하는 문서 변환 도구입니다.", kind: "WebApplication", robots: "index,follow" },
   "/search": { title: "도구 검색 | 도구상자", description: "계산기, PDF, 이미지, 문서 변환과 단위 변환 도구를 검색합니다.", kind: "WebPage", robots: "noindex,nofollow" },
 };
 
@@ -303,14 +302,14 @@ export function resolveSeoRoute(rawPath: string, suppliedCatalog?: CatalogSnapsh
 }
 
 export function getSeoPublicPaths(catalog: CatalogSnapshot = defaultCatalog) {
-  const staticPaths = Object.keys(staticRouteMeta).filter((path) => path !== "/search");
+  const staticPaths = Object.keys(staticRouteMeta).filter((path) => path !== "/search" && path !== "/guide");
   const categoryPaths = catalog.categories
     .filter((category) => category.parentId === null || catalog.categories.some((root) => root.id === category.parentId && root.parentId === null))
     .filter((category) => catalog.tools.some((tool) => getCategoryLineage(catalog.categories.find((item) => item.id === tool.categoryId)!, catalog.categories).some((lineage) => lineage.id === category.id)))
     .map((category) => getCategoryPath(category, catalog.categories));
   const toolPaths = catalog.tools.filter((tool) => tool.status === "active").map((tool) => getToolPath(tool, catalog.categories));
   const guidePaths = guideContents.map((guide) => getGuidePath(guide.slug));
-  return Array.from(new Set([...staticPaths, ...categoryPaths, ...toolPaths, "/guide", ...guidePaths])).sort();
+  return Array.from(new Set([...staticPaths, ...categoryPaths, ...toolPaths, ...guidePaths])).sort();
 }
 
 export function toAbsoluteUrl(path: string, origin?: string) {
