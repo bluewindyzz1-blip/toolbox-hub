@@ -11,7 +11,7 @@ const serverEntry = await import(pathToFileURL(path.join(root, "dist", "server-s
 
 const escapeHtml = (value) => value.replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", "\"": "&quot;" }[character]));
 const sitemapPaths = [...sitemap.matchAll(/<loc>https:\/\/carculate\.moneyko\.co\.kr([^<]*)<\/loc>/g)].map((match) => match[1] || "/");
-const staticPaths = new Set([...sitemapPaths, "/guide", ...serverEntry.getStaticPrerenderPaths()]);
+const staticPaths = new Set([...sitemapPaths, ...serverEntry.getStaticPrerenderPaths()]);
 
 function buildHead(meta) {
   const canonical = `${origin}${meta.canonicalPath}`;
