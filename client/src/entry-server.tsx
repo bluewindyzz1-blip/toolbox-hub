@@ -44,6 +44,18 @@ export function getStaticPageMeta(url: string): StaticPageMeta {
     breadcrumb: [{ name: "홈", path: "/" }, { name: "도구 검색", path: "/search" }],
   };
 
+  const infoMeta: Record<string, StaticPageMeta> = {
+    "/about": { title: "도구상자 소개 | 생활 계산기·파일 변환", description: "생활 계산과 브라우저 기반 파일 변환을 제공하는 도구상자의 운영 원칙과 제공 기능을 안내합니다.", canonicalPath: "/about", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "도구상자 소개", path: "/about" }] },
+    "/guide": { title: "계산 결과 활용 가이드 | 도구상자", description: "대출, 부동산, 급여, 세금과 PDF 도구의 계산 결과를 확인하고 다음 행동으로 연결하는 실용 가이드입니다.", canonicalPath: "/guides", type: "CollectionPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "계산 결과 활용 가이드", path: "/guides" }] },
+    "/faq": { title: "자주 묻는 질문 | 도구상자", description: "계산 결과의 참고 범위, 브라우저 파일 처리, 개인정보와 광고 안내에 관한 자주 묻는 질문입니다.", canonicalPath: "/faq", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "자주 묻는 질문", path: "/faq" }] },
+    "/privacy": { title: "개인정보처리방침 | 도구상자", description: "도구상자의 파일·계산기 입력 처리 방식과 개인정보 보호 방침을 안내합니다.", canonicalPath: "/privacy", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "개인정보처리방침", path: "/privacy" }] },
+    "/terms": { title: "이용약관 | 도구상자", description: "도구상자 온라인 계산 및 브라우저 기반 파일 처리 서비스의 이용약관입니다.", canonicalPath: "/terms", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "이용약관", path: "/terms" }] },
+    "/disclaimer": { title: "면책조항 | 도구상자", description: "도구상자 계산 결과와 파일 처리 기능의 참고 범위 및 이용 시 유의사항을 안내합니다.", canonicalPath: "/disclaimer", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "면책조항", path: "/disclaimer" }] },
+    "/cookie-policy": { title: "쿠키 및 광고 안내 | 도구상자", description: "도구상자의 쿠키, 방문 통계와 Google AdSense 광고 처리 안내입니다.", canonicalPath: "/cookie-policy", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "쿠키 및 광고 안내", path: "/cookie-policy" }] },
+    "/contact": { title: "문의하기 | 도구상자", description: "계산 오류, 파일 변환 오류, 개인정보 문의와 서비스 개선 의견을 도구상자 운영 이메일로 보낼 수 있습니다.", canonicalPath: "/contact", type: "WebPage", breadcrumb: [{ name: "홈", path: "/" }, { name: "문의하기", path: "/contact" }] },
+  };
+  if (infoMeta[pathname]) return infoMeta[pathname];
+
   const root = defaultCatalog.categories.find((item) => item.parentId === null && getCategoryPath(item, defaultCatalog.categories) === pathname);
   if (root) return {
     title: `${root.seoTitle ?? root.name} | 도구상자`,

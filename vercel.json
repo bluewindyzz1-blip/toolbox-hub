@@ -36,16 +36,16 @@
       
     },
     
-    {
-      
+        {
       "source": "/2026/07/blog-post_86.html",
-      
       "destination": "/calculator/finance/savings",
-      
       "permanent": true
-      
+    },
+    {
+      "source": "/guide",
+      "destination": "/guides",
+      "permanent": true
     }
-    
   ]
   
 }

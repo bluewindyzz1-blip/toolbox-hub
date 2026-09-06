@@ -4,7 +4,7 @@ import { defaultCatalog, getCategoryPath, getToolPath } from "../shared/catalog"
 import { getGuidePath, guideContents } from "../shared/content";
 
 const origin = (process.env.SITEMAP_ORIGIN || process.env.CANONICAL_ORIGIN || "https://carculate.moneyko.co.kr").replace(/\/$/, "");
-const staticPaths = ["/", "/about", "/guide", "/guides", "/faq", "/privacy", "/terms", "/disclaimer", "/cookie-policy", "/contact", "/document"];
+const staticPaths = ["/", "/about", "/guides", "/faq", "/privacy", "/terms", "/disclaimer", "/cookie-policy", "/contact"];
 const descendantCategoryIds = (id: number): number[] => [id, ...defaultCatalog.categories.filter((category) => category.parentId === id).flatMap((category) => descendantCategoryIds(category.id))];
 const categoryPaths = defaultCatalog.categories
   .filter((category) => category.parentId === null || defaultCatalog.categories.some((root) => root.id === category.parentId && root.parentId === null))
