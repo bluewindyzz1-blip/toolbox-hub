@@ -357,6 +357,10 @@ th:first-child,td:first-child { text-align:left; }
 .guide-discovery>a:hover { background:var(--signal); border-color:var(--signal); }
 @media (max-width:720px) { .guide-discovery { align-items:flex-start; flex-direction:column; gap:1.2rem; } .guide-discovery>a { width:100%; text-align:center; } }
 
+.guide-editorial-meta { display:flex; flex-wrap:wrap; gap:.45rem 1rem; margin:1rem 0 1.5rem; color:#5a5a56; font-family:"Noto Sans KR",sans-serif; font-size:.72rem; line-height:1.6; letter-spacing:-.05em; }
+.guide-editorial-meta span + span { padding-left:1rem; border-left:1px solid #c9c9c4; }
+@media (max-width:520px) { .guide-editorial-meta { flex-direction:column; gap:.2rem; }.guide-editorial-meta span + span { padding-left:0; border-left:0; } }
+
 .document-template-actions { margin-top: 1rem; padding: 1.25rem; border: var(--thin-line); background: #f7f7f3; }
 .document-template-actions h3 { margin: .25rem 0 .5rem; }
 .document-template-actions p:not(.eyebrow) { margin: 0 0 .85rem; color: #555; }

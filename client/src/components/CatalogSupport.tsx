@@ -181,9 +181,9 @@ const coreDecisionTools = [
 
 type DecisionMeta = { interpretation: string; reviewDate: string; sourceLabel: string; sourceUrl?: string; nextAction: string; guidePath: string };
 const decisionMeta: Record<string, DecisionMeta> = {
-  "annual-net": { interpretation: "결과는 입력한 연봉에서 예상 공제액을 뺀 월 실수령액입니다. 부양가족·비과세 수당·연말정산에 따라 실제 급여명세서와 달라질 수 있습니다.", reviewDate: "2026-01-01", sourceLabel: "국세청 홈택스", sourceUrl: "https://www.hometax.go.kr", nextAction: "급여명세서와 비과세 수당을 대조하세요.", guidePath: "/guides/annual-net" },
-  "monthly-take-home": { interpretation: "월 급여를 기준으로 사회보험과 추정 소득세를 반영한 참고용 실수령액입니다.", reviewDate: "2026-01-01", sourceLabel: "국세청 홈택스", sourceUrl: "https://www.hometax.go.kr", nextAction: "근로계약서의 세전 급여와 공제항목을 확인하세요.", guidePath: "/guides/monthly-take-home" },
-  "retirement-pay": { interpretation: "계속근로기간과 평균임금을 이용한 예상 퇴직금입니다. 평균임금 산정기간과 지급 사유에 따라 달라질 수 있습니다.", reviewDate: "2026-01-01", sourceLabel: "고용노동부", sourceUrl: "https://www.moel.go.kr", nextAction: "퇴직 전 급여명세서와 근속기간을 확인하세요.", guidePath: "/guides/retirement-pay" },
+  "annual-net": { interpretation: "결과는 입력한 연봉에서 예상 공제액을 뺀 월 실수령액입니다. 부양가족·비과세 수당·연말정산에 따라 실제 급여명세서와 달라질 수 있습니다.", reviewDate: "2026-01-01", sourceLabel: "국세청 홈택스", sourceUrl: "https://www.hometax.go.kr", nextAction: "급여명세서와 비과세 수당을 대조하세요.", guidePath: "/guides/annual-net-pay-guide" },
+  "monthly-take-home": { interpretation: "월 급여를 기준으로 사회보험과 추정 소득세를 반영한 참고용 실수령액입니다.", reviewDate: "2026-01-01", sourceLabel: "국세청 홈택스", sourceUrl: "https://www.hometax.go.kr", nextAction: "근로계약서의 세전 급여와 공제항목을 확인하세요.", guidePath: "/guides/annual-net-pay-guide" },
+  "retirement-pay": { interpretation: "계속근로기간과 평균임금을 이용한 예상 퇴직금입니다. 평균임금 산정기간과 지급 사유에 따라 달라질 수 있습니다.", reviewDate: "2026-01-01", sourceLabel: "고용노동부", sourceUrl: "https://www.moel.go.kr", nextAction: "퇴직 전 급여명세서와 근속기간을 확인하세요.", guidePath: "/guides/retirement-fund-how-much-guide" },
   "unemployment-benefit": { interpretation: "고용보험 가입기간과 평균임금 등을 바탕으로 한 예상치이며, 수급자격 판단을 대신하지 않습니다.", reviewDate: "2026-01-01", sourceLabel: "고용보험", sourceUrl: "https://www.ei.go.kr", nextAction: "이직 사유와 피보험단위기간을 고용보험에서 확인하세요.", guidePath: "/guides/unemployment-benefit" },
   "loan-interest": { interpretation: "원금·금리·기간과 선택한 상환방식으로 계산한 예상 이자입니다. 실제 약정의 우대금리와 일할 계산은 금융기관 조건이 우선합니다.", reviewDate: "2026-01-01", sourceLabel: "금융감독원 금융상품 한눈에", sourceUrl: "https://finlife.fss.or.kr", nextAction: "금융기관의 금리·수수료·중도상환 조건을 비교하세요.", guidePath: "/guides/loan-interest" },
   "loan-amortization": { interpretation: "원리금균등 방식에서 매월 같은 금액을 납부한다고 가정한 상환액입니다.", reviewDate: "2026-01-01", sourceLabel: "금융감독원 금융상품 한눈에", sourceUrl: "https://finlife.fss.or.kr", nextAction: "상환방식별 총이자를 비교하세요.", guidePath: "/guides/loan-amortization" },
@@ -215,11 +215,19 @@ function readInputSummary(): InputSummary[] {
 
 function guidePathFor(tool: CatalogTool) {
   const key = tool.logicKey ?? "";
-  if (["loan-interest", "loan-amortization", "equal-principal", "bullet-loan", "deposit-interest", "savings", "compound-interest", "early-repayment-fee"].includes(key)) return "/guide#guide-finance";
-  if (["monthly-rent", "rent-conversion", "jeonse-to-monthly", "monthly-to-jeonse", "jeonse-loan-interest", "mortgage", "acquisition-tax", "property-tax", "brokerage-fee", "pyeong"].includes(key)) return "/guide#guide-real-estate";
-  if (["annual-net", "annual-take-home", "monthly-take-home", "retirement-pay", "unemployment-benefit", "four-insurance"].includes(key)) return "/guide#guide-salary";
-  if (["vat", "vat-calculator"].includes(key)) return "/guide#guide-tax";
-  return "/guide#guide-pdf";
+  const guideByTool: Record<string, string> = {
+    "loan-interest": "/guides/loan-interest-comparison-guide", "loan-amortization": "/guides/mortgage-total-interest-guide",
+    "deposit-interest": "/guides/deposit-savings-comparison-guide", savings: "/guides/deposit-savings-comparison-guide",
+    "compound-interest": "/guides/financial-income-tax-guide", "early-repayment-fee": "/guides/early-repayment-fee-guide",
+    "monthly-rent": "/guides/jeonse-vs-monthly-cost-guide", "jeonse-loan-interest": "/guides/jeonse-loan-interest-guide",
+    mortgage: "/guides/mortgage-total-interest-guide", "acquisition-tax": "/guides/home-acquisition-tax-guide",
+    "property-tax": "/guides/property-tax-guide", "brokerage-fee": "/guides/real-estate-brokerage-fee-guide",
+    "annual-net": "/guides/annual-net-pay-guide", "annual-take-home": "/guides/annual-net-pay-guide",
+    "monthly-take-home": "/guides/annual-net-pay-guide", "retirement-pay": "/guides/retirement-fund-how-much-guide",
+    "unemployment-benefit": "/guides/pension-retirement-income-guide", "four-insurance": "/guides/four-insurance-payroll-guide",
+    vat: "/guides/vat-supply-price-guide", "vat-calculator": "/guides/vat-supply-price-guide",
+  };
+  return guideByTool[key] ?? "/guides";
 }
 
 function InputSummaryPanel({ tool }: { tool: CatalogTool }) {
