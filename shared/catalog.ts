@@ -80,6 +80,7 @@ export function getToolPath(tool: CatalogTool, categories: CatalogCategory[]) {
   const root = lineage[0];
   const firstBranch = lineage[1];
   if (!root) return "/";
+  if (root.slug === "units" && firstBranch) return `${getRootPath(root)}/${firstBranch.slug}`;
   return firstBranch ? `${getRootPath(root)}/${firstBranch.slug}/${tool.slug}` : `${getRootPath(root)}/${tool.slug}`;
 }
 
